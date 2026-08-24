@@ -3,8 +3,8 @@ use lettre::transport::smtp::authentication::Credentials;
 
 pub async fn send_reply_email(to_email: &str, name: &str, ticket_id: &str, original_msg: &str, admin_reply: &str) -> Result<(), String> {
     let from_email = std::env::var("SMTP_FROM").unwrap_or("ammavishnu9605@gmail.com".to_string());
-    let smtp_user = std::env::var("SMTP_USER").unwrap_or(from_email.clone());
-    let smtp_pass = std::env::var("SMTP_PASS").unwrap_or_default();
+    let smtp_user = std::env::var("SMTP_USER").or_else(|_| std::env::var("SMTP_USERNAME")).unwrap_or(from_email.clone());
+    let smtp_pass = std::env::var("SMTP_PASS").or_else(|_| std::env::var("SMTP_PASSWORD")).unwrap_or_default();
     let smtp_host = std::env::var("SMTP_HOST").unwrap_or("smtp.gmail.com".to_string());
 
     let from_addr = from_email.parse().map_err(|e: lettre::address::AddressError| e.to_string())?;
@@ -16,7 +16,7 @@ pub async fn send_reply_email(to_email: &str, name: &str, ticket_id: &str, origi
         .subject(format!("AURAWEAR Reply - Ticket {}", ticket_id))
         .body(format!(
             "Hi {},\n\nYou contacted AURAWEAR regarding: {}\n\nTicket ID: {}\nYour message: {}\n\nAdmin Reply:\n{}\n\nThanks,\nAURAWEAR - Clothing With An Aura",
-            name, ticket_id, ticket_id, original_msg, admin_reply
+            name, original_msg, ticket_id, original_msg, admin_reply
         ))
         .map_err(|e| e.to_string())?;
 
