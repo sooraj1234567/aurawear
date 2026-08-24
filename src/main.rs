@@ -76,10 +76,7 @@ async fn main() {
     // Bind to all interfaces so Render can access the application.
     let addr = SocketAddr::from(([0, 0, 0, 0], port.parse::<u16>().unwrap()));
 
-    println!(
-        "AuraWear running on http://{} - Admin http://{}/admin - Login http://{}/login",
-        addr, addr, addr
-    );
+    println!("AuraWear running on http://localhost:3000 - Admin http://localhost:3000/admin");
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
