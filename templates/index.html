@@ -259,7 +259,7 @@ html{scroll-behavior:smooth}
     </div>
   </div>
   <div class="hero-visual" id="heroVisual">
-   <img id="heroImage" src="" alt="Hero" onerror="if(!this.dataset.fb){this.dataset.fb=1; this.src='https://images.unsplash.com/photo-1495385794356-15371f348c19?q=80&w=1000'}">
+   <img id="heroImage" src="https://images.unsplash.com/photo-1495385794356-15371f348c19?q=80&w=1000" alt="Hero" onerror="if(!this.dataset.fb){this.dataset.fb=1; this.src='https://images.unsplash.com/photo-1495385794356-15371f348c19?q=80&w=1000'}">
   </div>
 </section>
 <div id="retroTicker" style="display:none; height:44px; overflow:hidden; border-top:1.5px solid #1A1611; border-bottom:1.5px solid #1A1611; position:relative; background:#E6F4FF">
@@ -759,7 +759,6 @@ async function loadHero(){
     const d=await r.json();
     const imgUrl = d.image || d.image_path || d.path || d.url;
     if(imgUrl){
-      // Ensure absolute or protocol-relative image URLs from admin uploads load correctly on Render
       const finalUrl = imgUrl.startsWith('http') || imgUrl.startsWith('/') ? imgUrl : '/' + imgUrl;
       document.getElementById('heroImage').src = finalUrl + (finalUrl.includes('?')?'&':'?') + 'v=' + Date.now();
     }
@@ -855,6 +854,6 @@ async function sendAuraAIQuery(){
   }
   chatBody.scrollTop = chatBody.scrollHeight;
 }
-</script>
+</script> 
 </body>
 </html>
