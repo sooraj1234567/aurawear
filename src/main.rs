@@ -44,12 +44,12 @@ async fn main() {
        .route("/api/orders/{id}/cancel", post(routes::orders::cancel_order))
        .route("/api/orders/{id}/payment_status", post(routes::orders::update_payment_status))
        .route("/api/orders/{id}", get(routes::orders::get_order_by_id).delete(routes::orders::delete_order))
-       // Inside your Axum Router setup (e.g., app router)
+       // Account deletion and admin deletion logs
        .route("/api/auth/delete-account", post(crate::routes::auth::delete_user_account))
        .route("/api/admin/deletion-logs", get(crate::routes::auth::get_deletion_logs))
        // AURA AI CONCIERGE ENDPOINT
        .route("/api/aura-ai", post(routes::ai::aura_ai_handler))
-       
+
        .route("/", get(index_page))
        .route("/index.html", get(index_page))
        .route("/admin", get(admin_page))
@@ -72,53 +72,75 @@ async fn main() {
        .layer(Extension(database));
 
     let port = std::env::var("PORT").unwrap_or_else(|_| "3000".to_string());
+
+    // Bind to all interfaces so Render can access the application.
     let addr = SocketAddr::from(([0, 0, 0, 0], port.parse::<u16>().unwrap()));
-    println!("AuraWear running on http://{} - Admin http://{}/admin - Login http://{}/login", addr, addr, addr);
+
+    println!(
+        "AuraWear running on http://{} - Admin http://{}/admin - Login http://{}/login",
+        addr, addr, addr
+    );
+
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
 
 async fn index_page() -> Html<String> {
-    Html(tokio::fs::read_to_string("templates/index.html")
-        .await
-        .unwrap_or_else(|_| "<h1>index.html missing</h1>".into()))
+    Html(
+        tokio::fs::read_to_string("templates/index.html")
+            .await
+            .unwrap_or_else(|_| "<h1>index.html missing</h1>".into()),
+    )
 }
 
 async fn admin_page() -> Html<String> {
-    Html(tokio::fs::read_to_string("templates/admin.html")
-        .await
-        .unwrap_or_else(|_| "<h1>admin.html missing</h1>".into()))
+    Html(
+        tokio::fs::read_to_string("templates/admin.html")
+            .await
+            .unwrap_or_else(|_| "<h1>admin.html missing</h1>".into()),
+    )
 }
 
 async fn login_page() -> Html<String> {
-    Html(tokio::fs::read_to_string("templates/login.html")
-        .await
-        .unwrap_or_else(|_| "<h1>login.html missing</h1>".into()))
+    Html(
+        tokio::fs::read_to_string("templates/login.html")
+            .await
+            .unwrap_or_else(|_| "<h1>login.html missing</h1>".into()),
+    )
 }
 
 async fn profile_page() -> Html<String> {
-    Html(tokio::fs::read_to_string("templates/profile.html")
-        .await
-        .unwrap_or_else(|_| "<h1>profile.html missing</h1>".into()))
+    Html(
+        tokio::fs::read_to_string("templates/profile.html")
+            .await
+            .unwrap_or_else(|_| "<h1>profile.html missing</h1>".into()),
+    )
 }
 
 async fn checkout_page() -> Html<String> {
-    Html(tokio::fs::read_to_string("templates/checkout.html")
-        .await
-        .unwrap_or_else(|_| "<h1>checkout.html missing</h1>".into()))
+    Html(
+        tokio::fs::read_to_string("templates/checkout.html")
+            .await
+            .unwrap_or_else(|_| "<h1>checkout.html missing</h1>".into()),
+    )
 }
 
 async fn product_page() -> Html<String> {
-    Html(tokio::fs::read_to_string("templates/product.html")
-        .await
-        .unwrap_or_else(|_| "<h1>product.html missing</h1>".into()))
+    Html(
+        tokio::fs::read_to_string("templates/product.html")
+            .await
+            .unwrap_or_else(|_| "<h1>product.html missing</h1>".into()),
+    )
 }
 
 async fn success_page(Query(params): Query<HashMap<String, String>>) -> Html<String> {
     let id = params
         .get("id")
         .cloned()
-        .unwrap_or_else(|| "AURAW-".to_string() + &chrono::Utc::now().timestamp().to_string()[6..]);
+        .unwrap_or_else(|| {
+            "AURAW-".to_string()
+                + &chrono::Utc::now().timestamp().to_string()[6..]
+        });
 
     let template = tokio::fs::read_to_string("templates/success.html")
         .await
