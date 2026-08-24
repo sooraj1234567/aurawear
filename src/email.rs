@@ -1,5 +1,6 @@
 use lettre::{Message, SmtpTransport, Transport};
 use lettre::transport::smtp::authentication::Credentials;
+use lettre::message::header::ContentType;
 
 pub async fn send_reply_email(to_email: &str, name: &str, ticket_id: &str, original_msg: &str, admin_reply: &str) -> Result<(), String> {
     let from_email = std::env::var("SMTP_FROM").unwrap_or("ammavishnu9605@gmail.com".to_string());
@@ -10,28 +11,47 @@ pub async fn send_reply_email(to_email: &str, name: &str, ticket_id: &str, origi
     let from_addr = from_email.parse().map_err(|e: lettre::address::AddressError| e.to_string())?;
     let to_addr = to_email.parse().map_err(|e: lettre::address::AddressError| e.to_string())?;
 
+    let html_body = format!(
+        "<p>Hi <strong>{}</strong>,</p>\
+         <p>You contacted AURAWEAR regarding: <em>{}</em></p>\
+         <p><strong>Ticket ID:</strong> {}</p>\
+         <p><strong>Your message:</strong> {}</p>\
+         <hr/>\
+         <p><strong>Admin Reply:</strong><br/>{}</p>\
+         <br/>\
+         <p>Thanks,<br/><strong>AURAWEAR - Clothing With An Aura</strong></p>",
+        name, original_msg, ticket_id, original_msg, admin_reply
+    );
+
     let email = Message::builder()
-        .from(lettre::message::Mailbox::new(None, from_addr))
+        .from(lettre::message::Mailbox::new(Some("AuraWear Support".to_string()), from_addr))
         .to(lettre::message::Mailbox::new(Some(name.to_string()), to_addr))
         .subject(format!("AURAWEAR Reply - Ticket {}", ticket_id))
-        .body(format!(
-            "Hi {},\n\nYou contacted AURAWEAR regarding: {}\n\nTicket ID: {}\nYour message: {}\n\nAdmin Reply:\n{}\n\nThanks,\nAURAWEAR - Clothing With An Aura",
-            name, original_msg, ticket_id, original_msg, admin_reply
-        ))
+        .header(ContentType::TEXT_HTML)
+        .body(html_body)
         .map_err(|e| e.to_string())?;
 
     let creds = Credentials::new(smtp_user, smtp_pass);
     
-    // Explicitly configure TLS relay for port 587 or STARTTLS to prevent cloud blocks on Render
+    // Using starttls_relay ensures secure port 587 transmission required by cloud servers
     let mailer = SmtpTransport::starttls_relay(&smtp_host)
         .map_err(|e| e.to_string())?
         .credentials(creds)
         .build();
 
-    tokio::task::spawn_blocking(move || mailer.send(&email))
+    let res = tokio::task::spawn_blocking(move || mailer.send(&email))
         .await
-        .map_err(|e| e.to_string())?
         .map_err(|e| e.to_string())?;
 
-    Ok(())
+    match res {
+        Ok(_) => {
+            println!("Email successfully sent to {} via {}", to_email, smtp_host);
+            Ok(())
+        }
+        Err(e) => {
+            let err_msg = format!("SMTP Send Error: {:?}", e);
+            eprintln!("{}", err_msg);
+            Err(err_msg)
+        }
+    }
 }
