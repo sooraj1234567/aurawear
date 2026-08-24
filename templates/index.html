@@ -759,7 +759,9 @@ async function loadHero(){
     const d=await r.json();
     const imgUrl = d.image || d.image_path || d.path || d.url;
     if(imgUrl){
-      document.getElementById('heroImage').src = imgUrl + (imgUrl.includes('?')?'&':'?') + 'v=' + Date.now();
+      // Ensure absolute or protocol-relative image URLs from admin uploads load correctly on Render
+      const finalUrl = imgUrl.startsWith('http') || imgUrl.startsWith('/') ? imgUrl : '/' + imgUrl;
+      document.getElementById('heroImage').src = finalUrl + (finalUrl.includes('?')?'&':'?') + 'v=' + Date.now();
     }
   }catch(e){}
 }
@@ -790,7 +792,7 @@ window.addEventListener("scroll", ()=>{
 </script>
 
 <!-- GLOBAL AURA AI FLOATING CONCIERGE -->
-<button class="aura-ai-trigger" onclick="toggleAuraAI()" style="position:fixed; bottom:24px; right:24px; background:#1A1611; color:#C9A86A; border:1px solid #C9A86A; padding:12px 20px; border-radius:30px; font-family:'Fraunces', serif; font-size:13px; letter-spacing:1.5px; cursor:pointer; z-index:999; box-shadow:0 10px 30px rgba(0,0,0,0.15); transition:all 0.3s ease;">
+<button class="aura-ai-trigger" onclick="toggleAuraAI()" style="position:fixed; bottom:24px; right:24px; background:#1A1611; color:#C9A86A; border:1.5px solid #C9A86A; padding:12px 20px; border-radius:30px; font-family:'Fraunces', serif; font-size:13px; letter-spacing:1.5px; cursor:pointer; z-index:999; box-shadow:0 10px 30px rgba(0,0,0,0.15); transition:all 0.3s ease;">
   <span>✨ Ask Aura AI</span>
 </button>
 
