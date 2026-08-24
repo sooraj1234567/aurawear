@@ -21,7 +21,9 @@ pub async fn send_reply_email(to_email: &str, name: &str, ticket_id: &str, origi
         .map_err(|e| e.to_string())?;
 
     let creds = Credentials::new(smtp_user, smtp_pass);
-    let mailer = SmtpTransport::relay(&smtp_host)
+    
+    // Explicitly configure TLS relay for port 587 or STARTTLS to prevent cloud blocks on Render
+    let mailer = SmtpTransport::starttls_relay(&smtp_host)
         .map_err(|e| e.to_string())?
         .credentials(creds)
         .build();
