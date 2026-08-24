@@ -58,8 +58,9 @@ pub async fn reply_contact(Extension(db): Extension<Database>, Path(id): Path<St
         let orig = contact.get_str("message").unwrap_or("").to_string();
         let _ = col.update_one(doc!{"_id": oid}, doc!{"$set": {"admin_reply": body.reply.clone(), "status": "replied"}}).await;
         let reply_clone = body.reply.clone();
+        let id_string = id.clone();
         tokio::spawn(async move {
-            let _ = send_reply_email(&to_email, &name, &id, &orig, &reply_clone).await;
+            let _ = send_reply_email(&to_email, &name, &id_string, &orig, &reply_clone).await;
         });
         return Json(json!({"success":true}));
     }
@@ -74,7 +75,7 @@ pub async fn delete_contact(Extension(db): Extension<Database>, Path(id): Path<S
 
 pub async fn track_contact(Extension(db): Extension<Database>, Query(params): Query<HashMap<String,String>>) -> Json<Value> {
     let col: Collection<Document> = db.collection("contacts");
-    let email = params.get("email").map(|s| s.to_lowercase()).unwrap_or_default();
+    let _email = params.get("email").map(|s| s.to_lowercase()).unwrap_or_default();
     let id_raw = params.get("id").cloned().unwrap_or_default().replace("AUR-","").replace("aur-","");
     if let Ok(oid) = ObjectId::parse_str(&id_raw) {
         if let Ok(Some(c)) = col.find_one(doc!{"_id": oid}).await {
