@@ -1,0 +1,281 @@
+<!DOCTYPE html><html><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Archive - AURAWEAR</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@300&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FBF8F3;font-family:Inter;color:#1A1611}
+.nav{padding:18px 4vw;border-bottom:1px solid rgba(0,0,0,.12);display:flex;justify-content:space-between;font-family:Fraunces;letter-spacing:4px}
+.wrap{padding:20px 4vw}
+h1{font-family:Fraunces;font-size:48px;font-weight:300;margin:0;letter-spacing:2px}
+.grid{display:grid;grid-template-columns:320px 1fr;gap:22px;margin-top:20px}
+.card{background:#EAE1CF;border:1px solid rgba(0,0,0,.1);padding:18px;height:fit-content}
+.order{background:#FFFBF1;border:1px solid rgba(0,0,0,.12);padding:16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.badge{padding:6px 14px;border-radius:20px;font-size:10px;letter-spacing:1px;font-weight:700}
+.PENDING{background:#E7C86A}.CONFIRMED{background:#A8C4B0}.SHIPPED{background:#8AA899;color:#fff}.DELIVERED{background:#1A1611;color:#fff}.CANCELLED{background:#b00;color:#fff}
+.btn{width:100%;border:1px solid #1A1611;background:transparent;padding:12px;letter-spacing:2px;cursor:pointer;margin-top:16px}
+.order-imgs{display:flex;gap:6px;margin-top:8px}
+.order-imgs img{width:54px;height:68px;object-fit:cover;border:1px solid rgba(0,0,0,.12);background:#F3F0EB}
+.view-link{font-size:11px;letter-spacing:1px;opacity:.7;cursor:pointer;margin-top:6px}
+.view-link:hover{opacity:1;text-decoration:underline}
+.edit-input{width:100%;padding:10px;border:1px solid rgba(0,0,0,.15);background:#fff;margin-top:8px;font-size:13px}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;place-items:center;z-index:99;padding:20px}
+#modal.open{display:grid}
+.modal-box{background:#FBF8F3;border:1px solid rgba(0,0,0,.12);max-width:520px;width:100%;padding:24px;max-height:90vh;overflow-y:auto}
+
+/* Delete modal styling */
+#deleteModal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;place-items:center;z-index:2000;padding:20px}
+#deleteModal.open{display:grid}
+
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+</style>
+</head><body>
+<div class="nav"><span>AuraWear</span><a href="/" style="text-decoration:none;color:#000;font-size:11px">SHOP • ACCOUNT</a></div>
+<div class="wrap">
+<h1>MY ARCHIVE</h1><p id="welcome" style="opacity:.6"></p>
+<div class="grid">
+<div class="card">
+
+<!-- PROFILE IMAGE ADDED -->
+<div style="display:flex;align-items:center;gap:14px">
+<div style="position:relative;width:64px;height:64px">
+<div style="width:64px;height:64px;border:1px solid #000;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#fff">
+<img id="profileImg" style="width:100%;height:100%;object-fit:cover;display:none">
+<span id="profileInitial" style="font-family:Fraunces;font-size:22px">◍</span>
+</div>
+<label for="avatarInput" style="position:absolute;bottom:-4px;right:-4px;background:#1A1611;color:#fff;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;cursor:pointer;font-size:11px">✎</label>
+</div>
+<div><div style="font-size:11px;letter-spacing:2px">PROFILE PHOTO</div><div id="uploadStatus" style="font-size:10px;opacity:.6;margin-top:2px">Click ✎ to change</div></div>
+</div>
+<input type="file" id="avatarInput" accept="image/*" hidden>
+
+<div style="margin-top:16px"><div style="font-size:10px;letter-spacing:2px;opacity:.5">PROFILE</div><div id="pInfo" style="margin-top:10px;line-height:2.2;font-size:14px"></div></div>
+
+<div style="margin-top:18px;border-top:1px solid rgba(0,0,0,.1);padding-top:14px">
+<div style="font-size:10px;letter-spacing:2px;opacity:.5">MANAGE PROFILE</div>
+<input id="editName" class="edit-input" placeholder="Full Name">
+<input id="editPhone" class="edit-input" placeholder="Phone">
+<input id="editEmail" class="edit-input" placeholder="Email" disabled style="opacity:.6">
+<button class="btn" style="background:#1A1611;color:#fff;margin-top:12px" onclick="saveProfile()">SAVE CHANGES</button>
+<div id="saveMsg" style="font-size:11px;margin-top:8px;min-height:16px"></div>
+</div>
+
+<div style="margin-top:18px"><div style="font-size:10px;letter-spacing:2px;opacity:.5">PREFERENCES</div><div style="margin-top:8px;font-size:13px">Newsletter • Archive Letters — ON</div></div>
+<button class="btn" onclick="logout()">LOG OUT</button>
+
+<!-- DELETE ACCOUNT SECTION -->
+<div style="margin-top:16px;border-top:1px solid rgba(0,0,0,.1);padding-top:14px">
+<button class="btn" style="background:transparent;color:#b00;border-color:#b00" onclick="openDeleteModal()">DELETE ACCOUNT</button>
+</div>
+
+</div>
+<div><div style="font-family:Fraunces;letter-spacing:2px;font-size:18px;margin-bottom:12px">MY ORDERS</div><div id="orders"></div></div>
+</div>
+</div>
+
+<!-- ORDER DETAILS MODAL -->
+<div id="modal" onclick="if(event.target==this)closeModal()"><div class="modal-box"><div style="display:flex;justify-content:space-between"><h3 id="mTitle" style="font-family:Fraunces;margin:0"></h3><button onclick="closeModal()" style="background:none;border:1px solid rgba(0,0,0,.2);width:32px;height:32px;cursor:pointer">✕</button></div><div id="mBody" style="margin-top:16px"></div></div></div>
+
+<!-- DELETE ACCOUNT CONFIRMATION MODAL -->
+<div id="deleteModal" onclick="if(event.target==this)closeDeleteModal()">
+  <div class="modal-box" style="border:2px dashed #b00">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3 style="font-family:Fraunces;margin:0;color:#b00">Delete Account</h3>
+      <button onclick="closeDeleteModal()" style="background:none;border:1px solid rgba(0,0,0,.2);width:32px;height:32px;cursor:pointer">✕</button>
+    </div>
+    <p style="font-size:12px;opacity:.7;line-height:1.5;margin-top:12px">Are you sure you wish to permanently remove your archive profile? All personal tracking data will be removed.</p>
+    
+    <label style="font-size:11px;font-weight:600;display:block;margin-top:14px;letter-spacing:1px">REASON FOR DELETION:</label>
+    <select id="delReason" style="width:100%;padding:10px;margin-top:6px;border:1px solid rgba(0,0,0,.2);background:#fff;font-size:12px">
+      <option value="No longer using the platform">No longer using the platform</option>
+      <option value="Privacy concerns">Privacy concerns</option>
+      <option value="Too many notifications/emails">Too many notifications/emails</option>
+      <option value="Created a duplicate account">Created a duplicate account</option>
+      <option value="Other">Other reason (specify below)</option>
+    </select>
+
+    <label style="font-size:11px;font-weight:600;display:block;margin-top:12px;letter-spacing:1px">ADDITIONAL DETAILS (OPTIONAL):</label>
+    <textarea id="delCustomReason" rows="3" placeholder="Tell us why you are leaving..." style="width:100%;padding:10px;margin-top:6px;border:1px solid rgba(0,0,0,.2);background:#fff;font-size:12px;resize:none;box-sizing:border-box"></textarea>
+
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button onclick="closeDeleteModal()" style="flex:1;background:#fff;border:1px solid #1A1611;padding:12px;font-size:10px;letter-spacing:2px;cursor:pointer">CANCEL</button>
+      <button onclick="confirmDeleteAccount()" style="flex:1;background:#b00;color:#fff;border:none;padding:12px;font-size:10px;letter-spacing:2px;cursor:pointer">CONFIRM DELETE</button>
+    </div>
+    <div id="delMsg" style="font-size:11px;margin-top:8px;color:#b00;text-align:center"></div>
+  </div>
+</div>
+
+<script>
+let allOrders=[];
+async function load(){
+ const token=localStorage.getItem('aurawear_token'); if(!token){location.href='/login.html';return;}
+ const r=await fetch('/api/auth/me',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+ const d=await r.json();
+ if(!d.success){logout();return;}
+ const user = d.user || d;
+ const name = user.name || user.first_name || 'User';
+ const email = user.email || localStorage.getItem('aurawear_email') || '';
+ const phone = user.phone || '';
+ const avatar = user.avatar || '';
+
+ document.getElementById('welcome').innerText=`Welcome, ${name} — your personal archive of orders and account details.`;
+ document.getElementById('pInfo').innerHTML=`○ ${name}<br>✉ ${email}<br>☎ ${phone || 'No phone'}`;
+ document.getElementById('editName').value = name;
+ document.getElementById('editPhone').value = phone;
+ document.getElementById('editEmail').value = email;
+
+ if(avatar){
+   document.getElementById('profileImg').src = avatar;
+   document.getElementById('profileImg').style.display='block';
+   document.getElementById('profileInitial').style.display='none';
+ } else {
+   document.getElementById('profileInitial').innerText = name.charAt(0).toUpperCase();
+ }
+
+ const ro=await fetch('/api/orders'); const od=await ro.json();
+ allOrders=(od.orders||[]).filter(o=> (o.email||'').toLowerCase().trim()===email.toLowerCase().trim());
+ if(allOrders.length===0){document.getElementById('orders').innerHTML='<div style="opacity:.6;border:1px dashed rgba(0,0,0,.2);padding:20px;text-align:center">No orders yet — <a href="/" style="color:#000">start shopping</a></div>'; return;}
+ document.getElementById('orders').innerHTML=allOrders.map((o,idx)=>{
+   const st=(o.status||'pending').toUpperCase();
+   const canCancel = (st==='PENDING' || st==='CONFIRMED');
+   const dateStr=new Date(o.created_at||Date.now()).toLocaleDateString();
+   const imgs=(o.items||[]).slice(0,4).map(it=>{
+     const src=it.image_path||it.image||'/uploads/hero.jpg';
+     return `<img src="${src}" onerror="this.src='https://images.unsplash.com/photo-1495385794356-15371f348c19?q=80&w=200'">`;
+   }).join('');
+   return `<div class="order">
+     <div><b>ORDER #${(o._id||'').toString().slice(-6).toUpperCase()}</b><br><span style="opacity:.6;font-size:12px">Placed • ${dateStr} • ${o.items?.length||0} items • ${o.payment_method||'COD'}</span><div class="order-imgs">${imgs}</div>
+     ${canCancel? `<div style="margin-top:8px"><button onclick="cancelOrder('${o._id}', event)" style="background:#1A1611;color:#fff;border:none;padding:8px 12px;font-size:9px;letter-spacing:2px;cursor:pointer">CANCEL ORDER</button></div>` : st==='CANCELLED'? `<div style="margin-top:8px;font-size:9px;letter-spacing:2px;color:#b00">CANCELLED</div>` : `<div style="margin-top:8px;font-size:9px;letter-spacing:1px;opacity:.4">Cannot cancel after shipping</div>`}
+     </div>
+     <div style="text-align:right"><span class="badge ${st}">${st}</span><div style="margin-top:8px;font-weight:600">$${o.total||o.subtotal||0}</div><div class="view-link" onclick="openOrder(${idx})">VIEW DETAILS →</div></div>
+   </div>`;
+ }).join('');
+}
+function openOrder(i){
+ const o=allOrders[i];
+ const st=(o.status||'pending').toUpperCase();
+ const canCancel = (st==='PENDING' || st==='CONFIRMED');
+ const itemsHtml=(o.items||[]).map(it=>{
+   const src=it.image_path||it.image||'/uploads/hero.jpg';
+   return `<div style="display:flex;gap:12px;margin-bottom:12px"><img src="${src}" style="width:60px;height:76px;object-fit:cover;border:1px solid rgba(0,0,0,.1)" onerror="this.src='https://images.unsplash.com/photo-1495385794356-15371f348c19?q=80&w=200'"><div><div style="font-family:Fraunces">${it.name}</div><div style="font-size:12px;opacity:.6">Qty ${it.qty||1} • $${it.price}</div></div></div>`;
+ }).join('');
+ document.getElementById('mTitle').innerText='ORDER #'+(o._id||'').toString().slice(-6).toUpperCase();
+ document.getElementById('mBody').innerHTML=`
+   <div style="font-size:12px;opacity:.7;margin-bottom:12px">Status: <b>${st}</b> • ${new Date(o.created_at).toLocaleString()}<br>Payment: ${o.payment_method||'COD'} - ${o.payment_status||''}</div>
+   <div>${itemsHtml}</div>
+   <div style="border-top:1px solid rgba(0,0,0,.12);margin-top:12px;padding-top:12px">
+     <div style="display:flex;justify-content:space-between"><span>Subtotal</span><span>$${o.subtotal||o.total||0}</span></div>
+     <div style="display:flex;justify-content:space-between;font-weight:600;margin-top:6px"><span>Total</span><span>$${o.total||0}</span></div>
+     ${canCancel? `<button onclick="cancelOrder('${o._id}')" style="width:100%;margin-top:16px;background:#b00;color:#fff;border:none;padding:12px;letter-spacing:2px;font-size:11px;cursor:pointer">CANCEL ORDER</button>` : ``}
+   </div>`;
+ document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+async function cancelOrder(id, e){
+ if(e) e.stopPropagation();
+ if(!confirm('Cancel this order?')) return;
+ const token=localStorage.getItem('aurawear_token');
+ const r=await fetch(`/api/orders/${id}/cancel`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+ const d=await r.json();
+ if(d.success){closeModal();load();} else alert(d.error||'Cannot cancel after shipping');
+}
+async function saveProfile(){
+ const name=document.getElementById('editName').value.trim();
+ const phone=document.getElementById('editPhone').value.trim();
+ const token=localStorage.getItem('aurawear_token');
+ if(!name){document.getElementById('saveMsg').innerText='Name required';return;}
+ document.getElementById('saveMsg').innerText='Saving...';
+ try{
+   const r=await fetch('/api/auth/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token,name,phone})});
+   const d=await r.json();
+   if(d.success){
+     document.getElementById('saveMsg').style.color='green';
+     document.getElementById('saveMsg').innerText='Profile updated ✓';
+     setTimeout(()=>load(),500);
+   }else{
+     document.getElementById('saveMsg').style.color='red';
+     document.getElementById('saveMsg').innerText=d.error||'Failed';
+   }
+ }catch(e){document.getElementById('saveMsg').innerText='Server error';}
+}
+
+// PROFILE IMAGE UPLOAD - FIXED WITH INSTANT PREVIEW
+document.getElementById('avatarInput').addEventListener('change', async (e)=>{
+ const file = e.target.files[0]; if(!file) return;
+
+ const reader = new FileReader();
+ reader.onload = (ev)=>{
+   document.getElementById('profileImg').src = ev.target.result;
+   document.getElementById('profileImg').style.display='block';
+   document.getElementById('profileInitial').style.display='none';
+ };
+ reader.readAsDataURL(file);
+
+ document.getElementById('uploadStatus').innerText='Uploading...';
+ const fd = new FormData();
+ fd.append('file', file);
+ fd.append('image', file);
+
+ try{
+   const r = await fetch('/api/upload',{method:'POST', body: fd});
+   const d = await r.json();
+   let path = d.path || d.url || d.file_path || d.image;
+   if(!path){ document.getElementById('uploadStatus').innerText='Upload failed'; return; }
+   if(!path.startsWith('/')) path = '/' + path;
+
+   const token = localStorage.getItem('aurawear_token');
+   const ru = await fetch('/api/auth/update',{method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({token, avatar: path})});
+   const du = await ru.json();
+   if(du.success){
+     document.getElementById('uploadStatus').innerText='Photo updated ✓';
+     document.getElementById('profileImg').src = path;
+     document.getElementById('profileImg').style.display='block';
+     document.getElementById('profileInitial').style.display='none';
+   } else {
+     document.getElementById('uploadStatus').innerText='Save failed: ' + (du.error||'');
+   }
+ }catch(err){
+   document.getElementById('uploadStatus').innerText='Server error';
+ }
+});
+
+// DELETE ACCOUNT MODAL HANDLERS
+function openDeleteModal(){
+  document.getElementById('deleteModal').classList.add('open');
+}
+function closeDeleteModal(){
+  document.getElementById('deleteModal').classList.remove('open');
+  document.getElementById('delMsg').innerText='';
+}
+async function confirmDeleteAccount(){
+  const email = localStorage.getItem('aurawear_email');
+  if(!email){ alert('Session expired'); location.href='/login.html'; return; }
+
+  const reason = document.getElementById('delReason').value;
+  const custom_reason = document.getElementById('delCustomReason').value.trim();
+  const msgEl = document.getElementById('delMsg');
+
+  msgEl.innerText = 'Processing deletion...';
+
+  try{
+    const res = await fetch('/api/auth/delete-account', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, reason, custom_reason })
+    });
+    const data = await res.json();
+    if(data.success){
+      localStorage.clear();
+      alert('Your account has been successfully deleted.');
+      location.href = '/';
+    } else {
+      msgEl.innerText = data.error || 'Failed to delete account.';
+    }
+  }catch(e){
+    msgEl.innerText = 'Server connection error.';
+  }
+}
+
+function logout(){localStorage.removeItem('aurawear_token');localStorage.removeItem('aurawear_email');location.href='/login.html';}
+load();
+</script>
+</body></html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html><html><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wishlist - AURAWEAR</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@300&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#FBF8F3;font-family:Inter;color:#1A1611}
+.nav{padding:18px 4vw;border-bottom:1px solid rgba(0,0,0,.12);display:flex;justify-content:space-between;font-family:Fraunces;letter-spacing:4px;position:sticky;top:0;background:#FBF8F3;z-index:20}
+.wrap{padding:30px 4vw}
+h1{font-family:Fraunces;font-size:42px;font-weight:300;margin:0;letter-spacing:2px}
+.grid{display:grid;grid-template-columns:repeat(5, 1fr);gap:18px;margin-top:24px;align-items:stretch}
+@media(max-width:1300px){.grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid rgba(0,0,0,.10);display:flex;flex-direction:column;height:100%;overflow:hidden}
+.img-wrap{width:100%;aspect-ratio:3/4;overflow:hidden;background:#EEE9DF}
+.img-wrap img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+.info{padding:14px;display:flex;flex-direction:column;flex:1}
+.name{font-family:Fraunces;font-size:15px;line-height:1.25;height:38px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.price{margin-top:8px;font-weight:500;font-size:14px}
+.btn{width:100%;border:1px solid #1A1611;background:#fff;padding:11px;font-size:10px;letter-spacing:2px;cursor:pointer;margin-top:8px}
+.btn.black{background:#1A1611;color:#fff;margin-top:auto}
+.btn.black:first-of-type{margin-top:14px}
+.empty{border:1px dashed rgba(0,0,0,.2);padding:40px;text-align:center;opacity:.6;grid-column:1/-1}
+#cartOverlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:99;display:none}
+#cartOverlay.open{display:block}
+#cartDrawer{position:fixed;top:0;right:0;width:380px;max-width:92vw;height:100%;background:#FBF8F3;border-left:1px solid rgba(0,0,0,.12);z-index:100;transform:translateX(100%);transition:.4s;display:flex;flex-direction:column}
+#cartDrawer.open{transform:translateX(0)}
+.cart-head{padding:18px;display:flex;justify-content:space-between;border-bottom:1px solid rgba(0,0,0,.12);font-family:Fraunces;letter-spacing:2px}
+.cart-body{flex:1;overflow-y:auto;padding:14px}
+.cart-item{display:flex;gap:12px;margin-bottom:14px}
+.cart-item img{width:72px;height:90px;object-fit:cover;background:#eee}
+.cart-name{font-family:Fraunces;font-size:14px;line-height:1.2}
+.cart-meta{font-size:12px;opacity:.7;margin-top:2px}
+.cart-qty{display:flex;gap:6px;align-items:center;margin-top:6px}
+.cart-qty button{width:28px;height:28px;border:1px solid rgba(0,0,0,.2);background:#fff;cursor:pointer}
+.remove{font-size:9px!important;width:auto!important;padding:0 10px}
+.cart-foot{border-top:1px solid rgba(0,0,0,.12);padding:18px}
+.cart-total{display:flex;justify-content:space-between;margin-bottom:14px;font-size:12px;letter-spacing:2px}
+.btn-gold{display:block;background:#C9A86A;color:#000;padding:14px;text-align:center;text-decoration:none;font-size:10px;letter-spacing:2px;font-weight:600}
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(100px);background:#1A1611;color:#fff;padding:14px 22px;font-size:11px;letter-spacing:2px;opacity:0;transition:all .4s;z-index:9999}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+</style>
+</head><body>
+<div class="nav">
+  <span style="cursor:pointer" onclick="location.href='/'">AuraWear</span>
+  <div style="display:flex;gap:18px;align-items:center">
+    <a href="/" style="text-decoration:none;color:#000;font-size:11px">SHOP</a>
+    <a href="javascript:void(0)" onclick="openCart()" style="text-decoration:none;color:#000;font-size:11px">CART (<span id="cartCount">0</span>)</a>
+    <a href="/profile.html" style="text-decoration:none;color:#000;font-size:11px">ACCOUNT</a>
+  </div>
+</div>
+
+<div class="wrap">
+<h1>WISHLIST</h1>
+<p style="opacity:.6;margin-top:6px"><span id="count">0</span> items saved</p>
+<div id="grid" class="grid"></div>
+</div>
+
+<div id="cartOverlay" onclick="closeCart()"></div>
+<div id="cartDrawer">
+  <div class="cart-head"><span>CART (<span id="cartCountDrawer">0</span>)</span><button onclick="closeCart()" style="background:none;border:1px solid rgba(0,0,0,.2);width:32px;height:32px;cursor:pointer">✕</button></div>
+  <div id="cartBody" class="cart-body"></div>
+  <div class="cart-foot"><div class="cart-total"><span>SUBTOTAL</span><span id="cartSubtotal">$0</span></div><a href="/checkout.html" class="btn-gold">CHECKOUT</a></div>
+</div>
+
+<div id="toast">ADDED TO CART</div>
+
+<script>
+function wishKey(){
+  const email = localStorage.getItem('aurawear_email');
+  return email ? 'aurawear_wishlist_' + email : 'aurawear_wishlist';
+}
+function cartKey(){
+  const email = localStorage.getItem('aurawear_email');
+  return email ? 'aurawear_cart_' + email : 'aurawear_cart';
+}
+function getWish(){return JSON.parse(localStorage.getItem(wishKey())||'[]')}
+function saveWish(w){localStorage.setItem(wishKey(),JSON.stringify(w))}
+function getCart(){return JSON.parse(localStorage.getItem(cartKey())||'[]')}
+function saveCart(c){localStorage.setItem(cartKey(),JSON.stringify(c));renderCart();}
+
+function renderCart(){
+  const cart=getCart(); const wish=getWish();
+  const count=cart.reduce((s,i)=>s+(i.qty||1),0);
+  const sub=cart.reduce((s,i)=>s+(i.price||0)*(i.qty||1),0);
+  document.getElementById('cartCount').innerText=count;
+  document.getElementById('cartCountDrawer').innerText=count;
+  document.getElementById('cartSubtotal').innerText='$'+sub;
+  document.getElementById('count').innerText=wish.length;
+  document.getElementById('cartBody').innerHTML=cart.length?cart.map((it,idx)=>`
+    <div class="cart-item">
+      <img src="${it.image_path}">
+      <div>
+        <div class="cart-name">${it.name.replace(/\*\*/g,'')}</div>
+        <div class="cart-meta">$${it.price} × ${it.qty}</div>
+        <div class="cart-qty">
+          <button onclick="updateQty(${idx},-1)">—</button><span>${it.qty}</span><button onclick="updateQty(${idx},1)">+</button>
+          <button onclick="removeItem(${idx})" class="remove">REMOVE</button>
+        </div>
+      </div>
+    </div>`).join(''):'<p style="padding:20px;opacity:.5">Your archive is empty</p>';
+}
+function updateQty(i,d){let c=getCart();c[i].qty=(c[i].qty||1)+d;if(c[i].qty<=0)c.splice(i,1);saveCart(c)}
+function removeItem(i){let c=getCart();c.splice(i,1);saveCart(c)}
+function openCart(){document.getElementById('cartDrawer').classList.add('open');document.getElementById('cartOverlay').classList.add('open')}
+function closeCart(){document.getElementById('cartDrawer').classList.remove('open');document.getElementById('cartOverlay').classList.remove('open')}
+
+function render(){
+  const wish=getWish(); renderCart();
+  const g=document.getElementById('grid');
+  if(!wish.length){g.innerHTML='<div class="empty">Your wishlist is empty — <a href="/" style="color:#000">Continue shopping</a></div>';return;}
+  g.innerHTML=wish.map((p,idx)=>{
+    const img=(p.image_path||p.image||'');
+    const pJson=encodeURIComponent(JSON.stringify(p));
+    return `<div class="card">
+      <div class="img-wrap"><img src="${img}"></div>
+      <div class="info"><div class="name">${p.name||''}</div><div class="price">$${p.price}</div>
+      <button class="btn black" onclick="addToCart('${pJson}')">ADD TO CART</button>
+      <button class="btn" onclick="removeWish(${idx})">REMOVE</button></div></div>`;
+  }).join('');
+}
+function removeWish(i){let w=getWish();w.splice(i,1);saveWish(w);render();}
+
+function addToCart(encoded){
+  const token = localStorage.getItem('aurawear_token');
+  if(!token){
+    localStorage.setItem('aurawear_redirect_after_login', '/wishlist.html');
+    location.href = '/login.html';
+    return;
+  }
+  const p=JSON.parse(decodeURIComponent(encoded));
+  let c=getCart();
+  let ex=c.find(x=> (x._id===p._id||x.id===p.id||x.name===p.name));
+  if(ex) ex.qty++;
+  else c.push({_id:p._id||p.id,id:p._id||p.id,name:p.name,price:p.price,image_path:p.image_path||p.image,qty:1});
+  saveCart(c);
+  const t=document.getElementById('toast'); 
+  t.classList.add('show'); 
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+render();
+</script>
+</body></html>

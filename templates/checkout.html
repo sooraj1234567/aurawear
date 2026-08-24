@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout - AURAWEAR</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces&family=Inter&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+.checkout-grid{display:grid;grid-template-columns:1.1fr.9fr;gap:48px;padding:3vw 4vw}
+.input-group{margin-bottom:20px}
+.input-group label{display:block;font-size:10px;letter-spacing:2px;opacity:.6;margin-bottom:8px}
+.input-group input{width:100%;padding:14px;border:1px solid rgba(0,0,0,.15);background:#fff;font-size:14px;outline:none}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.order-box{border:1px solid rgba(0,0,0,.12);padding:24px;background:#fff;height:fit-content;position:sticky;top:100px}
+.order-item{display:flex;gap:12px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(0,0,0,.06)}
+.order-item img{width:60px;height:76px;object-fit:cover}
+.place-btn{width:100%;background:#C9A86A;color:#fff;border:none;padding:18px;font-size:12px;letter-spacing:2px;cursor:pointer;margin-top:20px;display:flex;justify-content:center;gap:8px;align-items:center}
+.place-btn:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:900px){.checkout-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav style="display:flex;justify-content:space-between;padding:20px 4vw;border-bottom:1px solid rgba(0,0,0,.12)"><div class="logo" style="font-family:Fraunces;letter-spacing:4px;font-size:20px;cursor:pointer" onclick="location.href='/'">AURAWEAR</div><a href="/" style="font-size:11px">← BACK TO SHOP</a></nav>
+
+<div class="checkout-grid">
+  <div>
+    <h1 style="font-family:Fraunces;font-size:42px;margin:0 0 32px">Checkout</h1>
+    <div class="input-group"><label>CONTACT</label><label style="font-size:9px">EMAIL</label><input id="email" type="email" placeholder="you@example.com"></div>
+    <div style="margin-top:32px"><label style="font-size:11px;letter-spacing:2px;opacity:.6">SHIPPING ADDRESS</label>
+      <div class="row" style="margin-top:16px"><div class="input-group"><label>FIRST NAME</label><input id="firstName"></div><div class="input-group"><label>LAST NAME</label><input id="lastName"></div></div>
+      <div class="input-group"><label>ADDRESS</label><input id="address"></div>
+      <div class="row"><div class="input-group"><label>CITY</label><input id="city"></div><div class="input-group"><label>ZIP</label><input id="zip"></div></div>
+      <div class="input-group"><label>PHONE</label><input id="phone"></div>
+    </div>
+
+    <!-- PAYMENT METHOD - ONLY ADDED SECTION -->
+    <div style="margin-top:32px">
+      <label style="font-size:11px;letter-spacing:2px;opacity:.6">PAYMENT METHOD</label>
+      <div style="margin-top:16px;border:1px solid rgba(0,0,0,.12);background:#fff">
+        <label style="display:flex;gap:12px;padding:16px;border-bottom:1px solid rgba(0,0,0,.06);cursor:pointer;align-items:center">
+          <input type="radio" name="pay" value="COD" checked>
+          <div><div style="font-size:12px;letter-spacing:1px;font-weight:600">COD - Cash On Delivery</div><div style="font-size:11px;opacity:.6;margin-top:2px">Pay when delivered</div></div>
+        </label>
+        <label style="display:flex;gap:12px;padding:16px;border-bottom:1px solid rgba(0,0,0,.06);cursor:pointer;align-items:center">
+          <input type="radio" name="pay" value="UPI">
+          <div><div style="font-size:12px;letter-spacing:1px;font-weight:600">UPI - GPay / PhonePe / Paytm</div><div style="font-size:11px;opacity:.6;margin-top:2px">Mock payment - Test mode</div></div>
+        </label>
+        <label style="display:flex;gap:12px;padding:16px;cursor:pointer;align-items:center">
+          <input type="radio" name="pay" value="CARD">
+          <div><div style="font-size:12px;letter-spacing:1px;font-weight:600">Card - Credit / Debit Card</div><div style="font-size:11px;opacity:.6;margin-top:2px">Mock payment - Test mode</div></div>
+        </label>
+      </div>
+    </div>
+
+    <button id="placeBtn" class="place-btn"><span id="placeLabel">PLACE ORDER</span><span>•</span><span id="totalBtn">$0</span></button>
+    <div id="msg" style="margin-top:16px;font-size:12px;min-height:20px"></div>
+  </div>
+  <div class="order-box">
+    <h3 style="font-family:Fraunces;margin:0 0 20px">Order Summary</h3>
+    <div id="summary"></div>
+    <div style="border-top:1px solid rgba(0,0,0,.12);margin-top:20px;padding-top:16px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px"><span>Subtotal</span><span id="subtotal">$0</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:12px"><span>Shipping</span><span id="shipping">$15</span></div>
+      <div style="display:flex;justify-content:space-between;font-weight:600;font-size:16px"><span>TOTAL</span><span id="total">$0</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function getCart(){return JSON.parse(localStorage.getItem('aurawear_cart')||'[]')}
+let cart = getCart();
+
+function render(){
+  const box = document.getElementById('summary');
+  const subEl = document.getElementById('subtotal');
+  const totalEl = document.getElementById('total');
+  const totalBtnEl = document.getElementById('totalBtn');
+  const shippingEl = document.getElementById('shipping');
+
+  if(!cart.length){
+    box.innerHTML='<p style="opacity:.5">Cart empty</p>';
+    if(subEl) subEl.innerText='$0';
+    if(totalEl) totalEl.innerText='$0';
+    if(totalBtnEl) totalBtnEl.innerText='$0';
+    if(shippingEl) shippingEl.innerText='$0';
+    return;
+  }
+  let sub=0;
+  box.innerHTML = cart.map(c=>{
+    const img = c.image_path||c.image||'/uploads/hero.jpg';
+    sub+= (c.price||0)*(c.qty||1);
+    return `<div class="order-item"><img src="${img}"><div style="flex:1"><div style="font-family:Fraunces;font-size:14px">${c.name}</div><div style="font-size:11px;opacity:.6">QTY ${c.qty||1} ${c.size? '• SIZE '+c.size:''}</div></div><div>$${c.price}</div></div>`
+  }).join('');
+  if(subEl) subEl.innerText='$'+sub;
+  if(totalEl) totalEl.innerText='$'+(sub+15);
+  if(totalBtnEl) totalBtnEl.innerText='$'+(sub+15);
+  if(shippingEl) shippingEl.innerText='$15';
+  window._subtotal = sub;
+}
+render();
+
+// --- ONLY LOGIN AUTO-FILL ADDED - NO OTHER CHANGE ---
+async function loadUser(){
+  const token = localStorage.getItem('aurawear_token');
+  if(!token) return;
+  try{
+    const r=await fetch('/api/auth/me',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+    const d=await r.json();
+    if(d.success){
+      document.getElementById('email').value = d.email;
+      if(d.name){
+        const parts = d.name.trim().split(' ');
+        document.getElementById('firstName').value = parts[0]||'';
+        document.getElementById('lastName').value = parts.slice(1).join(' ')||'';
+      }
+      if(d.phone) document.getElementById('phone').value = d.phone;
+    }
+  }catch(e){}
+}
+loadUser();
+// --- END LOGIN FIX ---
+
+document.getElementById('placeBtn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('placeBtn');
+  const label = document.getElementById('placeLabel');
+  const msg = document.getElementById('msg');
+
+  if(!cart.length){
+    msg.innerText='Cart is empty - add products first';
+    msg.style.color='red';
+    return;
+  }
+
+  const email = document.getElementById('email').value.trim();
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName = document.getElementById('lastName').value.trim();
+  const address = document.getElementById('address').value.trim();
+  const city = document.getElementById('city').value.trim();
+  const zip = document.getElementById('zip').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const payment_method = document.querySelector('input[name="pay"]:checked').value;
+
+  if(!email ||!firstName ||!address){msg.innerText='Fill email, name and address';msg.style.color='red';return}
+
+  // Mock online payment confirmation
+  if(payment_method!== 'COD'){
+    const ok = confirm(`Mock Payment: Pay $${(window._subtotal||0)+15} via ${payment_method}?\n\n[OK] = Success\n[Cancel] = Fail`);
+    if(!ok){ msg.innerText='Payment cancelled'; msg.style.color='red'; return; }
+  }
+
+  btn.disabled=true;
+  if(label) label.innerText='PLACING...';
+  msg.innerText='';
+  msg.style.color='black';
+
+  try{
+    const order = {
+      email: email.toLowerCase().trim(),
+      first_name: firstName, last_name: lastName, address, city, zip, phone,
+      items: cart,
+      subtotal: window._subtotal||0,
+      total: (window._subtotal||0)+15,
+      payment_method: payment_method,
+      payment_status: payment_method==='COD'? 'COD_PENDING' : 'PAID',
+      transaction_id: payment_method!=='COD'? 'TXN_'+Date.now() : null,
+      status: payment_method==='COD'? 'PENDING' : 'CONFIRMED'
+    };
+    const res = await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(order)});
+    const data = await res.json();
+
+    if(data.success){
+      localStorage.setItem('aurawear_cart','[]');
+      msg.innerHTML='<span style="color:green">✓ Order placed! Redirecting...</span>';
+      let raw = data.order_id || '';
+      let match = raw.match(/[a-f0-9]{24}/i);
+      const orderId = match? match[0] : raw;
+      setTimeout(()=>{ window.location.href='/success?id='+orderId; }, 800);
+    }else{
+      msg.innerText='Error: '+(data.error||'failed');
+      msg.style.color='red';
+      btn.disabled=false;
+      if(label) label.innerText='PLACE ORDER';
+    }
+  }catch(e){
+    msg.innerText='Failed: '+e.message;
+    msg.style.color='red';
+    btn.disabled=false;
+    if(label) label.innerText='PLACE ORDER';
+  }
+});
+</script>
+</body>
+</html>

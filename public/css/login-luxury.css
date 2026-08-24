@@ -1,0 +1,173 @@
+/* =================================================================
+   AURAWEAR — LUXURY RETRO LOGIN STYLING (login-luxury.css)
+================================================================= */
+:root {
+  --bg-color: #FAF7F2;
+  --panel-bg: #FFFEFB;
+  --ink: #1A1611;
+  --accent: #C9A86A;
+  --border: #E2DBD0;
+  --muted: rgba(26, 22, 17, 0.6);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background-color: var(--bg-color);
+  font-family: 'Inter', sans-serif;
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+/* Navbar */
+.nav {
+  padding: 24px 4vw;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(250, 247, 242, 0.85);
+  backdrop-filter: blur(10px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.nav-brand {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  letter-spacing: 4px;
+}
+
+.nav-shop {
+  text-decoration: none;
+  color: var(--ink);
+  font-size: 11px;
+  letter-spacing: 2px;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+.nav-shop:hover { opacity: 1; }
+
+/* Main Wrapper */
+.wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 20px 40px 20px;
+}
+
+/* Luxury Auth Card */
+.card {
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  width: 440px;
+  max-width: 100%;
+  padding: 44px;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.03);
+  animation: cardFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes cardFadeUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.card h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  letter-spacing: 6px;
+  margin: 0 0 8px 0;
+  font-size: 26px;
+  text-align: center;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tab {
+  padding: 10px 0;
+  font-size: 11px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  opacity: 0.4;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.tab.active {
+  opacity: 1;
+  border-bottom: 2px solid var(--ink);
+}
+
+/* Form Inputs */
+.input-group {
+  margin-bottom: 16px;
+}
+
+input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-color);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input:focus {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(26,22,17,0.04);
+}
+
+/* Button */
+.btn {
+  width: 100%;
+  background: var(--ink);
+  color: #fff;
+  padding: 16px;
+  border: none;
+  border-radius: 8px;
+  letter-spacing: 2px;
+  font-size: 11px;
+  font-weight: 500;
+  margin-top: 12px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.btn:hover {
+  background: var(--accent);
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+
+#msg {
+  font-size: 12px;
+  margin-top: 14px;
+  text-align: center;
+  color: #a33;
+  letter-spacing: 0.5px;
+}

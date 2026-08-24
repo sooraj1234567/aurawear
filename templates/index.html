@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AURAWEAR - Clothing With An Aura</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+.hero{
+  display:grid;
+  grid-template-columns:1.05fr 0.95fr;
+  min-height:82vh;
+  max-height:82vh;
+  overflow:hidden;
+  border-bottom:1px solid var(--border);
+  background:#FBF8F3;
+}
+.hero-text{
+  padding:4.5vw 4vw 3vw 4vw;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  background:#FBF8F3;
+  position:relative;
+}
+.hero-text::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:radial-gradient(rgba(0,0,0,.04) 1px, transparent 1px);
+  background-size:16px 16px;
+  opacity:.3;
+  pointer-events:none;
+}
+.eyebrow{font-size:10px;letter-spacing:3.5px;opacity:.5;margin-bottom:22px;position:relative}
+.hero-text h1{
+  font-family:var(--serif);
+  font-size:clamp(46px,5.8vw,84px);
+  line-height:.88;
+  font-weight:300;
+  margin:0;
+  position:relative;
+  letter-spacing:-1px;
+}
+.hero-text h1 em{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400}
+.hero-text p{
+  max-width:380px;
+  margin-top:20px;
+  font-size:13.5px;
+  line-height:1.65;
+  opacity:.7;
+  position:relative;
+}
+.hero-cta{margin-top:28px;position:relative}
+.btn-gold{
+  display:inline-block;
+  background:#C9A86A;
+  color:#000;
+  padding:14px 26px;
+  text-decoration:none;
+  font-size:10px;
+  letter-spacing:2.2px;
+  font-weight:600;
+  transition:all.4s;
+}
+.btn-gold:hover{background:#000;color:#fff}
+.btn-gold.full{display:block;text-align:center;width:100%;box-sizing:border-box}
+.hero-meta{margin-top:16px;font-size:8.5px;letter-spacing:2.2px;opacity:.4}
+.hero-visual{
+  position:relative;
+  overflow:hidden;
+  background:#EADFCB;
+  height:82vh;
+}
+.hero-visual img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center top;
+  display:block;
+  filter:sepia(0.08) contrast(1.05) saturate(1.1);
+  transition:transform 2.5s cubic-bezier(.77,0,.175,1);
+}
+.hero-visual:hover img{transform:scale(1.04)}
+.hero-visual::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(0deg, rgba(166,106,58,0.12) 0%, transparent 55%);
+  mix-blend-mode:multiply;
+  pointer-events:none;
+}
+.shop-section{padding:4vw}
+.section-header{display:flex;justify-content:space-between;align-items:end;margin-bottom:28px;flex-wrap:wrap;gap:16px}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:22px}
+.product-card{
+  background:#fff;
+  border:1px solid rgba(0,0,0,.10);
+  display:flex;
+  flex-direction:column;
+  cursor:pointer;
+  transition:.25s;
+  overflow:hidden;
+}
+.product-card:hover{border-color:rgba(0,0,0,.22);transform:translateY(-2px)}
+.product-card.img-wrap{width:100%;aspect-ratio:3/4;background:#F3F0EB;overflow:hidden;position:relative}
+.product-card.img-wrap img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;transition:.6s}
+.product-card:hover.img-wrap img{transform:scale(1.03)}
+.badge{position:absolute;top:10px;left:10px;background:#FBF8F3;border:1px solid rgba(0,0,0,.12);padding:4px 8px;font-size:9px;letter-spacing:1.5px}
+.p-info{padding:14px 14px 12px;display:flex;flex-direction:column;flex:1}
+.p-name{font-family:Fraunces;font-size:17px;line-height:1.25;min-height:42px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.p-desc{font-size:11.5px;opacity:.55;line-height:1.5;margin-top:6px;min-height:34px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.p-price{margin-top:10px;font-weight:500;font-size:14px}
+.add-btn{margin-top:12px;width:100%;border:1px solid #1A1611;background:#fff;padding:10px;font-size:10px;letter-spacing:2px;cursor:pointer;transition:.2s}
+.add-btn:hover{background:#1A1611;color:#fff}
+#searchOverlay{position:fixed;inset:0;background:#FBF8F3;z-index:999;display:none;flex-direction:column;padding:28px 4vw;overflow-y:auto}
+#searchOverlay.open{display:flex}
+.search-top{display:flex;gap:12px;border-bottom:1px solid rgba(0,0,0,.15);padding-bottom:18px;margin-bottom:22px}
+.search-top input{flex:1;background:transparent;border:none;font-family:Fraunces;font-size:28px;outline:none}
+.search-top button{background:none;border:1px solid rgba(0,0,0,.2);width:42px;height:42px;cursor:pointer}
+
+/* Fixed search results grid to align items cleanly like product cards */
+#searchResults{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
+  gap:22px;
+  align-items:stretch;
+}
+
+.search-item{
+  background:#fff;
+  border:1px solid rgba(0,0,0,.1);
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  width:100%;
+  box-sizing:border-box;
+  transition:transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+
+.search-item:hover{
+  transform:translateY(-3px);
+  border-color:rgba(0,0,0,.22);
+  box-shadow:0 10px 24px rgba(0,0,0,.07);
+}
+
+.search-item .s-img{
+  width:100%;
+  aspect-ratio:3/4;
+  background:#F3F0EB;
+  overflow:hidden;
+  position:relative;
+}
+
+.search-item .s-img img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:top center;
+  display:block;
+  transition:transform .5s ease;
+}
+
+.search-item:hover .s-img img{
+  transform:scale(1.03);
+}
+
+.search-item .s-info{
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  flex:1;
+}
+
+.search-item .s-name{
+  font-family:Fraunces;
+  font-size:17px;
+  line-height:1.3;
+  color:#1A1611;
+}
+
+.search-item .s-price{
+  font-size:12px;
+  line-height:1.5;
+  margin-top:2px;
+  font-weight:500;
+  opacity:.8;
+}
+
+@media(max-width:600px){
+  #searchResults{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+  }
+
+  .search-item .s-info{
+    padding:10px;
+  }
+
+  .search-item .s-name{
+    font-size:15px;
+  }
+
+  .search-item .s-price{
+    font-size:10px;
+  }
+}
+@media(max-width:900px){
+.hero{grid-template-columns:1fr;min-height:auto;max-height:none}
+.hero-text{padding:10vw 6vw}
+.hero-visual{height:78vh}
+.product-grid{grid-template-columns:repeat(2,1fr);gap:14px}
+.shop-section{padding:6vw}
+}
+html{scroll-behavior:smooth}
+</style>
+</head>
+<body>
+
+<div class="announce">
+  <div class="announce-track">
+    <span>FREE SHIPPING ON ORDERS $150+ • SUSTAINABLE • SMALL-BATCH • EST. 1972 REIMAGINED 2026 • </span>
+    <span>FREE SHIPPING ON ORDERS $150+ • SUSTAINABLE • SMALL-BATCH • EST. 1972 REIMAGINED 2026 • </span>
+  </div>
+</div>
+
+<nav class="navbar" id="navbar">
+  <div class="logo">AURAWEAR</div>
+  <div class="nav-links">
+    <a href="#shop">SHOP</a><span class="dot">•</span>
+    <a href="#collections">COLLECTIONS</a><span class="dot">•</span>
+    <a href="#lookbook">LOOKBOOK</a><span class="dot">•</span>
+    <a href="#about">ABOUT</a>
+  </div>
+  <div class="nav-actions" style="display:flex;align-items:center;gap:18px">
+    <button onclick="openSearch()" class="icon-btn" style="background:none;border:none;cursor:pointer">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="11" cy="11" r="6"/><path d="M21 21l-4.3-4.3"/></svg>
+    </button>
+    <a href="javascript:void(0)" id="accountLink" onclick="goAccount(event)" style="font-size:11px;letter-spacing:2px;text-decoration:none;color:#000">ACCOUNT</a>
+    <a href="javascript:void(0)" onclick="openCart()" class="cart-icon" style="position:relative;display:flex;align-items:center">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M9 8V6a3 3 0 0 1 6 0v2"/><path d="M3 8h18l-1 12H4L3 8z"/></svg>
+      <span id="cartCount" style="position:absolute;top:-8px;right:-10px;background:#C9A86A;color:#fff;font-size:9px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center">0</span>
+    </a>
+    <a href="/wishlist.html" style="text-decoration:none;color:#000;font-size:11px;letter-spacing:2px">WISHLIST (<span id="wishCount">0</span>)</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-text">
+    <div class="eyebrow reveal">VOL. 01 — THE 1970S ARCHIVE</div>
+    <h1 class="reveal d1">Clothing<br><em>With An Aura</em></h1>
+    <p class="reveal d2">Timeless silhouettes for Men, Women & Everyone in between — inspired by 1970s style, cut for today. Small-batch, sustainable, genderless.</p>
+    <div class="hero-cta reveal d3">
+      <a href="#shop" class="btn-gold">SHOP THE COLLECTION</a>
+      <div class="hero-meta">SUSTAINABLE • SMALL-BATCH • ALL GENDERS • 15 PIECES</div>
+    </div>
+  </div>
+  <div class="hero-visual" id="heroVisual">
+   <img id="heroImage" src="" alt="Hero" onerror="if(!this.dataset.fb){this.dataset.fb=1; this.src='https://images.unsplash.com/photo-1495385794356-15371f348c19?q=80&w=1000'}">
+  </div>
+</section>
+<div id="retroTicker" style="display:none; height:44px; overflow:hidden; border-top:1.5px solid #1A1611; border-bottom:1.5px solid #1A1611; position:relative; background:#E6F4FF">
+  <div id="tickerTrack" style="display:flex; white-space:nowrap; will-change:transform"></div>
+  <button onclick="document.getElementById('retroTicker').style.display='none'" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:#FFFEFB; border:1.5px solid #1A1611; width:24px; height:24px; border-radius:50%; cursor:pointer; z-index:2">✕</button>
+</div>
+
+<style>
+@keyframes tickerMove { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+.ticker-item{display:flex; align-items:center; gap:10px; padding:0 32px; font-family:'Courier Prime', monospace; font-size:13px; letter-spacing:.5px; font-weight:600}
+</style>
+
+<script>
+async function loadTicker(){
+  try{
+    const r = await fetch('/api/announcement?t='+Date.now());
+    const j = await r.json();
+    const bar = j.bar || {};
+    if(!bar.enabled && bar.enabled!==undefined) return;
+    const wrap = document.getElementById('retroTicker');
+    const track = document.getElementById('tickerTrack');
+    wrap.style.background = bar.bg_color || '#E6F4FF';
+    wrap.style.color = bar.text_color || '#1A1611';
+    wrap.style.display = 'flex';
+    const msgs = bar.messages || [];
+    if(!msgs.length) return;
+    const speed = bar.speed || 22;
+    const iconSvg = (type)=>{
+      if(type==='heart') return `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-6.5-4.3-9-8.2A5.5 5.5 0 0 1 12 8a5.5 5.5 0 0 1 9 4.8C18.5 16.7 12 21 12 21z"/></svg>`;
+      if(type==='tag') return `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 12l-8-8H4v8l8 8 8-8z"/><circle cx="7.5" cy="7.5" r="1.5" fill="#fff"/></svg>`;
+      return `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9l1-5h16l1 5v11H3V9z"/><path d="M9 11V7a3 3 0 0 1 6 0v4"/></svg>`;
+    };
+    let html = '';
+    for(let loop=0; loop<2; loop++){
+      msgs.forEach(m=>{
+        html += `<div class="ticker-item">${iconSvg(m.icon)} <span>${m.text}</span> ${iconSvg(m.icon)}</div>`;
+      });
+    }
+    track.innerHTML = html;
+    track.style.animation = `tickerMove ${speed}s linear infinite`;
+  }catch(e){ console.log('ticker fail',e) }
+}
+loadTicker();
+</script>
+<section id="shop" class="shop-section">
+  <div class="section-header">
+    <div><h2>THE ARCHIVE</h2><p>Curated 70s silhouettes, re-cut for now</p></div>
+    <div class="gender-filters">
+      <button data-gender="All" class="active">ALL</button>
+      <button data-gender="Men">MEN</button>
+      <button data-gender="Women">WOMEN</button>
+      <button data-gender="Unisex">KIDS</button>
+    </div>
+  </div>
+
+  <div id="filterStatus" style="display:none;margin:0 0 18px;padding:12px 16px;background:#1A1611;color:#FBF8F3;font-size:11px;letter-spacing:2px;justify-content:space-between;align-items:center">
+    <span id="filterText">Showing</span>
+    <button onclick="clearCollectionFilter()" style="background:#C9A86A;border:none;padding:8px 14px;font-size:10px;letter-spacing:2px;cursor:pointer;font-weight:600">VIEW ALL →</button>
+  </div>
+
+  <div id="product-grid" class="product-grid"></div>
+</section>
+
+<section id="collections" style="padding:5vw 4vw;background:#fff;border-top:1px solid rgba(0,0,0,.08)">
+  <div style="max-width:1080px;margin:0 auto">
+    <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:28px">
+      <div>
+        <h2 style="font-family:Fraunces;font-weight:300;font-size:32px;letter-spacing:4px;margin:0">COLLECTIONS</h2>
+        <p style="opacity:.6;font-size:12px;margin-top:6px;letter-spacing:.5px">Three archives — click to filter</p>
+      </div>
+      <div style="font-size:8px;letter-spacing:3px;opacity:.35">EST. 1972 — REIMAGINED 2026</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3, 280px);justify-content:center;gap:26px">
+      <div id="col-shirts" style="background:#FBF8F3;border:1px solid rgba(0,0,0,.08);cursor:pointer;transition:.3s">
+        <div style="height:280px;overflow:hidden;background:#F3F0EB">
+          <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">
+        </div>
+        <div style="padding:14px 14px 16px;text-align:center">
+          <div style="font-family:Fraunces;font-size:18px;letter-spacing:.5px">Shirting Archive</div>
+          <div id="col-shirts-count" style="font-size:9px;letter-spacing:2px;opacity:.5;margin-top:6px;text-transform:uppercase">Floral, Color Block</div>
+          <div style="margin-top:12px;font-size:9px;letter-spacing:2px;border:1px solid #000;display:inline-block;padding:7px 14px">SHOP NOW</div>
+        </div>
+      </div>
+      <div id="col-outerwear" style="background:#FBF8F3;border:1px solid rgba(0,0,0,.08);cursor:pointer;transition:.3s">
+        <div style="height:280px;overflow:hidden;background:#F3F0EB">
+          <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600" style="width:100%;height:100%;object-fit:cover">
+        </div>
+        <div style="padding:14px 14px 16px;text-align:center">
+          <div style="font-family:Fraunces;font-size:18px;letter-spacing:.5px">Outerwear Archive</div>
+          <div id="col-outerwear-count" style="font-size:9px;letter-spacing:2px;opacity:.5;margin-top:6px;text-transform:uppercase">Leather, Tweed</div>
+          <div style="margin-top:12px;font-size:9px;letter-spacing:2px;border:1px solid #000;display:inline-block;padding:7px 14px">SHOP NOW</div>
+        </div>
+      </div>
+      <div id="col-bottoms" style="background:#FBF8F3;border:1px solid rgba(0,0,0,.08);cursor:pointer;transition:.3s">
+        <div style="height:280px;overflow:hidden;background:#F3F0EB">
+          <img src="https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=600" style="width:100%;height:100%;object-fit:cover">
+        </div>
+        <div style="padding:14px 14px 16px;text-align:center">
+          <div style="font-family:Fraunces;font-size:18px;letter-spacing:.5px">Bottoms & Dresses</div>
+          <div id="col-bottoms-count" style="font-size:9px;letter-spacing:2px;opacity:.5;margin-top:6px;text-transform:uppercase">Trousers, Slip Dress</div>
+          <div style="margin-top:12px;font-size:9px;letter-spacing:2px;border:1px solid #000;display:inline-block;padding:7px 14px">SHOP NOW</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+#col-shirts:hover, #col-outerwear:hover, #col-bottoms:hover{transform:translateY(-5px);border-color:rgba(0,0,0,.2)!important;box-shadow:0 12px 24px rgba(0,0,0,.06)}
+@media(max-width:900px){
+  #collections div[style*="grid-template-columns:repeat(3, 280px)"]{grid-template-columns:repeat(2, 1fr)!important}
+}
+@media(max-width:600px){
+  #collections div[style*="grid-template-columns:repeat(3, 280px)"]{grid-template-columns:1fr!important;max-width:320px;margin:0 auto}
+}
+</style>
+
+<section id="lookbook" style="padding:5vw 4vw;background:#FBF8F3">
+  <h2 style="font-family:Fraunces;font-weight:300;font-size:42px;letter-spacing:2px;margin:0">LOOKBOOK</h2>
+  <p style="opacity:.6;font-size:13px;margin:8px 0 24px">Worn in the wild — 1970s aura, today</p>
+  <div style="display:grid;grid-template-columns:repeat(12,1fr);grid-auto-rows:24vw;gap:12px">
+    <div style="grid-column:span 8;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,.1)"><img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200" style="width:100%;height:100%;object-fit:cover"></div>
+    <div style="grid-column:span 4;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,.1)"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800" style="width:100%;height:100%;object-fit:cover"></div>
+    <div style="grid-column:span 4;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,.1)"><img src="https://images.unsplash.com/photo-1495385794356-15371f348c19?w=800" style="width:100%;height:100%;object-fit:cover"></div>
+    <div style="grid-column:span 4;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,.1)"><img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800" style="width:100%;height:100%;object-fit:cover"></div>
+    <div style="grid-column:span 4;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,.1)"><img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800" style="width:100%;height:100%;object-fit:cover"></div>
+  </div>
+</section>
+
+<section id="about" style="padding:6vw 4vw;background:#1A1611;color:#FBF8F3;display:grid;grid-template-columns:1fr 1fr;gap:4vw">
+  <div>
+    <div style="font-size:10px;letter-spacing:3.5px;opacity:.5;margin-bottom:20px">ABOUT AURAWEAR</div>
+    <h2 style="font-family:Fraunces;font-weight:300;font-size:clamp(36px,4vw,56px);line-height:.9;margin:0">Clothing<br><em style="font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;color:#C9A86A">With An Aura</em></h2>
+    <p style="max-width:420px;margin-top:22px;line-height:1.7;opacity:.8;font-size:14px">We hunt deadstock, study 70s cuts, and re-cut them for all genders today. Small-batch in Kerala, sustainable fabrics, no overproduction. Every piece has an aura — you can feel 1972 in the stitch.</p>
+    <div style="margin-top:28px;display:flex;gap:24px">
+      <div><div style="font-family:Fraunces;font-size:28px">15</div><div style="font-size:9px;letter-spacing:2px;opacity:.6">PIECES / DROP</div></div>
+      <div><div style="font-family:Fraunces;font-size:28px">100%</div><div style="font-size:9px;letter-spacing:2px;opacity:.6">SUSTAINABLE</div></div>
+      <div><div style="font-family:Fraunces;font-size:28px">1972</div><div style="font-size:9px;letter-spacing:2px;opacity:.6">ORIGIN</div></div>
+    </div>
+  </div>
+  <div style="border:1px solid rgba(255,255,255,.15);padding:14px;background:rgba(255,255,255,.03)">
+    <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block">
+    <div style="margin-top:12px;font-size:10px;letter-spacing:2px;opacity:.6">ATELIER — THIDANADU, KERALA • SMALL-BATCH STUDIO</div>
+  </div>
+</section>
+
+<section id="contactWrap" style="background:#A66A3C; background-size:cover; background-position:center; padding:60px 20px; position:relative; overflow:hidden; min-height:650px">
+  <video id="contactVideo" autoplay muted loop playsinline style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none; z-index:1"></video>
+  <div id="contactOverlay" style="position:absolute; inset:0; background:rgba(0,0,0,0.35); z-index:1; display:none"></div>
+
+  <div id="contactCard" style="position:relative; z-index:2; max-width:1100px; margin:0 auto; background:#F9F1E7; border-radius:22px; padding:40px 36px; border:2px dashed rgba(0,0,0,.15)">
+    <h2 id="csHeading" style="font-family:Fraunces; font-size:52px; text-align:center; font-weight:300; letter-spacing:2px; margin:0">GET IN TOUCH</h2>
+    <p id="csSub" style="font-family:'Courier Prime', monospace; text-align:center; font-size:11px; letter-spacing:3px; margin-top:12px; opacity:.7">SEND US A NOTE — WE'D LOVE TO HEAR FROM YOU</p>
+    <div id="csTypes" style="display:flex; gap:8px; flex-wrap:wrap; margin:24px 0"></div>
+    <label style="font-family:'Courier Prime'; font-size:12px">NAME:</label>
+    <input id="c_name" style="width:100%; border:none; border-bottom:1px dashed #000; background:transparent; padding:10px; margin-bottom:16px">
+    <label style="font-family:'Courier Prime'; font-size:12px">EMAIL:</label>
+    <input id="c_email" style="width:100%; border:none; border-bottom:1px dashed #000; background:transparent; padding:10px; margin-bottom:16px">
+    <label style="font-family:'Courier Prime'; font-size:12px">MESSAGE:</label>
+    <textarea id="c_msg" rows="3" style="width:100%; border:none; border-bottom:1px dashed #000; background:transparent; padding:10px; margin-bottom:16px"></textarea>
+    <input type="file" id="c_file" accept="image/*" style="font-size:11px; margin-bottom:12px">
+    <br>
+    <button onclick="sendContact()" style="background:#A66A3C; color:#fff; border:none; padding:12px 28px; border-radius:24px; letter-spacing:2px; cursor:pointer">[ • SEND • ]</button>
+    <p id="c_status" style="font-size:11px; margin-top:12px; font-family:'Courier Prime'"></p>
+  </div>
+</section>
+
+<script>
+let selectedType = 'enquiry';
+async function loadHomeContact(){
+  try{
+    const r = await fetch('/api/contact-section?t='+Date.now());
+    const j = await r.json();
+    const s = j.section;
+    if(!s) return;
+    if(s.heading) document.getElementById('csHeading').innerText = s.heading;
+    if(s.subheading) document.getElementById('csSub').innerText = s.subheading;
+    const wrap = document.getElementById('contactWrap');
+    const overlay = document.getElementById('contactOverlay');
+    const video = document.getElementById('contactVideo');
+    if(s.background_video && s.background_video.length > 5){
+      video.src = s.background_video;
+      video.style.display = 'block';
+      overlay.style.display = 'block';
+      wrap.style.backgroundImage = 'none';
+      wrap.style.background = '#000';
+    } else if(s.background_image && s.background_image.length > 5){
+      wrap.style.backgroundImage = `url('${s.background_image}')`;
+      wrap.style.backgroundSize = 'cover';
+      wrap.style.backgroundPosition = 'center';
+      wrap.style.backgroundRepeat = 'no-repeat';
+      overlay.style.display = 'block';
+      video.style.display = 'none';
+    }
+    const types = s.message_types || ['enquiry','complaint','appreciation','good_review','bad_review','suggestion'];
+    selectedType = types[0]||'enquiry';
+    document.getElementById('csTypes').innerHTML = types.map(t=>`<button data-type="${t}" class="cs-pill" style="border:1px solid #1A1611; background:transparent; padding:6px 12px; font-size:10px; border-radius:20px; cursor:pointer; font-family:Courier Prime">${t.replace(/_/g,' ').toUpperCase()}</button>`).join('');
+    document.querySelectorAll('.cs-pill').forEach(b=>{
+      b.onclick=()=>{
+        document.querySelectorAll('.cs-pill').forEach(x=>{x.style.background='transparent'; x.style.color='#000'});
+        b.style.background='#1A1611'; b.style.color='#fff';
+        selectedType=b.dataset.type;
+      };
+    });
+    const first = document.querySelector('.cs-pill');
+    if(first){ first.style.background='#1A1611'; first.style.color='#fff'; }
+  }catch(e){ console.log('contact section load failed',e); }
+}
+loadHomeContact();
+
+(async()=>{
+  const token=localStorage.getItem('token')||localStorage.getItem('aurawear_token');
+  if(token){ try{ const r=await fetch('/api/auth/me',{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token})}); const d=await r.json(); if(d.user){ document.getElementById('c_name').value=d.user.name||''; document.getElementById('c_email').value=d.user.email||''; } }catch{} }
+})();
+
+async function sendContact(){
+  const f=document.getElementById('c_file').files[0];
+  let imgPath="";
+  if(f){ const fd=new FormData(); fd.append('file',f); const up=await fetch('/api/upload',{method:'POST',body:fd}); const j=await up.json(); imgPath=j.path||j.url||""; }
+  const payload={ name:document.getElementById('c_name').value, email:document.getElementById('c_email').value, phone:"", message_type:selectedType, message:document.getElementById('c_msg').value, image:imgPath, user_email:document.getElementById('c_email').value };
+  const r=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const d=await r.json();
+  if(d.success){ document.getElementById('c_status').innerText="✓ Sent! Admin will reply to your email: "+payload.email; document.getElementById('c_msg').value=''; } else { document.getElementById('c_status').innerText=d.error||'Failed'; }
+}
+</script>
+
+<footer style="background:#1A1611; color:#FBF8F3; padding:5vw 4vw; border-top:1px solid rgba(255,255,255,0.1)">
+  <div style="max-width:1200px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:40px; margin-bottom:40px">
+    <div>
+      <div style="font-family:Fraunces; font-size:24px; letter-spacing:4px; margin-bottom:14px">AURAWEAR</div>
+      <p style="font-size:12px; line-height:1.6; opacity:.7; max-width:260px">Timeless 1970s silhouettes re-cut for today. Sustainable, small-batch, and genderless design rooted in Kerala.</p>
+    </div>
+    <div>
+      <div style="font-family:'Courier Prime', monospace; font-size:10px; letter-spacing:2px; opacity:.5; margin-bottom:14px">NAVIGATION</div>
+      <div style="display:flex; flex-direction:column; gap:8px; font-size:12px">
+        <a href="#shop" style="color:#FBF8F3; text-decoration:none; opacity:.8; transition:.2s">Shop Collection</a>
+        <a href="#collections" style="color:#FBF8F3; text-decoration:none; opacity:.8; transition:.2s">Archives</a>
+        <a href="#lookbook" style="color:#FBF8F3; text-decoration:none; opacity:.8; transition:.2s">Lookbook</a>
+        <a href="#about" style="color:#FBF8F3; text-decoration:none; opacity:.8; transition:.2s">Our Story</a>
+      </div>
+    </div>
+    <div>
+      <div style="font-family:'Courier Prime', monospace; font-size:10px; letter-spacing:2px; opacity:.5; margin-bottom:14px">ATELIER</div>
+      <p style="font-size:12px; line-height:1.6; opacity:.7">Thidanadu, Kottayam<br>Kerala, India — 686123</p>
+      <p style="font-size:12px; opacity:.7; margin-top:10px">support@aurawear.com</p>
+    </div>
+  </div>
+  <div style="max-width:1200px; margin:0 auto; border-top:1px solid rgba(255,255,255,0.1); padding-top:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; font-size:11px; font-family:'Courier Prime', monospace; opacity:.6">
+    <div>© 2026 AURAWEAR — CLOTHING WITH AN AURA</div>
+    <div>EST. 1972 • REIMAGINED TODAY</div>
+  </div>
+</footer>
+
+<div id="searchOverlay">
+  <div class="search-top">
+    <input id="searchInput" placeholder="Search archive... (name, fabric, era, category)">
+    <button onclick="closeSearch()">✕</button>
+  </div>
+  <div id="searchResults"></div>
+</div>
+
+<div id="cartOverlay" onclick="closeCart()"></div>
+<div id="cartDrawer">
+  <div class="cart-head"><span>CART (<span id="cartCountDrawer">0</span>)</span><button onclick="closeCart()">✕</button></div>
+  <div id="cartBody"></div>
+  <div class="cart-foot">
+    <div class="cart-total"><span>SUBTOTAL</span><span id="cartSubtotal">$0</span></div>
+    <a href="/checkout.html" class="btn-gold full" onclick="return handleCheckout(event)">CHECKOUT</a>
+  </div>
+</div>
+
+<script>
+let allProducts=[];
+
+function getWish(){return JSON.parse(localStorage.getItem('aurawear_wishlist')||'[]')}
+function saveWish(w){localStorage.setItem('aurawear_wishlist',JSON.stringify(w));renderCart();renderProducts(allProducts);}
+function isWish(id){return getWish().some(x=> (x.id||x._id)===id)}
+function toggleWishlist(id,name,image,price){
+  let w=getWish();
+  if(isWish(id)){ w=w.filter(x=> (x.id||x._id)!==id); }
+  else{ w.push({id,_id:id,name,image_path:image,image,price}); }
+  saveWish(w);
+}
+function getCart(){return JSON.parse(localStorage.getItem('aurawear_cart')||'[]')}
+function saveCart(c){localStorage.setItem('aurawear_cart',JSON.stringify(c));renderCart()}
+function renderCart(){
+  const cart=getCart();
+  const wish=getWish();
+  const count=cart.reduce((s,i)=>s+(i.qty||1),0);
+  const sub=cart.reduce((s,i)=>s+(i.price||0)*(i.qty||1),0);
+  const cartEl=document.getElementById('cartCount');
+  if(cartEl) cartEl.innerText=count;
+  document.getElementById('cartCountDrawer').innerText=count;
+  document.getElementById('cartSubtotal').innerText='$'+sub;
+  const wishEl=document.getElementById('wishCount');
+  if(wishEl) wishEl.innerText=wish.length;
+  document.getElementById('cartBody').innerHTML=cart.length?cart.map((it,idx)=>`
+    <div class="cart-item"><img src="${it.image_path}"><div><div class="cart-name">${it.name.replace(/\*\*/g,'')}</div>
+    <div class="cart-meta">$${it.price} × ${it.qty}</div>
+    <div class="cart-qty"><button onclick="updateQty(${idx},-1)">—</button><span>${it.qty}</span><button onclick="updateQty(${idx},1)">+</button><button onclick="removeItem(${idx})" class="remove">REMOVE</button></div></div></div>`).join(''):'<p style="padding:20px;opacity:.5">Your archive is empty</p>';
+}
+function updateQty(i,d){let c=getCart();c[i].qty=(c[i].qty||1)+d;if(c[i].qty<=0)c.splice(i,1);saveCart(c)}
+function removeItem(i){let c=getCart();c.splice(i,1);saveCart(c)}
+function handleCheckout(event){
+  const token=localStorage.getItem('aurawear_token');
+  if(!token){
+    event.preventDefault();
+    localStorage.setItem('aurawear_redirect_after_login','/checkout.html');
+    window.location.href='/login';
+    return false;
+  }
+  return true;
+}
+function openCart(){
+  document.getElementById('cartDrawer').classList.add('open');
+  document.getElementById('cartOverlay').classList.add('open');
+  // Hide Aura AI button when cart is open
+  const aiTrigger = document.querySelector('.aura-ai-trigger');
+  if(aiTrigger) aiTrigger.style.display = 'none';
+  const aiModal = document.getElementById('auraModal');
+  if(aiModal) aiModal.classList.remove('open');
+}
+
+function closeCart(){
+  document.getElementById('cartDrawer').classList.remove('open');
+  document.getElementById('cartOverlay').classList.remove('open');
+  // Show Aura AI button again when cart closes
+  const aiTrigger = document.querySelector('.aura-ai-trigger');
+  if(aiTrigger) aiTrigger.style.display = 'flex';
+}
+function openSearch(){document.getElementById('searchOverlay').classList.add('open');document.getElementById('searchInput').focus(); renderSearch('');}
+function closeSearch(){document.getElementById('searchOverlay').classList.remove('open')}
+
+function renderProducts(list){
+  document.getElementById('product-grid').innerHTML=list.map(p=>{
+    const clean=(p.name||'').replace(/\*\*/g,'').trim();
+    const desc=(p.description||'').replace(/\*\*/g,'').trim();
+    const gl=(p.gender||p.category||'').toLowerCase()==='unisex'?'Kids':(p.gender||p.category||'Archive');
+    const pid = getOid(p._id) || p._id || p.id || '';
+    const stock = p.stock?? p.stock_count?? 10;
+    let stockHtml = '';
+    let btnDisabled = '';
+    if(stock <= 0){
+      stockHtml = `<div style="color:#900; font-size:10px; letter-spacing:1px; margin-top:8px; font-weight:700">● OUT OF STOCK</div>`;
+      btnDisabled = 'disabled style="opacity:.4; cursor:not-allowed"';
+    } else if(stock <= 3){
+      stockHtml = `<div style="color:#A66A3C; font-size:10px; letter-spacing:1px; margin-top:8px; font-weight:700">● ONLY ${stock} LEFT!</div>`;
+    } else {
+      stockHtml = `<div style="color:#2d6a4f; font-size:10px; letter-spacing:1px; margin-top:8px">● IN STOCK: ${stock} available</div>`;
+    }
+
+    return `<div class="product-card reveal">
+      <div class="img-wrap" onclick="location.href='/product?id=${pid}'">
+        <img src="${p.image_path||p.image}" loading="lazy">
+        <span class="badge">${gl.toUpperCase()}</span>
+      </div>
+      <div class="p-info">
+        <div class="p-name">${clean}</div>
+        <div class="p-desc">${desc || 'Vintage archive piece'}</div>
+        <div class="p-price">$${p.price}</div>
+        ${stockHtml}
+        <button ${btnDisabled} onclick="event.stopPropagation(); if(${stock}>0) addToCart({id:'${pid}',_id:'${pid}',name:\`${clean.replace(/`/g,'')}\`,price:${p.price},image_path:'${p.image_path||p.image}', stock:${stock}})" class="add-btn">
+          ${stock<=0? 'SOLD OUT' : 'ADD TO CART'}
+        </button>
+      </div>
+    </div>`
+  }).join('');
+  observeReveals();
+}
+
+function getOid(idField){
+  if(!idField) return '';
+  if(typeof idField==='string') return idField;
+  if(idField.$oid) return idField.$oid;
+  return String(idField);
+}
+
+window.addToCart=(p)=>{
+  let c=getCart();
+  let ex=c.find(x=>x._id===p.id||x.id===p.id);
+  let currentQty = ex? ex.qty : 0;
+  if(currentQty + 1 > p.stock){
+    alert(`Only ${p.stock} left in stock!`);
+    return;
+  }
+  if(ex) ex.qty++;
+  else c.push({...p,qty:1});
+  saveCart(c);
+  openCart();
+}
+
+function renderSearch(query){
+  const q=query.toLowerCase().trim();
+  const resEl=document.getElementById('searchResults');
+  if(!q){resEl.innerHTML='<div style="opacity:.5">Type to search... e.g. Leather, Dress, 1980s, Women</div>';return;}
+  const filtered=allProducts.filter(p=>{
+    return (p.name||'').toLowerCase().includes(q)||
+           (p.description||'').toLowerCase().includes(q)||
+           (p.category||'').toLowerCase().includes(q)||
+           (p.gender||'').toLowerCase().includes(q)||
+           (p.fabric||'').toLowerCase().includes(q)||
+           (p.era||'').toLowerCase().includes(q);
+  });
+  if(!filtered.length){resEl.innerHTML=`<div style="opacity:.5">No results for "${query}"</div>`;return;}
+  resEl.innerHTML=filtered.map(p=>{
+    const clean=(p.name||'').replace(/\*\*/g,'').trim();
+    const pid=p._id||p.id||'';
+    const gl=(p.gender||p.category||'').toUpperCase()||'ARCHIVE';
+    return `<div class="search-item" onclick="location.href='/product?id=${pid}'">
+      <div class="s-img">
+        <img src="${p.image_path||p.image}" loading="lazy">
+        <span class="badge">${gl}</span>
+      </div>
+      <div class="s-info">
+        <div class="s-name">${clean}</div>
+        <div class="s-price">$${p.price} • ${(p.gender||'').toUpperCase()} • ${p.fabric||''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('searchInput').addEventListener('input', e=>{renderSearch(e.target.value);});
+document.getElementById('searchInput').addEventListener('keydown', e=>{if(e.key==='Escape') closeSearch();});
+
+function goAccount(e){
+  e.preventDefault();
+  const token=localStorage.getItem('aurawear_token');
+  if(token) location.href='/profile.html';
+  else location.href='/login.html';
+}
+async function checkAuth(){
+  const token=localStorage.getItem('aurawear_token');
+  if(!token) return;
+  try{
+    const r=await fetch('/api/auth/me',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+    const d=await r.json();
+    if(d.success){document.getElementById('accountLink').innerText=d.name.toUpperCase();}
+  }catch(e){}
+}
+checkAuth();
+
+function updateCollectionCounts(){
+  if(!allProducts.length) return;
+  const shirts=allProducts.filter(p=> (p.name||'').toLowerCase().includes('shirt')).length;
+  const outer=allProducts.filter(p=>{const n=(p.name||'').toLowerCase();return n.includes('jacket')||n.includes('suit')}).length;
+  const bottoms=allProducts.filter(p=>{const n=(p.name||'').toLowerCase();return n.includes('trouser')||n.includes('pant')||n.includes('dress')}).length;
+  document.getElementById('col-shirts-count').innerText=`${shirts} SHIRTS • FLORAL, COLOR BLOCK, CORDUROY`;
+  document.getElementById('col-outerwear-count').innerText=`${outer} JACKETS • LEATHER, TWEED, SHAG COLLAR`;
+  document.getElementById('col-bottoms-count').innerText=`${bottoms} PIECES • PLEATED TROUSERS, SLIP DRESS`;
+}
+function filterCollection(type){
+  let filtered=[]; let label='';
+  if(type==='shirts'){filtered=allProducts.filter(p=> (p.name||'').toLowerCase().includes('shirt'));label=`Showing ${filtered.length} Shirts`;}
+  else if(type==='outerwear'){filtered=allProducts.filter(p=>{const n=(p.name||'').toLowerCase();return n.includes('jacket')||n.includes('suit')});label=`Showing ${filtered.length} Outerwear`;}
+  else if(type==='bottoms'){filtered=allProducts.filter(p=>{const n=(p.name||'').toLowerCase();return n.includes('trouser')||n.includes('pant')||n.includes('dress')});label=`Showing ${filtered.length} Bottoms & Dresses`;}
+  renderProducts(filtered.length?filtered:allProducts);
+  document.getElementById('filterText').innerText=label;
+  document.getElementById('filterStatus').style.display='flex';
+  document.getElementById('shop').scrollIntoView({behavior:'smooth'});
+  document.querySelectorAll('.gender-filters button').forEach(b=>b.classList.remove('active'));
+  const allBtn=document.querySelector('.gender-filters button[data-gender="All"]'); if(allBtn) allBtn.classList.add('active');
+}
+function clearCollectionFilter(){
+  renderProducts(allProducts);
+  document.getElementById('filterStatus').style.display='none';
+  document.querySelectorAll('.gender-filters button').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.gender-filters button[data-gender="All"]').classList.add('active');
+}
+document.getElementById('col-shirts').addEventListener('click', ()=> filterCollection('shirts'));
+document.getElementById('col-outerwear').addEventListener('click', ()=> filterCollection('outerwear'));
+document.getElementById('col-bottoms').addEventListener('click', ()=> filterCollection('bottoms'));
+
+fetch('/api/products').then(r=>r.json()).then(d=>{
+  allProducts=d.products||d||[];
+  renderProducts(allProducts);
+  renderCart();
+  updateCollectionCounts();
+});
+
+document.querySelectorAll('.gender-filters button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.gender-filters button').forEach(x=>x.classList.remove('active'));b.classList.add('active');
+  const g=b.dataset.gender.toLowerCase();
+  if(g==='all') renderProducts(allProducts);
+  else if(g==='unisex') renderProducts(allProducts.filter(p=>{const pg=(p.gender||p.category||'').toLowerCase();return pg==='unisex'||pg==='kids'}));
+  else renderProducts(allProducts.filter(p=>(p.gender||p.category||'').toLowerCase()===g));
+  document.getElementById('filterStatus').style.display='none';
+}));
+
+function observeReveals(){const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.15});document.querySelectorAll('.reveal').forEach(el=>io.observe(el));}
+observeReveals();
+window.addEventListener('scroll',()=>{document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>20)});
+
+async function loadHero(){
+  try{
+    const r=await fetch('/api/hero?t='+Date.now());
+    const d=await r.json();
+    const imgUrl = d.image || d.image_path || d.path || d.url;
+    if(imgUrl){
+      document.getElementById('heroImage').src = imgUrl + (imgUrl.includes('?')?'&':'?') + 'v=' + Date.now();
+    }
+  }catch(e){}
+}
+loadHero();
+</script>
+<script type="module">
+import { animate, stagger, inView, scroll } from "https://cdn.jsdelivr.net/npm/motion@12.16.0/+esm"
+animate(".hero-text.eyebrow", { y:[20,0], opacity:[0,1] }, { duration:0.6, delay:0.1 })
+animate(".hero-text h1", { y:[60,0], opacity:[0,1] }, { duration:0.8, delay:0.2 })
+animate(".hero-text p", { y:[30,0], opacity:[0,1] }, { duration:0.7, delay:0.4 })
+animate(".hero-cta", { y:[20,0], opacity:[0,1] }, { duration:0.6, delay:0.6 })
+animate("#heroImage", { scale:[1.15,1], opacity:[0,1] }, { duration:1.4, easing:"ease-out" })
+scroll(animate("#heroImage", { y: [-50, 50] }), { target: document.querySelector(".hero-visual") })
+inView(".product-grid", () => {
+  animate(".product-card", { y:[40,0], opacity:[0,1] }, { delay: stagger(0.08), duration:0.6, easing:"ease-out" })
+})
+document.querySelectorAll("#col-shirts, #col-outerwear, #col-bottoms").forEach(card=>{
+  card.addEventListener("mouseenter", ()=> animate(card, { y:-8, scale:1.02 }, { duration:0.3 }))
+  card.addEventListener("mouseleave", ()=> animate(card, { y:0, scale:1 }, { duration:0.3 }))
+})
+let lastY = 0
+window.addEventListener("scroll", ()=>{
+  const curr = window.scrollY
+  if(curr > 120 && curr > lastY) animate("#navbar", { y:"-100%" }, { duration:0.3 })
+  else animate("#navbar", { y:"0%" }, { duration:0.3 })
+  lastY = curr
+})
+</script>
+
+<!-- GLOBAL AURA AI FLOATING CONCIERGE -->
+<button class="aura-ai-trigger" onclick="toggleAuraAI()" style="position:fixed; bottom:24px; right:24px; background:#1A1611; color:#C9A86A; border:1px solid #C9A86A; padding:12px 20px; border-radius:30px; font-family:'Fraunces', serif; font-size:13px; letter-spacing:1.5px; cursor:pointer; z-index:999; box-shadow:0 10px 30px rgba(0,0,0,0.15); transition:all 0.3s ease;">
+  <span>✨ Ask Aura AI</span>
+</button>
+
+<div class="aura-ai-modal" id="auraModal" style="position:fixed; bottom:85px; right:24px; width:360px; max-width:90vw; height:480px; background:#FFFEFB; border:1px solid #E2DBD0; border-radius:16px; box-shadow:0 20px 40px rgba(0,0,0,0.15); z-index:1000; display:flex; flex-direction:column; overflow:hidden; transform:scale(0.95); opacity:0; pointer-events:none; transition:all 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+  <div class="aura-ai-header" style="background:#1A1611; color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; font-family:'Fraunces', serif; letter-spacing:1px; font-size:13px;">
+    <span>AURAWEAR STYLIST CONCIERGE</span>
+    <button onclick="toggleAuraAI()" style="background:none; border:none; color:#fff; cursor:pointer; font-size:16px;">✕</button>
+  </div>
+  <div class="aura-ai-body" id="auraChatBody" style="flex:1; padding:16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; font-size:13px; background:#FAF7F2;">
+    <div class="aura-msg bot" style="padding:12px 16px; border-radius:10px; max-width:88%; line-height:1.5; background:#FFFEFB; border:1px solid #E2DBD0; align-self:flex-start; color:#1A1611;">
+      Greetings. I am your 1970s Haute-Couture Archivist. Ask me about any dress style, fabric, or let me recommend pieces from our archive!
+    </div>
+  </div>
+  <div class="aura-ai-footer" style="padding:12px; background:#FFFEFB; border-top:1px solid #E2DBD0; display:flex; gap:8px;">
+    <input type="text" id="auraInput" placeholder="Ask about dresses or fits..." onkeypress="if(event.key==='Enter')sendAuraAIQuery()" style="flex:1; padding:10px 14px; border:1px solid #E2DBD0; border-radius:8px; background:#FAF7F2; font-size:12px; outline:none;">
+    <button onclick="sendAuraAIQuery()" style="background:#1A1611; color:#fff; border:none; padding:0 16px; border-radius:8px; cursor:pointer; font-size:12px; letter-spacing:1px;">Send</button>
+  </div>
+</div>
+
+<script>
+function toggleAuraAI(){
+  const modal = document.getElementById('auraModal');
+  if(modal.style.opacity === "0" || modal.style.opacity === "") {
+      modal.style.opacity = "1";
+      modal.style.transform = "scale(1)";
+      modal.style.pointerEvents = "all";
+  } else {
+      modal.style.opacity = "0";
+      modal.style.transform = "scale(0.95)";
+      modal.style.pointerEvents = "none";
+  }
+}
+
+async function sendAuraAIQuery(){
+  const input = document.getElementById('auraInput');
+  const chatBody = document.getElementById('auraChatBody');
+  const text = input.value.trim();
+  if(!text) return;
+
+  chatBody.innerHTML += `<div class="aura-msg user" style="padding:12px 16px; border-radius:10px; max-width:88%; line-height:1.5; background:#1A1611; color:#fff; align-self:flex-end;">${text}</div>`;
+  input.value = '';
+  chatBody.scrollTop = chatBody.scrollHeight;
+
+  const loadingId = 'load_' + Date.now();
+  chatBody.innerHTML += `<div class="aura-msg bot" id="${loadingId}" style="padding:12px 16px; border-radius:10px; max-width:88%; line-height:1.5; background:#FFFEFB; border:1px solid #E2DBD0; align-self:flex-start; color:#1A1611; opacity:0.6;">Consulting archive records...</div>`;
+  chatBody.scrollTop = chatBody.scrollHeight;
+
+  try {
+    const res = await fetch('/api/aura-ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text })
+    });
+    const data = await res.json();
+    document.getElementById(loadingId).remove();
+    chatBody.innerHTML += `<div class="aura-msg bot" style="padding:12px 16px; border-radius:10px; max-width:88%; line-height:1.5; background:#FFFEFB; border:1px solid #E2DBD0; align-self:flex-start; color:#1A1611;">${data.reply}</div>`;
+  } catch(e) {
+    document.getElementById(loadingId).remove();
+    chatBody.innerHTML += `<div class="aura-msg bot" style="padding:12px 16px; border-radius:10px; max-width:88%; line-height:1.5; background:#FFFEFB; border:1px solid #E2DBD0; align-self:flex-start; color:#1A1611;">Pardon me, the archives are busy. Please try asking again.</div>`;
+  }
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+</script>
+</body>
+</html>

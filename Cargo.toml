@@ -1,0 +1,22 @@
+[package]
+name = "aurawear"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = { version = "0.8.9", features = ["multipart"] }
+chrono = { version = "0.4", features = ["serde"] }
+dotenvy = "0.15.7"
+futures = "0.3.34"
+futures-util = "0.3.31"
+mongodb = "3.8.0"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+tokio = { version = "1.53.1", features = ["full"] }
+tower-http = { version = "0.7.0", features = ["fs", "cors"] }
+uuid = { version = "1.24.1", features = ["v4"] }
+bcrypt = "0.15"
+jsonwebtoken = "8.3"
+lettre = { version = "0.11", default-features = false, features = ["builder", "tokio1-native-tls", "smtp-transport", "hostname"] }
+dotenv = "0.15"
+rand = "0.8"

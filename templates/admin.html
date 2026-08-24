@@ -1,0 +1,3787 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Admin - AURAWEAR</title>
+
+<link rel="stylesheet" href="/css/admin-retro.css">
+
+</head>
+
+<body>
+
+<div class="admin-top">
+
+  <h1>
+    AURAWEAR ADMIN
+    <span class="badge">EST. 1972 • COMPASS</span>
+  </h1>
+
+  <div class="tabs">
+
+    <div class="tab active" id="tabP" onclick="showTab('products')">
+      PRODUCTS
+    </div>
+
+    <div class="tab" id="tabO" onclick="showTab('orders')">
+      ORDERS (<span id="orderCount">0</span>)
+    </div>
+
+    <div class="tab" id="tabU" onclick="showTab('users')">
+      USERS (<span id="userCount">0</span>)
+    </div>
+
+    <div class="tab" id="tabM" onclick="showTab('messages')">
+      MESSAGES
+    </div>
+
+    <div class="tab" id="tabDel" onclick="showTab('deletions')">
+      DELETIONS
+    </div>
+
+    <div class="tab" id="tabC" onclick="showTab('contact-section')">
+      CONTACT SECTION
+    </div>
+
+    <div class="tab" id="tabA" onclick="showTab('announcement')">
+      ANNOUNCEMENT
+    </div>
+
+    <div class="tab" onclick="cleanBad()">
+      CLEAN BAD
+    </div>
+
+    <a class="view-store" href="/">
+      VIEW STORE →
+    </a>
+
+  </div>
+
+</div>
+
+
+<div class="wrap">
+
+
+<!-- =========================
+     ANNOUNCEMENT TAB
+========================= -->
+
+<div id="tab-announcement" style="display:none;">
+
+  <div style="border:1.5px dashed #1A1611;padding:20px;margin:0 0 20px 0;background:#FFFEFB;border-radius:12px">
+
+    <label style="font-size:11px;letter-spacing:2px">
+      ANNOUNCEMENT BAR TEXT (top scrolling banner)
+    </label>
+
+    <div style="display:flex;gap:10px;margin-top:10px">
+
+      <input
+        id="announcement_text"
+        style="flex:1;padding:12px;border:1.5px solid #1A1611;border-radius:8px"
+        placeholder="e.g. Free Shipping on orders over $150 • New 70s Collection Live"
+      >
+
+      <button onclick="saveAnnouncement()" class="btn">
+        SAVE IN COMPASS
+      </button>
+
+    </div>
+
+    <small style="opacity:.5;font-family:Courier Prime;font-size:10px">
+      
+    </small>
+
+    <div
+      id="annPreview"
+      style="margin-top:12px;padding:10px;background:#E6F0FF;border-radius:8px;font-family:Courier Prime;font-size:12px;min-height:20px"
+    ></div>
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================
+     PRODUCTS TAB
+========================= -->
+
+<div id="productsTab">
+
+
+  <!-- HERO IMAGE -->
+
+  <div class="form" style="grid-template-columns:320px 1fr; align-items:start; background:#FFFEFB;">
+
+    <div>
+
+      <label>HERO SECTION IMAGE </label>
+
+      <img
+        id="heroPreview"
+        src=""
+        style="width:100%; height:200px; object-fit:cover; background:#F3F0EB; border:1.5px solid #1A1611; border-radius:12px; margin-top:6px;"
+      >
+
+    </div>
+
+
+    <div>
+
+      <label>CHANGE HERO IMAGE</label>
+
+      <input
+        id="heroFile"
+        type="file"
+        accept="image/*,video/*"
+      >
+
+      <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+
+        <button class="btn" onclick="uploadHero()">
+          UPDATE HERO 
+        </button>
+
+        <span
+          id="heroStatus"
+          style="font-family:Courier Prime; font-size:11px; opacity:.7;"
+        ></span>
+
+      </div>
+
+      <div style="font-family:Courier Prime; font-size:9px; opacity:.5; margin-top:10px; line-height:1.5">
+
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- ADD PRODUCT FORM -->
+
+  <div class="form">
+
+    <div>
+      <label>PRODUCT NAME</label>
+      <input id="p_name">
+    </div>
+
+    <div>
+      <label>PRICE ($)</label>
+      <input id="p_price" type="number">
+    </div>
+
+    <div>
+      <label>STOCK</label>
+      <input id="p_stock" type="number" value="">
+    </div>
+
+    <div>
+
+      <label>GENDER</label>
+
+      <select id="p_gender">
+
+        <option value="Men">Men</option>
+        <option value="Women">Women</option>
+        <option value="Unisex">Kids (Unisex)</option>
+        <option value="All">All</option>
+
+      </select>
+
+    </div>
+
+
+    <div>
+
+      <label>CATEGORY</label>
+
+      <select id="p_cat">
+
+        <option>Jackets</option>
+        <option>Dresses</option>
+        <option>Suits</option>
+        <option>Shirts</option>
+        <option>Jeans</option>
+        <option>Archive</option>
+
+      </select>
+
+    </div>
+
+
+    <div>
+      <label>FABRIC</label>
+      <input id="p_fabric">
+    </div>
+
+
+    <div>
+      <label>YEAR</label>
+      <input id="p_era" value="">
+    </div>
+
+
+    <div>
+      <label>SIZES (comma)</label>
+      <input id="p_sizes" value="">
+    </div>
+
+
+    <div class="col2">
+
+      <label>MAIN IMAGE FILE</label>
+
+      <input
+        id="p_file"
+        type="file"
+        accept="image/*"
+      >
+
+    </div>
+
+    <div class="full">
+      <label>ADDITIONAL GALLERY IMAGES (Multiple Angles / Parts - Upload Files)</label>
+      <div id="p_images_container" style="display:flex; flex-direction:column; gap:8px; margin-top:6px;"></div>
+      <button type="button" class="btn-del" onclick="addImgUploadField('p_images_container')" style="margin-top:8px; width:fit-content">+ Upload Image File</button>
+    </div>
+
+
+    <div class="full">
+
+      <label>DESCRIPTION</label>
+
+      <textarea id="p_desc" rows="2"></textarea>
+
+    </div>
+
+
+    <div class="full">
+
+      <button class="btn" onclick="addProduct()">
+        + ADD PRODUCT
+      </button>
+
+      <span
+        id="status"
+        style="font-family:Courier Prime; margin-left:10px"
+      ></span>
+
+    </div>
+
+  </div>
+
+
+  <div id="productGrid" class="grid"></div>
+
+</div>
+
+
+
+<!-- =========================
+     EDIT PRODUCT MODAL
+========================= -->
+
+<div
+  id="editModal"
+  style="position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:200; display:none; place-items:center; padding:20px"
+>
+
+  <div
+    style="background:#FFFEFB; border:2px dashed #1A1611; width:min(560px, 96vw); max-height:90vh; overflow:auto; padding:22px"
+  >
+
+    <h3 style="font-family:Fraunces; font-weight:300; letter-spacing:2px">
+      EDIT PRODUCT
+    </h3>
+
+
+    <input type="hidden" id="e_id">
+
+
+    <label style="font-size:9px; letter-spacing:2px; opacity:.6">
+      NAME
+    </label>
+
+    <input
+      id="e_name"
+      style="width:100%; padding:10px; border:1px solid #ddd; margin-bottom:10px"
+    >
+
+
+    <label style="font-size:9px; letter-spacing:2px; opacity:.6">
+      PRICE
+    </label>
+
+    <input
+      id="e_price"
+      type="number"
+      style="width:100%; padding:10px; border:1px solid #ddd; margin-bottom:10px"
+    >
+
+
+    <label style="font-size:9px; letter-spacing:2px; opacity:.6">
+      STOCK
+    </label>
+
+    <input
+      id="e_stock"
+      type="number"
+      style="width:100%; padding:10px; border:1px solid #ddd; margin-bottom:10px"
+    >
+
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+
+      <div>
+
+        <label style="font-size:9px">
+          CATEGORY
+        </label>
+
+        <input
+          id="e_cat"
+          style="width:100%; padding:10px; border:1px solid #ddd"
+        >
+
+      </div>
+
+
+      <div>
+
+        <label style="font-size:9px">
+          GENDER
+        </label>
+
+        <select
+          id="e_gender"
+          style="width:100%; padding:10px; border:1px solid #ddd"
+        >
+
+          <option>Men</option>
+          <option>Women</option>
+          <option>Unisex</option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <label
+      style="font-size:9px; letter-spacing:2px; opacity:.6; margin-top:10px; display:block"
+    >
+      FABRIC / ERA / SIZES
+    </label>
+
+
+    <div
+      style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px"
+    >
+
+      <input id="e_fabric" placeholder="Fabric">
+
+      <input id="e_era" placeholder="Era">
+
+      <input id="e_sizes" placeholder="S,M,L">
+
+    </div>
+
+
+    <label style="font-size:9px">
+      DESCRIPTION
+    </label>
+
+    <textarea
+      id="e_desc"
+      rows="3"
+      style="width:100%; padding:10px; border:1px solid #ddd"
+    ></textarea>
+
+
+    <label
+      style="font-size:9px; margin-top:10px; display:block"
+    >
+      CHANGE MAIN IMAGE (optional)
+    </label>
+
+
+    <img
+      id="e_preview"
+      style="width:100px; height:120px; object-fit:cover; border:1px solid #ddd; margin:6px 0"
+    >
+
+
+    <input
+      type="file"
+      id="e_file"
+      accept="image/*"
+    >
+
+    <label style="font-size:9px; margin-top:12px; display:block">
+      ADDITIONAL GALLERY IMAGES (Multiple Angles / Parts - Upload Files)
+    </label>
+    <div id="e_images_container" style="display:flex; flex-direction:column; gap:8px; margin-top:6px; margin-bottom:10px;"></div>
+    <button type="button" class="btn-del" onclick="addImgUploadField('e_images_container')" style="margin-bottom:10px;">+ Upload Image File</button>
+
+    <div style="margin-top:16px; display:flex; gap:8px">
+
+      <button
+        onclick="saveEdit()"
+        style="background:#1A1611; color:#fff; border:none; padding:12px 18px; letter-spacing:2px; font-size:11px; cursor:pointer"
+      >
+        SAVE CHANGES
+      </button>
+
+
+      <button
+        onclick="closeEdit()"
+        style="background:#fff; border:1px solid #000; padding:12px 18px; letter-spacing:2px; font-size:11px; cursor:pointer"
+      >
+        CANCEL
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================
+     ORDERS TAB
+========================= -->
+
+<div id="ordersTab" style="display:none">
+
+
+  <div class="stats">
+
+    <div class="stat">
+
+      <span>TODAY'S ORDERS</span>
+
+      <b id="statToday">0</b>
+
+    </div>
+
+
+    <div class="stat">
+
+      <span>PENDING ORDERS</span>
+
+      <b id="statPending">0</b>
+
+    </div>
+
+
+    <div class="stat">
+
+      <span>REVENUE TODAY (PAID)</span>
+
+      <b id="statRev">$0</b>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="toolbar">
+
+    <input
+      id="orderSearch"
+      placeholder="Search OrderID / Name / Email / Phone / TXN"
+      oninput="applyFilter()"
+    >
+
+
+    <select
+      id="orderSort"
+      onchange="applyFilter()"
+    >
+
+      <option value="newest">Newest First</option>
+      <option value="high">Highest Amount</option>
+
+    </select>
+
+
+    <button class="btn" onclick="loadOrders()">
+      REFRESH
+    </button>
+
+
+    <button class="btn-del" onclick="deleteInvalid()">
+      DELETE INVALID
+    </button>
+
+  </div>
+
+
+
+  <div class="filters">
+
+    <button class="fbtn active" data-f="all" onclick="setFilter(this)">
+      ALL
+    </button>
+
+    <button class="fbtn" data-f="pending" onclick="setFilter(this)">
+      PENDING
+    </button>
+
+    <button class="fbtn" data-f="confirmed" onclick="setFilter(this)">
+      CONFIRMED
+    </button>
+
+    <button class="fbtn" data-f="packed" onclick="setFilter(this)">
+      PACKED
+    </button>
+
+    <button class="fbtn" data-f="shipped" onclick="setFilter(this)">
+      SHIPPED
+    </button>
+
+    <button class="fbtn" data-f="delivered" onclick="setFilter(this)">
+      DELIVERED
+    </button>
+
+    <button class="fbtn" data-f="cancelled" onclick="setFilter(this)">
+      CANCELLED
+    </button>
+
+    <button class="fbtn" data-f="return_requested" onclick="setFilter(this)">
+      RETURNS
+    </button>
+
+  </div>
+
+
+
+  <table>
+
+    <thead>
+
+      <tr>
+
+        <th>ID</th>
+        <th>CUSTOMER</th>
+        <th>CONTACT</th>
+        <th>ITEMS</th>
+        <th>TOTAL</th>
+        <th>PAYMENT</th>
+        <th>STATUS</th>
+        <th>DATE</th>
+        <th>ACTION</th>
+
+      </tr>
+
+    </thead>
+
+
+    <tbody id="ordersBody"></tbody>
+
+  </table>
+
+</div>
+
+
+
+<!-- =========================
+     USERS TAB
+========================= -->
+
+<div id="usersTab" style="display:none">
+
+
+  <div class="stats">
+
+    <div class="stat">
+
+      <span>TOTAL USERS</span>
+
+      <b id="statUsers">0</b>
+
+    </div>
+
+
+    <div class="stat">
+
+      <span>USERS WITH PHOTO</span>
+
+      <b id="statUsersPhoto">0</b>
+
+    </div>
+
+
+    <div class="stat">
+
+      <span>TOTAL ORDERS</span>
+
+      <b id="statUsersOrders">0</b>
+
+    </div>
+
+  </div>
+
+
+
+  <table>
+
+    <thead>
+
+      <tr>
+
+        <th>PHOTO</th>
+        <th>NAME</th>
+        <th>EMAIL</th>
+        <th>PHONE</th>
+        <th>JOINED</th>
+        <th>ORDERS</th>
+        <th>ACTION</th>
+
+      </tr>
+
+    </thead>
+
+
+    <tbody id="usersBody"></tbody>
+
+  </table>
+
+</div>
+
+
+
+<!-- =========================
+     DELETIONS TAB (NEW)
+========================= -->
+
+<div id="deletionsTab" style="display:none">
+  <div class="form" style="display:block">
+    <h3 style="font-family:Fraunces; font-weight:300; margin:0 0 12px">ACCOUNT DELETION AUDIT LOGS</h3>
+    <p style="font-size:11px; opacity:.6; margin-bottom:16px">Review users who deleted their accounts and the specific reasons they provided.</p>
+    
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:12px;">
+        <thead>
+          <tr style="background:#FAF7F2; text-align:left; border-bottom:1.5px solid #1A1611;">
+            <th style="padding:10px;">User Name</th>
+            <th style="padding:10px;">Email</th>
+            <th style="padding:10px;">Phone</th>
+            <th style="padding:10px;">Reason</th>
+            <th style="padding:10px;">Custom Notes</th>
+            <th style="padding:10px;">Deleted At</th>
+          </tr>
+        </thead>
+        <tbody id="deletionLogsBody">
+          <tr><td colspan="6" style="padding:15px; text-align:center; opacity:.5;">Loading deletion logs...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- =========================
+     MESSAGES TAB
+========================= -->
+
+<div id="messagesTab" style="display:none">
+
+  <div class="form" style="display:block">
+
+    <h3
+      style="font-family:Fraunces; font-weight:300; margin:0 0 12px"
+    >
+      CONTACT MESSAGES — Guest + Logged Users
+    </h3>
+
+    <div id="msgList">
+      Loading messages...
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================
+     CONTACT SECTION TAB
+========================= -->
+
+<div id="contact-sectionTab" style="display:none">
+
+  <div class="form" style="display:block">
+
+    <h3
+      style="font-family:Fraunces; font-weight:300; margin:0 0 16px"
+    >
+      CONTACT SECTION CMS — Edit Home Page Contact Section
+    </h3>
+
+
+    <label>HEADING</label>
+
+    <input
+      id="cs_heading"
+      placeholder="GET IN TOUCH"
+    >
+
+
+    <label>SUBHEADING</label>
+
+    <input
+      id="cs_sub"
+      placeholder="SEND US A NOTE — WE'D LOVE TO HEAR FROM YOU"
+    >
+
+
+    <label>BACKGROUND IMAGE URL (auto filled after upload)</label>
+
+    <input
+      id="cs_bg_img"
+      placeholder="Background Image URL"
+    >
+
+
+    <input
+      type="file"
+      id="cs_bg_file"
+      accept="image/*"
+      onchange="uploadContactMedia('bg')"
+    >
+
+
+    <label>BACKGROUND VIDEO URL (mp4 or youtube link)</label>
+
+    <input
+      id="cs_video"
+      placeholder="Video URL"
+    >
+
+
+    <input
+      type="file"
+      id="cs_video_file"
+      accept="video/*"
+      onchange="uploadContactMedia('video')"
+    >
+
+
+    <label>STAMP IMAGE URL</label>
+
+    <input
+      id="cs_stamp"
+      placeholder="Stamp image"
+    >
+
+
+    <input
+      type="file"
+      id="cs_stamp_file"
+      accept="image/*"
+      onchange="uploadContactMedia('stamp')"
+    >
+
+
+    <label>MESSAGE TYPES (shows as pills on home page)</label>
+
+    <div
+      id="cs_types"
+      style="margin:10px 0; display:flex; flex-wrap:wrap; gap:6px"
+    ></div>
+
+
+    <div style="display:flex; gap:8px">
+
+      <input
+        id="newType"
+        placeholder="Add new type ex: return_request"
+        style="flex:1"
+      >
+
+      <button
+        class="btn"
+        type="button"
+        onclick="addType()"
+      >
+        ADD TYPE
+      </button>
+
+    </div>
+
+
+    <br>
+
+
+    <label>
+
+      <input
+        type="checkbox"
+        id="cs_active"
+        checked
+      >
+
+      ACTIVE - Show on Home Page
+
+    </label>
+
+
+    <br><br>
+
+
+    <button
+      class="btn"
+      onclick="saveContactSection()"
+    >
+      SAVE & PUBLISH TO HOME PAGE
+    </button>
+
+
+    <div
+      id="cs_preview"
+      style="margin-top:20px; padding:16px; background:#F9F1E7; border:1.5px dashed #1A1611; border-radius:12px; min-height:80px"
+    ></div>
+
+  </div>
+
+</div>
+
+
+</div>
+
+
+
+<!-- =========================
+     ORDER MODAL
+========================= -->
+
+<div
+  id="orderModal"
+  class="modal"
+  onclick="if(event.target===this)closeModal()"
+>
+
+  <div class="modal-card">
+
+
+    <div>
+
+      <h2
+        style="font-family:Fraunces;font-weight:300;margin:0 0 12px"
+      >
+        ORDER
+        <span id="mId"></span>
+      </h2>
+
+
+      <div
+        id="mCustomer"
+        style="font-size:13px;line-height:1.7"
+      ></div>
+
+
+      <div style="margin-top:14px">
+
+        <b style="font-size:10px;letter-spacing:2px">
+          PRODUCTS
+        </b>
+
+        <div id="mItems"></div>
+
+      </div>
+
+
+      <div
+        style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px"
+      >
+
+        <div>
+
+          <label>COURIER</label>
+
+          <input
+            id="mCourier"
+            placeholder="DTDC / Delhivery"
+          >
+
+        </div>
+
+
+        <div>
+
+          <label>TRACKING</label>
+
+          <input
+            id="mTracking"
+            placeholder="TRK123..."
+          >
+
+        </div>
+
+      </div>
+
+
+      <div style="margin-top:10px">
+
+        <label>INTERNAL NOTE</label>
+
+        <textarea
+          id="mNote"
+          rows="3"
+        ></textarea>
+
+      </div>
+
+    </div>
+
+
+
+    <div
+      style="background:#fff;border:1.5px solid #1A1611;padding:14px;display:flex;flex-direction:column;gap:9px;height:fit-content;border-radius:14px"
+    >
+
+      <div
+        style="font-family:Courier Prime;font-size:10px;opacity:.5"
+      >
+        UPDATE STATUS
+      </div>
+
+
+      <select
+        id="mStatus"
+        style="padding:11px;border:1.5px solid #1A1611;border-radius:10px"
+      >
+
+        <option>pending</option>
+        <option>confirmed</option>
+        <option>packed</option>
+        <option>shipped</option>
+        <option>delivered</option>
+        <option>cancelled</option>
+        <option>return_requested</option>
+
+      </select>
+
+
+      <button class="btn" onclick="saveStatus()">
+        UPDATE STATUS
+      </button>
+
+
+      <button
+        class="btn"
+        style="background:#C9A86A;color:#000"
+        onclick="saveTracking()"
+      >
+        ADD TRACKING + MARK SHIPPED
+      </button>
+
+
+      <button class="btn-del" onclick="doCancel()">
+        CANCEL + RESTOCK
+      </button>
+
+
+      <button class="btn-del" onclick="markCod()">
+        MARK COD COLLECTED (PAID)
+      </button>
+
+
+      <button class="btn-del" onclick="doRefund()">
+        PROCESS REFUND
+      </button>
+
+
+      <button class="btn-del" onclick="printInvoice()">
+        PRINT INVOICE
+      </button>
+
+
+      <button class="btn-del" onclick="saveNote()">
+        SAVE NOTE
+      </button>
+
+
+      <hr style="border:none;border-top:1px dashed #1A1611">
+
+
+      <div
+        style="font-family:Courier Prime;font-size:10px;opacity:.5"
+      >
+        QUICK TEMPLATES
+      </div>
+
+
+      <button
+        class="btn-del"
+        onclick="copyTpl('Your order ID is confirmed and being packed.')"
+      >
+        Copy: Confirmed
+      </button>
+
+
+      <button
+        class="btn-del"
+        onclick="copyTpl('Your order shipped via COURIER - Tracking TRACKING')"
+      >
+        Copy: Shipped
+      </button>
+
+
+      <button
+        class="btn-del"
+        onclick="closeModal()"
+      >
+        CLOSE
+      </button>
+
+
+      <div
+        id="mResult"
+        style="font-family:Courier Prime;font-size:11px;opacity:.7;margin-top:6px;min-height:18px"
+      ></div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<script>
+
+let allOrders=[];
+let currentFilter='all';
+let currentModalId=null;
+let allUsers=[];
+
+let currentTypes=[
+  "enquiry",
+  "complaint",
+  "appreciation",
+  "good_review",
+  "bad_review",
+  "suggestion"
+];
+
+
+// Dynamic Gallery File Upload Field Helpers
+function addImgUploadField(containerId, existingUrl = '') {
+  const container = document.getElementById(containerId);
+  const row = document.createElement('div');
+  row.style.display = 'flex';
+  row.style.gap = '6px';
+  row.style.alignItems = 'center';
+  row.style.marginBottom = '6px';
+
+  let previewHtml = '';
+  if(existingUrl) {
+    previewHtml = `<img src="${existingUrl}" style="width:30px;height:35px;object-fit:cover;border:1px solid #1A1611;">`;
+  }
+
+  row.innerHTML = `
+    ${previewHtml}
+    <input type="file" accept="image/*" class="gallery-file-input" style="flex:1; padding:6px; border:1px solid #1A1611; border-radius:6px; background:#fff; font-size:10px;" onchange="uploadGalleryFile(this)">
+    <input type="hidden" class="gallery-url-input" value="${existingUrl}">
+    <span class="upload-status" style="font-size:10px; font-family:Courier Prime; opacity:0.7;">${existingUrl ? '✓ Ready' : 'No file'}</span>
+    <button type="button" class="btn-del" onclick="this.parentElement.remove()" style="padding:4px 8px;">✕</button>
+  `;
+  container.appendChild(row);
+}
+
+async function uploadGalleryFile(fileInput) {
+  const file = fileInput.files[0];
+  if(!file) return;
+
+  const row = fileInput.parentElement;
+  const statusSpan = row.querySelector('.upload-status');
+  const hiddenUrlInput = row.querySelector('.gallery-url-input');
+
+  statusSpan.innerText = 'Uploading...';
+
+  const fd = new FormData();
+  fd.append('file', file);
+
+  try {
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      body: fd
+    });
+    const data = await res.json();
+
+    if(data.path || data.url) {
+      const serverPath = data.path || data.url;
+      hiddenUrlInput.value = serverPath;
+      statusSpan.innerText = '✓ Saved';
+    } else {
+      statusSpan.innerText = 'Failed';
+      alert('Upload failed: ' + (data.error || 'Unknown error'));
+    }
+  } catch(err) {
+    statusSpan.innerText = 'Error';
+    alert('Upload error: ' + err.message);
+  }
+}
+
+function getUploadedImgFields(containerId) {
+  const container = document.getElementById(containerId);
+  if(!container) return [];
+  const hiddenInputs = container.querySelectorAll('.gallery-url-input');
+  let arr = [];
+  hiddenInputs.forEach(inp => {
+    if(inp.value.trim()) arr.push(inp.value.trim());
+  });
+  return arr;
+}
+
+
+function getOid(idField){
+
+  if(!idField) return '';
+
+  if(typeof idField==='string')
+    return idField;
+
+  if(idField.$oid)
+    return idField.$oid;
+
+  if(typeof idField==='object'){
+    return idField.$oid || idField.toString();
+  }
+
+  return String(idField);
+
+}
+
+
+
+function showTab(t){
+
+  document.getElementById('productsTab').style.display =
+    t==='products' ? 'block' : 'none';
+
+  document.getElementById('ordersTab').style.display =
+    t==='orders' ? 'block' : 'none';
+
+  document.getElementById('usersTab').style.display =
+    t==='users' ? 'block' : 'none';
+
+  document.getElementById('deletionsTab').style.display =
+    t==='deletions' ? 'block' : 'none';
+
+  document.getElementById('messagesTab').style.display =
+    t==='messages' ? 'block' : 'none';
+
+  document.getElementById('contact-sectionTab').style.display =
+    t==='contact-section' ? 'block' : 'none';
+
+  document.getElementById('tab-announcement').style.display =
+    t==='announcement' ? 'block' : 'none';
+
+
+  document.getElementById('tabP').classList.toggle(
+    'active',
+    t==='products'
+  );
+
+  document.getElementById('tabO').classList.toggle(
+    'active',
+    t==='orders'
+  );
+
+  document.getElementById('tabU').classList.toggle(
+    'active',
+    t==='users'
+  );
+
+  document.getElementById('tabDel').classList.toggle(
+    'active',
+    t==='deletions'
+  );
+
+  document.getElementById('tabM').classList.toggle(
+    'active',
+    t==='messages'
+  );
+
+  document.getElementById('tabC').classList.toggle(
+    'active',
+    t==='contact-section'
+  );
+
+  document.getElementById('tabA').classList.toggle(
+    'active',
+    t==='announcement'
+  );
+
+
+  if(t==='orders') loadOrders();
+
+  if(t==='users') loadUsers();
+
+  if(t==='deletions') loadDeletionLogs();
+
+  if(t==='messages') loadMessages();
+
+  if(t==='contact-section') loadCS();
+
+  if(t==='announcement') loadAnnouncement();
+
+  if(t==='products'){
+    loadProducts();
+    loadHero();
+  }
+
+}
+
+
+
+async function loadHero(){
+
+  try{
+
+    const r=await fetch('/api/hero');
+
+    const j=await r.json();
+
+    if(j.image){
+      document.getElementById('heroPreview').src=j.image;
+    }
+
+  }catch(e){}
+
+}
+
+
+
+async function uploadHero(){
+
+  const f=document.getElementById('heroFile').files[0];
+
+  if(!f){
+    alert('Select hero image');
+    return;
+  }
+
+  const fd=new FormData();
+
+  fd.append('file',f);
+
+  document.getElementById('heroStatus').innerText =
+    'Uploading to Compass...';
+
+
+  const up=await fetch(
+    '/api/hero-upload',
+    {
+      method:'POST',
+      body:fd
+    }
+  );
+
+
+  const upJ=await up.json();
+
+  const p=
+    upJ.path ||
+    upJ.mongo_path ||
+    upJ.url;
+
+
+  if(p){
+
+    document.getElementById('heroPreview').src=p;
+
+    document.getElementById('heroStatus').innerText =
+      'Saved in Compass: '+p;
+
+  }else{
+
+    document.getElementById('heroStatus').innerText =
+      'Failed: '+(upJ.error||'');
+
+  }
+
+}
+
+
+
+async function loadAnnouncement(){
+
+  try{
+
+    const r=await fetch('/api/announcement');
+
+    const j=await r.json();
+
+    const txt=
+      j.text ||
+      j.message ||
+      j.announcement ||
+      '';
+
+    document.getElementById('announcement_text').value=txt;
+
+    document.getElementById('annPreview').innerText =
+      txt
+        ? 'Preview: '+txt
+        : 'No announcement set';
+
+  }catch(e){
+
+    document.getElementById('annPreview').innerText =
+      'Failed to load';
+
+  }
+
+}
+
+
+
+async function saveAnnouncement(){
+
+  const text=
+    document.getElementById('announcement_text').value;
+
+
+  const r=await fetch(
+    '/api/announcement',
+    {
+      method:'PUT',
+
+      headers:{
+        'Content-Type':'application/json'
+      },
+
+      body:JSON.stringify({
+        text,
+        message:text
+      })
+
+    }
+  );
+
+
+  const j=await r.json().catch(()=>({}));
+
+
+  if(j.success!==false){
+
+    alert('Announcement saved in Compass!');
+
+    document.getElementById('annPreview').innerText =
+      'Preview: '+text;
+
+  }else{
+
+    alert(
+      'Failed: '+(j.error||'')
+    );
+
+  }
+
+}
+
+
+
+async function loadProducts(){
+
+  const r=await fetch('/api/products');
+
+  const d=await r.json();
+
+  const products=d.products||[];
+
+
+  document.getElementById('productGrid').innerHTML =
+    products.map(p=>{
+
+      const id=getOid(p._id);
+
+      return `
+        <div class="card">
+
+          <div class="img-wrap">
+
+            <img
+              src="${p.image_path||p.image}"
+              loading="lazy"
+            >
+
+          </div>
+
+          <div class="info">
+
+            <div class="name">
+              ${p.name}
+            </div>
+
+            <div class="meta">
+
+              $${p.price}
+              •
+              ${p.gender||''}
+              •
+              Stock:${p.stock??0}
+              ${p.stock<5?'🔴 LOW':''}
+
+            </div>
+
+            <div
+              class="meta"
+              style="font-size:10px; opacity:.6"
+            >
+
+              ${(p.description||'').slice(0,60)}
+
+            </div>
+
+
+            <div
+              style="margin-top:auto; padding-top:8px; display:flex; gap:6px"
+            >
+
+              <button
+                class="btn-del"
+                onclick="openEdit('${id}')"
+              >
+                EDIT
+              </button>
+
+
+              <button
+                class="btn-del"
+                onclick="del('${id}')"
+              >
+                DELETE
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      `;
+
+    }).join('');
+
+}
+
+
+
+async function addProduct(){
+
+  const f=document.getElementById('p_file').files[0];
+
+  if(!f){
+    alert('Select image');
+    return;
+  }
+
+
+  const fd=new FormData();
+
+  fd.append('file',f);
+
+
+  document.getElementById('status').innerText=
+    'Uploading...';
+
+
+  const up=await fetch(
+    '/api/upload',
+    {
+      method:'POST',
+      body:fd
+    }
+  );
+
+
+  const upJ=await up.json();
+
+
+  if(!upJ.success){
+
+    alert(upJ.error);
+
+    return;
+
+  }
+
+  const imagesArr = getUploadedImgFields('p_images_container');
+  if(upJ.path && !imagesArr.includes(upJ.path)) imagesArr.unshift(upJ.path);
+
+
+  const payload={
+
+    name:
+      document.getElementById('p_name').value,
+
+    price:
+      parseInt(
+        document.getElementById('p_price').value
+      )||0,
+
+    stock:
+      parseInt(
+        document.getElementById('p_stock').value
+      )||10,
+
+    gender:
+      document.getElementById('p_gender').value,
+
+    category:
+      document.getElementById('p_cat').value,
+
+    fabric:
+      document.getElementById('p_fabric').value,
+
+    era:
+      document.getElementById('p_era').value,
+
+    sizes:
+      document.getElementById('p_sizes').value,
+
+    description:
+      document.getElementById('p_desc').value,
+
+    image_path:
+      upJ.path,
+
+    images:
+      imagesArr
+
+  };
+
+
+  const r=await fetch(
+    '/api/products',
+    {
+      method:'POST',
+
+      headers:{
+        'Content-Type':'application/json'
+      },
+
+      body:JSON.stringify(payload)
+
+    }
+  );
+
+
+  const d=await r.json();
+
+
+  if(d.success){
+
+    document.getElementById('status').innerText=
+      'Added';
+
+    loadProducts();
+
+  }else{
+
+    alert(d.error);
+
+  }
+
+}
+
+
+
+async function del(id){
+
+  if(!confirm('Delete?'))
+    return;
+
+  await fetch(
+    '/api/products/'+id,
+    {
+      method:'DELETE'
+    }
+  );
+
+  loadProducts();
+
+}
+
+
+
+async function cleanBad(){
+
+  const r=await fetch('/api/products');
+
+  const d=await r.json();
+
+  const bad=
+    d.products.filter(
+      p=>(p.image_path||'').includes('reading')
+    );
+
+
+  for(let b of bad){
+
+    await fetch(
+      '/api/products/'+getOid(b._id),
+      {
+        method:'DELETE'
+      }
+    );
+
+  }
+
+
+  alert('Cleaned '+bad.length);
+
+  loadProducts();
+
+}
+
+
+
+function parseMongoDate(v){
+
+  if(!v)
+    return null;
+
+  if(typeof v==='string'){
+
+    const d=new Date(v);
+
+    return isNaN(d)
+      ? null
+      : d;
+
+  }
+
+
+  if(typeof v==='number')
+    return new Date(v);
+
+
+  if(v.$date){
+
+    if(typeof v.$date==='string')
+      return new Date(v.$date);
+
+    if(v.$date.$numberLong)
+      return new Date(
+        parseInt(v.$date.$numberLong)
+      );
+
+    if(typeof v.$date==='number')
+      return new Date(v.$date);
+
+  }
+
+
+  if(v.$numberLong)
+    return new Date(
+      parseInt(v.$numberLong)
+    );
+
+
+  return null;
+
+}
+
+
+
+function safeDate(v){
+
+  const d=parseMongoDate(v);
+
+  if(!d)
+    return '—';
+
+  return d.toLocaleString();
+
+}
+
+
+
+async function loadOrders(){
+
+  const r=await fetch('/api/orders');
+
+  const d=await r.json();
+
+  allOrders=d.orders||[];
+
+  document.getElementById('orderCount').innerText=
+    allOrders.length;
+
+  applyFilter();
+
+}
+
+
+
+function applyFilter(){
+
+  const q=
+    document.getElementById('orderSearch')
+    .value
+    .toLowerCase();
+
+  const sort=
+    document.getElementById('orderSort').value;
+
+
+  let list=[...allOrders];
+
+
+  if(currentFilter!=='all'){
+
+    list=list.filter(
+      o=>(o.status||'pending')
+      .toLowerCase()===currentFilter
+    );
+
+  }
+
+
+  if(q){
+
+    list=list.filter(o=>
+
+      (getOid(o._id||o.id)||'')
+        .toLowerCase()
+        .includes(q)
+
+      ||
+
+      (o.first_name||'')
+        .toLowerCase()
+        .includes(q)
+
+      ||
+
+      (o.last_name||'')
+        .toLowerCase()
+        .includes(q)
+
+      ||
+
+      (o.email||'')
+        .toLowerCase()
+        .includes(q)
+
+      ||
+
+      (o.phone||'')
+        .toLowerCase()
+        .includes(q)
+
+      ||
+
+      (o.transaction_id||'')
+        .toLowerCase()
+        .includes(q)
+
+      ||
+
+      (o.payment_method||'')
+        .toLowerCase()
+        .includes(q)
+
+    );
+
+  }
+
+
+  if(sort==='high'){
+
+    list.sort(
+      (a,b)=>
+        (b.total||0)-
+        (a.total||0)
+    );
+
+  }else{
+
+    list.sort(
+      (a,b)=>
+        new Date(b.created_at||0)-
+        new Date(a.created_at||0)
+    );
+
+  }
+
+
+  const today=
+    new Date().toDateString();
+
+  let todayC=0;
+  let pend=0;
+  let rev=0;
+
+
+  allOrders.forEach(o=>{
+
+    try{
+
+      if(
+        new Date(o.created_at)
+        .toDateString()===today
+      ){
+
+        todayC++;
+
+        if(
+          (o.payment_status||'').includes('PAID')
+          ||
+          o.payment_method==='COD'
+        ){
+
+          rev+=o.total||0;
+
+        }
+
+      }
+
+    }catch{}
+
+
+    if(
+      (o.status||'pending')==='pending'
+    ){
+
+      pend++;
+
+    }
+
+  });
+
+
+  document.getElementById('statToday').innerText=
+    todayC;
+
+  document.getElementById('statPending').innerText=
+    pend;
+
+  document.getElementById('statRev').innerText=
+    '$'+rev;
+
+
+  document.getElementById('ordersBody').innerHTML=
+
+    list.map(o=>{
+
+      const full=
+        getOid(
+          o._id||
+          o.id||
+          ''
+        );
+
+
+      const short=
+        full.slice(-8);
+
+
+      const cust=
+        `${o.first_name||''} ${o.last_name||''}`
+        .trim()
+        ||
+        'Guest';
+
+
+      const contact=
+        `${o.email||''}<br>
+         ${o.phone||''}<br>
+         <span style="opacity:.6;font-size:11px">
+           ${o.address||''} ${o.city||''}
+         </span>`;
+
+
+      const items=
+        o.items
+          ?
+            (
+              Array.isArray(o.items)
+                ?
+                  o.items.length
+                :
+                  1
+            )
+          :
+            '—';
+
+
+      const st=
+        (o.status||'pending')
+        .toLowerCase();
+
+
+      const payMethod=
+        o.payment_method||'COD';
+
+
+      const payStatus=
+        o.payment_status
+        ||
+        (
+          payMethod==='COD'
+            ?
+              'COD_PENDING'
+            :
+              'PAID'
+        );
+
+
+      const txn=
+        o.transaction_id
+          ?
+            `<div style="font-size:8px;opacity:.6;margin-top:2px">
+              ${o.transaction_id}
+             </div>`
+          :
+            '';
+
+
+      return `
+
+        <tr>
+
+          <td
+            style="font-family:monospace;font-size:10px"
+          >
+
+            ${short}
+
+            <div style="opacity:.4">
+              ${full.slice(0,6)}
+            </div>
+
+          </td>
+
+
+          <td>
+            <b>${cust}</b>
+          </td>
+
+
+          <td>
+            ${contact}
+          </td>
+
+
+          <td>
+            ${items}
+          </td>
+
+
+          <td>
+            $${o.total||0}
+          </td>
+
+
+          <td>
+
+            <b>
+              ${payMethod}
+            </b>
+
+            <br>
+
+            <span class="badge-pay ${payStatus}">
+              ${payStatus}
+            </span>
+
+            ${txn}
+
+          </td>
+
+
+          <td>
+
+            <span class="badge ${st}">
+              ${st.toUpperCase()}
+            </span>
+
+          </td>
+
+
+          <td>
+            ${safeDate(o.created_at)}
+          </td>
+
+
+          <td>
+
+            <div class="action-stack">
+
+              <button
+                class="btn-del"
+                onclick="openOrder('${full}')"
+              >
+                VIEW
+              </button>
+
+
+              <button
+                class="btn-del"
+                onclick="quickStatus('${full}','confirmed')"
+              >
+                CONFIRM
+              </button>
+
+
+              <button
+                class="btn-del"
+                onclick="quickStatus('${full}','shipped')"
+              >
+                SHIP
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+      `;
+
+    }).join('');
+
+}
+
+
+
+function setFilter(el){
+
+  document
+    .querySelectorAll('.fbtn')
+    .forEach(
+      b=>b.classList.remove('active')
+    );
+
+
+  el.classList.add('active');
+
+  currentFilter=el.dataset.f;
+
+  applyFilter();
+
+}
+
+
+
+async function openOrder(id){
+
+  const r=
+    await fetch(
+      '/api/orders/'+id
+    );
+
+  const d=
+    await r.json();
+
+
+  if(!d.success){
+
+    alert(
+      'Not found: '+id
+    );
+
+    return;
+
+  }
+
+
+  const o=d.order;
+
+  currentModalId=id;
+
+
+  document.getElementById('mId').innerText=
+    id.slice(-8);
+
+
+  document.getElementById('mCustomer').innerHTML=
+
+    `<b>
+      ${o.first_name||''}
+      ${o.last_name||''}
+    </b>
+
+    <br>
+
+    Email: ${o.email||''}
+
+    <br>
+
+    Phone: ${o.phone||''}
+
+    <br>
+
+    Address:
+    ${o.address||''},
+    ${o.city||''}
+    ${o.zip||''}
+
+    <br>
+
+    <hr style="margin:10px 0;opacity:.2">
+
+    <b>PAYMENT:</b>
+
+    ${o.payment_method||'COD'}
+
+    -
+
+    <span class="badge-pay ${o.payment_status||''}">
+      ${o.payment_status||'PENDING'}
+    </span>
+
+    <br>
+
+    ${
+      o.transaction_id
+        ?
+          'TXN: '+o.transaction_id+'<br>'
+        :
+          ''
+    }
+
+    Total:
+    $${o.total}
+
+    •
+
+    Status:
+
+    <span class="badge ${o.status}">
+      ${o.status}
+    </span>`;
+
+
+  document.getElementById('mItems').innerHTML=
+
+    (o.items||[])
+    .map(it=>{
+
+      const obj=
+        typeof it==='object' &&
+        it!==null
+          ?
+            it
+          :
+            {};
+
+
+      return `
+
+        <div
+          style="display:flex;gap:8px;border-bottom:1px solid rgba(0,0,0,.06);padding:6px 0"
+        >
+
+          <img
+            src="${obj.image_path||obj.image||''}"
+            style="width:40px;height:50px;object-fit:cover;background:#eee"
+          >
+
+
+          <div style="font-size:12px">
+
+            <b>
+              ${obj.name||'Item'}
+            </b>
+
+            <br>
+
+            $${obj.price||''}
+            x
+            ${obj.qty||obj.quantity||1}
+
+            ${
+              obj.size
+                ?
+                  `Size:${obj.size}`
+                :
+                  ''
+            }
+
+          </div>
+
+        </div>
+
+      `;
+
+    }).join('')
+    ||
+    'No items';
+
+
+  document.getElementById('mCourier').value=
+    o.courier||'';
+
+  document.getElementById('mTracking').value=
+    o.tracking_number||'';
+
+  document.getElementById('mNote').value=
+    o.internal_note||'';
+
+  document.getElementById('mStatus').value=
+    o.status||'pending';
+
+
+  document
+    .getElementById('orderModal')
+    .classList
+    .add('open');
+
+}
+
+
+
+function closeModal(){
+
+  document
+    .getElementById('orderModal')
+    .classList
+    .remove('open');
+
+}
+
+
+
+async function quickStatus(id,status){
+
+  await fetch(
+    `/api/orders/${id}/status`,
+    {
+      method:'POST',
+
+      headers:{
+        'Content-Type':'application/json'
+      },
+
+      body:
+        JSON.stringify({
+          status
+        })
+
+    }
+  );
+
+
+  loadOrders();
+
+}
+
+
+
+async function saveStatus(){
+
+  const st=
+    document.getElementById('mStatus').value;
+
+
+  await quickStatus(
+    currentModalId,
+    st
+  );
+
+
+  document.getElementById('mResult').innerText=
+    'Status updated -> stock auto handled';
+
+}
+
+
+
+async function saveTracking(){
+
+  const courier=
+    document.getElementById('mCourier').value;
+
+  const tracking=
+    document.getElementById('mTracking').value;
+
+
+  if(!tracking){
+
+    alert('Enter tracking');
+
+    return;
+
+  }
+
+
+  await fetch(
+    `/api/orders/${currentModalId}/tracking`,
+    {
+
+      method:'POST',
+
+      headers:{
+        'Content-Type':'application/json'
+      },
+
+      body:
+        JSON.stringify({
+          courier,
+          tracking_number:tracking
+        })
+
+    }
+  );
+
+
+  document.getElementById('mResult').innerText=
+    'Shipped + tracking saved';
+
+
+  loadOrders();
+
+}
+
+
+
+async function saveNote(){
+
+  const note=
+    document.getElementById('mNote').value;
+
+
+  await fetch(
+    `/api/orders/${currentModalId}/note`,
+    {
+
+      method:'POST',
+
+      headers:{
+        'Content-Type':'application/json'
+      },
+
+      body:
+        JSON.stringify({
+          note
+        })
+
+    }
+  );
+
+
+  document.getElementById('mResult').innerText=
+    'Note saved';
+
+}
+
+
+
+async function doCancel(){
+
+  if(!confirm('Cancel + restock?'))
+    return;
+
+
+  await fetch(
+    `/api/orders/${currentModalId}/cancel`,
+    {
+
+      method:'POST',
+
+      headers:{
+        'Content-Type':'application/json'
+      },
+
+      body:
+        JSON.stringify({
+          reason:'Admin cancel'
+        })
+
+    }
+  );
+
+
+  document.getElementById('mResult').innerText=
+    'Cancelled + restocked + refund if needed';
+
+
+  loadOrders();
+
+  closeModal();
+
+}
+
+
+
+async function markCod(){
+
+  await fetch(
+    `/api/orders/${currentModalId}/payment_status`,
+    {
+
+      method:'POST',
+
+      headers:{
+        'Content-Type':'application/json'
+      },
+
+      body:
+        JSON.stringify({
+          payment_status:'PAID'
+        })
+
+    }
+  ).catch(()=>{});
+
+
+  document.getElementById('mStatus').value=
+    'delivered';
+
+
+  await quickStatus(
+    currentModalId,
+    'delivered'
+  );
+
+
+  document.getElementById('mResult').innerText=
+    'COD Collected -> PAID + Delivered';
+
+}
+
+
+
+async function doRefund(){
+
+  if(!confirm('Process REFUND?'))
+    return;
+
+
+  await fetch(
+    `/api/orders/${currentModalId}/payment_status`,
+    {
+
+      method:'POST',
+
+      headers:{
+        'Content-Type':'application/json'
+      },
+
+      body:
+        JSON.stringify({
+          payment_status:'REFUNDED'
+        })
+
+    }
+  );
+
+
+  document.getElementById('mResult').innerText=
+    'Payment REFUNDED';
+
+
+  loadOrders();
+
+}
+
+
+
+function printInvoice(){
+
+  const o=
+    document.getElementById('mCustomer')
+    .innerHTML;
+
+
+  const items=
+    document.getElementById('mItems')
+    .innerHTML;
+
+
+  const w=
+    window.open(
+      '',
+      '',
+      'width=800,height=900'
+    );
+
+
+  w.document.write(`
+
+    <html>
+
+    <head>
+
+      <style>
+
+        body{
+          font-family:Inter;
+          padding:40px
+        }
+
+        h1{
+          font-family:Fraunces;
+          letter-spacing:5px
+        }
+
+      </style>
+
+    </head>
+
+
+    <body>
+
+      <h1>AURAWEAR</h1>
+
+      <hr>
+
+      <div>
+        ${o}
+      </div>
+
+      <hr>
+
+      <div>
+        ${items}
+      </div>
+
+      <p>
+        Thank you
+      </p>
+
+    </body>
+
+    </html>
+
+  `);
+
+
+  w.document.close();
+
+  w.print();
+
+}
+
+
+
+function copyTpl(t){
+
+  navigator.clipboard.writeText(t);
+
+  document.getElementById('mResult').innerText=
+    'Copied: '+t;
+
+}
+
+
+
+async function deleteInvalid(){
+
+  if(!confirm('Delete Invalid?'))
+    return;
+
+
+  for(let o of allOrders){
+
+    if(
+
+      !o.created_at
+
+      ||
+
+      isNaN(
+        new Date(o.created_at).getTime()
+      )
+
+      ||
+
+      (o.email||'').includes('jehiwuhw')
+
+    ){
+
+      await fetch(
+        '/api/orders/'+getOid(o._id),
+        {
+          method:'DELETE'
+        }
+      ).catch(()=>{});
+
+    }
+
+  }
+
+
+  alert('Cleaned');
+
+  loadOrders();
+
+}
+
+
+
+async function loadUsers(){
+
+  try{
+
+    const r=
+      await fetch('/api/users');
+
+    const d=
+      await r.json();
+
+
+    allUsers=
+      d.users||[];
+
+
+    document.getElementById('userCount').innerText=
+      allUsers.length;
+
+
+    document.getElementById('statUsers').innerText=
+      allUsers.length;
+
+
+    document.getElementById('statUsersPhoto').innerText=
+      allUsers.filter(
+        u=>u.avatar
+      ).length;
+
+
+    const or=
+      await fetch('/api/orders');
+
+    const od=
+      await or.json();
+
+    const orders=
+      od.orders||[];
+
+
+    document.getElementById('statUsersOrders').innerText=
+      orders.length;
+
+
+    document.getElementById('usersBody').innerHTML=
+
+      allUsers.map(u=>{
+
+        const email=
+          (u.email||'')
+          .toLowerCase();
+
+
+        const orderCount=
+          orders.filter(
+            o=>
+              (o.email||'')
+              .toLowerCase()
+              ===email
+          ).length;
+
+
+        const avatar=
+          u.avatar||'';
+
+
+        const name=
+
+          (
+            (u.first_name||'')
+            +' '+
+            (u.last_name||'')
+          )
+          .trim()
+
+          ||
+
+          u.name
+
+          ||
+
+          'User';
+
+
+        const joined=
+
+          u.created_at
+            ?
+              new Date(
+                u.created_at
+              ).toLocaleDateString()
+            :
+              '—';
+
+
+        const uid=
+          getOid(u._id);
+
+
+        return `
+
+          <tr>
+
+            <td>
+
+              ${
+                avatar
+                  ?
+                    `<img
+                      src="${avatar}"
+                      class="avatar"
+                    >`
+
+                  :
+                    `<div class="avatar">
+                      ${name.charAt(0).toUpperCase()}
+                    </div>`
+              }
+
+            </td>
+
+
+            <td>
+              <b>${name}</b>
+            </td>
+
+
+            <td>
+              ✉ ${u.email||''}
+            </td>
+
+
+            <td>
+              ☎ ${u.phone||'—'}
+            </td>
+
+
+            <td>
+              ${joined}
+            </td>
+
+
+            <td>
+              ${orderCount} orders
+            </td>
+
+
+            <td>
+
+              <button
+                class="btn-del"
+                onclick="deleteUser('${uid}')"
+                style="background:#1A1611;color:#fff"
+              >
+                DELETE
+              </button>
+
+            </td>
+
+          </tr>
+
+        `;
+
+      }).join('')
+
+      ||
+
+      '<tr><td colspan="7">No users yet</td></tr>';
+
+
+  }catch(e){
+
+    document.getElementById('usersBody').innerHTML=
+      '<tr><td colspan="7">Failed: '+e+'</td></tr>';
+
+  }
+
+}
+
+
+
+async function deleteUser(id){
+
+  if(!id)
+    return;
+
+
+  if(!confirm('Delete this user permanently?'))
+    return;
+
+
+  const r=
+    await fetch(
+      '/api/users/'+id,
+      {
+        method:'DELETE'
+      }
+    );
+
+
+  const d=
+    await r.json()
+    .catch(()=>({}));
+
+
+  if(d.success){
+
+    loadUsers();
+
+  }else{
+
+    alert(
+      'Failed: '+(d.error||'')
+    );
+
+  }
+
+}
+
+
+
+async function loadDeletionLogs(){
+  try{
+    const r = await fetch('/api/admin/deletion-logs');
+    const d = await r.json();
+    const tbody = document.getElementById('deletionLogsBody');
+    if(d.success && d.logs){
+      tbody.innerHTML = d.logs.length ? d.logs.map(l => `
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="padding:10px;"><b>${l.name || 'N/A'}</b></td>
+          <td style="padding:10px;">${l.email || 'N/A'}</td>
+          <td style="padding:10px;">${l.phone || 'N/A'}</td>
+          <td style="padding:10px; font-weight:600; color:#b00;">${l.reason || 'N/A'}</td>
+          <td style="padding:10px; opacity:.8;">${l.custom_reason || '-'}</td>
+          <td style="padding:10px; font-size:10px; opacity:.6;">${l.deleted_at || ''}</td>
+        </tr>
+      `).join('') : '<tr><td colspan="6" style="padding:15px; text-align:center; opacity:.5;">No deletion audit logs recorded yet.</td></tr>';
+    }
+  }catch(e){
+    document.getElementById('deletionLogsBody').innerHTML = '<tr><td colspan="6" style="padding:15px; text-align:center; color:#b00;">Failed to load deletion logs.</td></tr>';
+  }
+}
+
+
+
+async function loadMessages(){
+
+  document.getElementById('msgList').innerHTML=
+    'Loading...';
+
+
+  const r=
+    await fetch('/api/contact');
+
+
+  const d=
+    await r.json();
+
+
+  const list=
+    d.contacts||[];
+
+
+  if(!list.length){
+
+    document.getElementById('msgList').innerHTML=
+      'No messages yet';
+
+    return;
+
+  }
+
+
+  document.getElementById('msgList').innerHTML=
+
+    list.map(c=>{
+
+      const oid=
+        getOid(c._id);
+
+
+      return `
+
+        <div
+          class="card"
+          style="padding:14px; margin-bottom:12px; display:block"
+        >
+
+          <b>
+            ${c.name}
+          </b>
+
+          (${c.email})
+
+          <span class="pill">
+            ${c.message_type||''}
+          </span>
+
+
+          <span class="badge ${c.status||'pending'}">
+
+            ${(c.status||'pending').toUpperCase()}
+
+          </span>
+
+
+          <p style="margin:8px 0">
+            ${c.message||''}
+          </p>
+
+
+          ${
+            c.image
+              ?
+                `<img
+                  src="${c.image}"
+                  style="width:120px; border:1.5px solid #1A1611; border-radius:10px"
+                >`
+              :
+                ''
+          }
+
+
+          <div
+            style="font-family:Courier Prime; font-size:10px; opacity:.5"
+          >
+
+            Ticket:
+            AUR-${oid.slice(-6).toUpperCase()}
+
+            |
+
+            ${c.created_at||''}
+
+          </div>
+
+
+          ${
+            c.admin_reply
+              ?
+                `<div
+                  style="background:#F9F1E7; padding:8px; border-left:3px solid #A66A3C; margin:8px 0; border-radius:8px"
+                >
+
+                  <b>Replied:</b>
+
+                  ${c.admin_reply}
+
+                </div>`
+
+              :
+                ''
+          }
+
+
+          <textarea
+            id="reply_${oid}"
+            placeholder="Reply will email to ${c.email}"
+            style="width:100%; margin-top:8px"
+          ></textarea>
+
+
+          <div
+            style="margin-top:6px; display:flex; gap:6px"
+          >
+
+            <button
+              class="btn"
+              onclick="replyMsg('${oid}')"
+            >
+              REPLY & EMAIL
+            </button>
+
+
+            <button
+              class="btn-del"
+              onclick="delMsg('${oid}')"
+            >
+              DELETE
+            </button>
+
+          </div>
+
+        </div>
+
+      `;
+
+    }).join('');
+
+}
+
+
+
+async function replyMsg(id){
+
+  const reply=
+    document
+    .getElementById('reply_'+id)
+    .value;
+
+
+  if(!reply)
+    return alert('Type reply');
+
+
+  await fetch(
+    '/api/contact/'+id+'/reply',
+    {
+
+      method:'POST',
+
+      headers:{
+        'Content-Type':'application/json'
+      },
+
+      body:
+        JSON.stringify({
+          reply
+        })
+
+    }
+  );
+
+
+  alert('Replied & Emailed');
+
+  loadMessages();
+
+}
+
+
+
+async function delMsg(id){
+
+  if(!confirm('Delete message?'))
+    return;
+
+
+  await fetch(
+    '/api/contact/'+id,
+    {
+      method:'DELETE'
+    }
+  );
+
+
+  loadMessages();
+
+}
+
+
+
+async function loadCS(){
+
+  const r=
+    await fetch('/api/contact-section');
+
+  const d=
+    await r.json();
+
+  const s=
+    d.section||{};
+
+
+  document.getElementById('cs_heading').value=
+    s.heading||'GET IN TOUCH';
+
+
+  document.getElementById('cs_sub').value=
+    s.subheading||'';
+
+
+  document.getElementById('cs_bg_img').value=
+    s.background_image||'';
+
+
+  document.getElementById('cs_video').value=
+    s.background_video||'';
+
+
+  document.getElementById('cs_stamp').value=
+    s.stamp_image||'';
+
+
+  currentTypes=
+    s.message_types||currentTypes;
+
+
+  document.getElementById('cs_active').checked=
+    s.is_active!==false;
+
+
+  renderTypes();
+
+
+  document.getElementById('cs_preview').innerHTML=
+
+    `${
+      s.background_image
+        ?
+          `<img
+            src="${s.background_image}"
+            style="width:180px; border:1.5px solid #1A1611; border-radius:10px"
+          >`
+        :
+          ''
+    }
+
+    <p>
+
+      <b>
+        ${s.heading||''}
+      </b>
+
+      <br>
+
+      <small>
+        ${s.subheading||''}
+      </small>
+
+      <br>
+
+      Types:
+      ${currentTypes.join(', ')}
+
+    </p>`;
+
+}
+
+
+
+function renderTypes(){
+
+  document.getElementById('cs_types').innerHTML=
+
+    currentTypes.map(
+      t=>
+        `<span class="pill">
+
+          ${t}
+
+          <b
+            style="cursor:pointer"
+            onclick="removeType('${t}')"
+          >
+            x
+          </b>
+
+        </span>`
+    ).join('');
+
+}
+
+
+
+function addType(){
+
+  const v=
+
+    document
+    .getElementById('newType')
+    .value
+    .trim()
+    .toLowerCase()
+    .replace(/ /g,'_');
+
+
+  if(!v)
+    return;
+
+
+  if(!currentTypes.includes(v)){
+
+    currentTypes.push(v);
+
+    renderTypes();
+
+    document.getElementById('newType').value='';
+
+  }
+
+}
+
+
+
+function removeType(t){
+
+  currentTypes=
+    currentTypes.filter(
+      x=>x!==t
+    );
+
+  renderTypes();
+
+}
+
+
+
+async function uploadContactMedia(which){
+
+  const inputId=
+
+    which==='bg'
+
+      ?
+        'cs_bg_file'
+
+      :
+
+        which==='video'
+
+          ?
+            'cs_video_file'
+
+          :
+            'cs_stamp_file';
+
+
+  const f=
+    document
+    .getElementById(inputId)
+    .files[0];
+
+
+  if(!f)
+    return;
+
+
+  const fd=
+    new FormData();
+
+
+  fd.append(
+    'file',
+    f
+  );
+
+
+  const r=
+    await fetch(
+      '/api/upload',
+      {
+        method:'POST',
+        body:fd
+      }
+    );
+
+
+  const j=
+    await r.json();
+
+
+  const url=
+    j.path||j.url;
+
+
+  if(which==='bg')
+    document.getElementById('cs_bg_img').value=url;
+
+
+  if(which==='video')
+    document.getElementById('cs_video').value=url;
+
+
+  if(which==='stamp')
+    document.getElementById('cs_stamp').value=url;
+
+
+  alert(
+    'Uploaded: '+url
+  );
+
+}
+
+
+
+async function saveContactSection(){
+
+  const body={
+
+    heading:
+      document
+      .getElementById('cs_heading')
+      .value,
+
+
+    subheading:
+      document
+      .getElementById('cs_sub')
+      .value,
+
+
+    background_image:
+      document
+      .getElementById('cs_bg_img')
+      .value,
+
+
+    background_video:
+      document
+      .getElementById('cs_video')
+      .value,
+
+
+    stamp_image:
+      document
+      .getElementById('cs_stamp')
+      .value,
+
+
+    message_types:
+      currentTypes,
+
+
+    is_active:
+      document
+      .getElementById('cs_active')
+      .checked
+
+  };
+
+
+  await fetch(
+    '/api/contact-section',
+    {
+
+      method:'PUT',
+
+      headers:{
+        'Content-Type':'application/json'
+      },
+
+      body:
+        JSON.stringify(body)
+
+    }
+  );
+
+
+  alert(
+    'Contact Section Saved - Now visible on Home Page!'
+  );
+
+}
+
+
+
+async function openEdit(id){
+
+  try{
+
+    console.log(
+      'openEdit',
+      id
+    );
+
+
+    if(!id || id==='undefined'){
+
+      alert('Invalid ID');
+
+      return;
+
+    }
+
+
+    const r=
+      await fetch(
+        '/api/products/'+id
+      );
+
+
+    const d=
+      await r.json();
+
+
+    console.log(
+      'product fetch',
+      d
+    );
+
+
+    const p=
+      d.product||d;
+
+
+    if(!p || (!p.name &&!d.success)){
+
+      alert(
+        'Product not found: '+id
+      );
+
+      return;
+
+    }
+
+
+    document.getElementById('e_id').value=
+      id;
+
+
+    document.getElementById('e_name').value=
+      p.name||'';
+
+
+    document.getElementById('e_price').value=
+      p.price||0;
+
+
+    document.getElementById('e_stock').value=
+      p.stock??10;
+
+
+    document.getElementById('e_cat').value=
+      p.category||'Jackets';
+
+
+    document.getElementById('e_gender').value=
+      p.gender||'Men';
+
+
+    document.getElementById('e_fabric').value=
+      p.fabric||'';
+
+
+    document.getElementById('e_era').value=
+      p.era||'1970s';
+
+
+    document.getElementById('e_sizes').value=
+
+      Array.isArray(p.sizes)
+
+        ?
+          p.sizes.join(',')
+
+        :
+          (
+            p.sizes||'S,M,L'
+          );
+
+
+    document.getElementById('e_desc').value=
+      p.description||'';
+
+
+    const imgEl=
+      document.getElementById('e_preview');
+
+
+    const imgPath=
+      p.image_path||
+      p.image||
+      '';
+
+
+    imgEl.src=
+      imgPath;
+
+
+    imgEl.dataset.orig=
+      imgPath;
+
+
+    const imgContainer = document.getElementById('e_images_container');
+    imgContainer.innerHTML = '';
+    let gallery = Array.isArray(p.images) ? p.images : (p.image_path ? [p.image_path] : []);
+    if(!gallery.length && imgPath) gallery = [imgPath];
+    gallery.forEach(imgUrl => addImgUploadField('e_images_container', imgUrl));
+
+
+    document.getElementById('e_file').value=
+      '';
+
+
+    document.getElementById('editModal').style.display=
+      'grid';
+
+
+    document.getElementById('editModal').style.placeItems=
+      'center';
+
+
+  }catch(e){
+
+    alert(
+      'Edit open failed: '+e.message
+    );
+
+    console.error(e);
+
+  }
+
+}
+
+
+
+function closeEdit(){
+
+  document.getElementById('editModal').style.display=
+    'none';
+
+}
+
+
+
+async function saveEdit(){
+
+  try{
+
+    const id=
+      document.getElementById('e_id').value;
+
+
+    if(!id){
+
+      alert('No ID');
+
+      return;
+
+    }
+
+
+    let imgPath=
+
+      document
+      .getElementById('e_preview')
+      .dataset.orig
+
+      ||
+
+      '';
+
+
+    const f=
+      document
+      .getElementById('e_file')
+      .files[0];
+
+
+    if(f){
+
+      const fd=
+        new FormData();
+
+      fd.append(
+        'file',
+        f
+      );
+
+
+      const up=
+        await fetch(
+          '/api/upload',
+          {
+            method:'POST',
+            body:fd
+          }
+        );
+
+
+      const j=
+        await up.json();
+
+
+      if(j.path){
+
+        imgPath=j.path;
+
+      }else{
+
+        alert(
+          'Image upload failed'
+        );
+
+        return;
+
+      }
+
+    }
+
+
+    const imagesArr = getUploadedImgFields('e_images_container');
+    if(imgPath && !imagesArr.includes(imgPath)) imagesArr.unshift(imgPath);
+
+
+    const body={
+
+      name:
+        document
+        .getElementById('e_name')
+        .value,
+
+
+      price:
+
+        parseFloat(
+          document
+          .getElementById('e_price')
+          .value
+        )
+
+        ||
+
+        0,
+
+
+      stock:
+
+        parseInt(
+          document
+          .getElementById('e_stock')
+          .value
+        )
+
+        ||
+
+        0,
+
+
+      category:
+        document
+        .getElementById('e_cat')
+        .value,
+
+
+      gender:
+        document
+        .getElementById('e_gender')
+        .value,
+
+
+      fabric:
+        document
+        .getElementById('e_fabric')
+        .value,
+
+
+      era:
+        document
+        .getElementById('e_era')
+        .value,
+
+
+      sizes:
+
+        document
+        .getElementById('e_sizes')
+        .value
+        .split(',')
+        .map(
+          s=>s.trim()
+        )
+        .filter(Boolean),
+
+
+      description:
+        document
+        .getElementById('e_desc')
+        .value,
+
+
+      image:
+        imgPath,
+
+
+      image_path:
+        imgPath,
+
+      images:
+        imagesArr
+
+    };
+
+
+    const r=
+      await fetch(
+        '/api/products/'+id,
+        {
+
+          method:'PUT',
+
+          headers:{
+            'Content-Type':'application/json'
+          },
+
+          body:
+            JSON.stringify(body)
+
+        }
+      );
+
+
+    const d=
+      await r.json();
+
+
+    console.log(
+      'save result',
+      d
+    );
+
+
+    if(d.success){
+
+      closeEdit();
+
+      await loadProducts();
+
+      alert('Updated!');
+
+    }else{
+
+      alert(
+        'Failed: '+
+        (
+          d.error||
+          JSON.stringify(d)
+        )
+      );
+
+    }
+
+
+  }catch(e){
+
+    alert(
+      'Error: '+e.message
+    );
+
+  }
+
+}
+
+
+
+// Close modal when clicking outside
+
+document
+.getElementById('editModal')
+?.addEventListener(
+  'click',
+  (e)=>{
+    if(e.target.id==='editModal')
+      closeEdit();
+  }
+);
+
+
+
+loadProducts();
+loadHero();
+
+</script>
+
+</body>
+</html>

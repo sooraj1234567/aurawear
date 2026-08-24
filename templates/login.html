@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account - AURAWEAR</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<!-- Separate Luxury Stylesheet -->
+<link rel="stylesheet" href="/css/login-luxury.css">
+</head>
+<body>
+
+<div class="nav">
+  <span class="nav-brand">AURAWEAR</span>
+  <a href="/" class="nav-shop">SHOP ARCHIVE</a>
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <h1>AURAWEAR</h1>
+    <div class="subtitle">HAUTE-COUTURE ARCHIVE CONCIERGE</div>
+    
+    <div class="tabs">
+      <div id="t1" class="tab active" onclick="showLogin()">SIGN IN</div>
+      <div id="t2" class="tab" onclick="showReg()">CREATE ACCOUNT</div>
+    </div>
+
+    <!-- Login Box -->
+    <div id="loginBox">
+      <div class="input-group">
+        <input id="lemail" type="email" placeholder="Email Address">
+      </div>
+      <div class="input-group">
+        <input id="lpass" type="password" placeholder="Password">
+      </div>
+      <button class="btn" onclick="doLogin()">ACCESS ARCHIVE</button>
+    </div>
+
+    <!-- Register Box -->
+    <div id="regBox" style="display:none">
+      <div class="input-group">
+        <input id="rname" placeholder="Full Name">
+      </div>
+      <div class="input-group">
+        <input id="remail" type="email" placeholder="Email Address">
+      </div>
+      <div class="input-group">
+        <input id="rphone" placeholder="Phone Number (Optional)">
+      </div>
+      <div class="input-group">
+        <input id="rpass" type="password" placeholder="Create Password">
+      </div>
+      <button class="btn" onclick="doRegister()">REGISTER & JOIN</button>
+    </div>
+
+    <div id="msg"></div>
+  </div>
+</div>
+
+<!-- Separate Luxury JavaScript -->
+<script src="/js/login.js"></script>
+</body>
+</html>

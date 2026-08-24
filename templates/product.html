@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product - AURAWEAR</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<!-- Separate Luxury PDP Stylesheet -->
+<link rel="stylesheet" href="/css/product-luxury.css">
+</head>
+<body>
+
+<nav class="navbar scrolled">
+  <div class="logo" onclick="location.href='/'" style="cursor:pointer">AURAWEAR</div>
+  <div class="nav-links">
+    <a href="/">Shop</a>
+    <span class="dot">•</span>
+    <a href="/">Collections</a>
+  </div>
+  <div class="nav-actions">
+    <a id="cartBtn" class="cart-icon" href="#" style="position:relative; display:flex; align-items:center;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 8V6a3 3 0 0 1 6 0v2"/><path d="M3 8h18l-1 12H4L3 8z"/></svg>
+      <span id="cartCount" style="position:absolute; top:-8px; right:-8px; background:#C9A86A; color:white; font-size:10px; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center">0</span>
+    </a>
+  </div>
+</nav>
+
+<div class="pdp">
+  <!-- Left Gallery Section -->
+  <div class="pdp-gallery-wrapper">
+    <div class="pdp-main" id="mainImgContainer">
+      <img id="mainImg" src="/uploads/hero.jpg" alt="Product Main View">
+    </div>
+    <div class="pdp-thumbs" id="thumbs"></div>
+  </div>
+
+  <!-- Right Buy Box & Details Section -->
+  <div class="pdp-details">
+    <h1 id="pName">Loading Archive...</h1>
+    
+    <div class="price-row">
+      <span id="pPrice"></span>
+      <span class="badge-batch">SMALL-BATCH ARCHIVE</span>
+    </div>
+
+    <div id="pGender"></div>
+    
+    <div class="meta-box" id="metaBox">
+      <div id="pStock"></div>
+      <div id="pFabric" style="opacity:.7; margin-top:4px;"></div>
+      <div id="pEra" style="opacity:.7; margin-top:2px;"></div>
+      <div id="pCategory" style="opacity:.7; margin-top:2px;"></div>
+      <div id="pDesc" style="margin-top:12px; line-height:1.6; color:var(--ink);"></div>
+    </div>
+
+    <span class="size-label">SELECT SIZE</span>
+    <div class="size-row" id="sizeRow"></div>
+
+    <button id="addBtn" class="btn-gold">Add to Cart — <span id="priceBtn"></span></button>
+    <a href="/" class="back-link">← BACK TO ARCHIVE</a>
+  </div>
+</div>
+
+<!-- Immersive Story & Dynamic Angles Showcase Grid -->
+<div class="story">
+  <div>
+    <h2 id="storyTitle">Corduroy wale that catches light, leather that learns your shape.</h2>
+    <p id="storyDesc">We chose premium vintage construction for a reason — fine enough to read as solid from a distance, structured enough to hold true character when you move.</p>
+  </div>
+  <div class="detail-imgs" id="detailImagesGrid"></div>
+</div>
+
+<!-- Cart Overlay & Slide Drawer -->
+<div id="cartOverlay"></div>
+<div id="cartDrawer">
+  <div style="display:flex; justify-content:space-between; align-items:center; padding:24px; border-bottom:1px solid var(--border)">
+    <span style="font-family:'Fraunces',serif; font-size:20px;">CART (<span id="cartCountDrawer">0</span>)</span>
+    <button id="closeCartBtn" style="background:none; border:none; font-size:22px; cursor:pointer; opacity:0.7; transition:opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">✕</button>
+  </div>
+  <div id="cartBody" style="flex:1; overflow-y:auto; padding:0 24px;"></div>
+  <div style="border-top:1px solid var(--border); padding:24px; background:var(--bg-color);">
+    <div style="display:flex; justify-content:space-between; margin-bottom:14px;">
+      <span style="font-size:11px; letter-spacing:1px; opacity:0.6;">SUBTOTAL</span>
+      <span id="cartSubtotal" style="font-weight:500; font-size:16px;">$0</span>
+    </div>
+    <a href="/checkout" class="btn-gold" style="display:block; text-align:center; text-decoration:none;">PROCEED TO CHECKOUT</a>
+  </div>
+</div>
+
+<script>
+let cart=JSON.parse(localStorage.getItem('aurawear_cart')||'[]');
+function saveCart(){localStorage.setItem('aurawear_cart',JSON.stringify(cart));updateBadge();}
+function updateBadge(){const c=cart.reduce((s,i)=>s+(i.qty||1),0);document.getElementById('cartCount').innerText=c;document.getElementById('cartCountDrawer').innerText=c;}
+function openCart(){document.getElementById('cartDrawer').classList.add('open');document.getElementById('cartOverlay').classList.add('open');renderCart();}
+function closeCart(){document.getElementById('cartDrawer').classList.remove('open');document.getElementById('cartOverlay').classList.remove('open');}
+
+function renderCart(){
+  const body=document.getElementById('cartBody');const sub=document.getElementById('cartSubtotal');
+  if(!cart.length){body.innerHTML='<div style="padding:60px; text-align:center; opacity:0.6; font-size:13px;">Your cart is empty</div>';sub.innerText='$0';return;}
+  let t=0;
+  body.innerHTML=cart.map(c=>{
+    t+=c.price*c.qty;
+    return `<div style="display:flex; gap:16px; padding:18px 0; border-bottom:1px solid var(--border); align-items:center;">
+      <img src="${c.image_path||c.image}" style="width:70px; height:85px; object-fit:cover; border-radius:6px; border:1px solid var(--border)">
+      <div>
+        <div style="font-family:'Fraunces',serif; font-size:15px; margin-bottom:4px;">${c.name}</div>
+        <div style="font-size:11px; opacity:0.6; letter-spacing:1px;">SIZE ${c.size||'M'} • QTY ${c.qty||1}</div>
+        <div style="font-size:13px; font-weight:500; margin-top:6px;">$${c.price}</div>
+      </div>
+    </div>`;
+  }).join('');
+  sub.innerText=`$${t}`;
+}
+
+document.getElementById('cartBtn').addEventListener('click',e=>{e.preventDefault();openCart();});
+document.getElementById('closeCartBtn').addEventListener('click',closeCart);
+document.getElementById('cartOverlay').addEventListener('click',closeCart);
+
+function cleanName(raw){
+  if(!raw) return 'AURAWEAR Archive Piece';
+  let s = raw.replace(/\*\*/g,'').trim();
+  if(s.includes('/uploads') || s.includes('reading') || s.includes('.png') || s.includes('.jpg') || s.length>80){
+    return 'AURAWEAR Archive Piece';
+  }
+  return s;
+}
+
+const params=new URLSearchParams(location.search);
+const id=params.get('id');
+
+async function load(){
+  if(!id){document.getElementById('pName').innerText='No ID Provided';return}
+  try{
+    const res = await fetch('/api/products/'+id+'?t='+Date.now());
+    const data = await res.json();
+    let p = data.product || data;
+    if(!p || !p.name){
+      const r2 = await fetch('/api/products');
+      const d2 = await r2.json();
+      const list = d2.products||d2||[];
+      p = list.find(x => (x._id||x.id||'')==id);
+    }
+    if(!p){document.getElementById('pName').innerText='Product not found';return}
+
+    const name = cleanName(p.name);
+    const price = p.price||1450;
+    const mainImg = p.image_path||p.image||'/uploads/hero.jpg';
+    const stock = p.stock ?? 10;
+    
+    let sizes = ['XS','S','M','L','XL'];
+    if(Array.isArray(p.sizes)) {
+      sizes = p.sizes;
+    } else if(typeof p.sizes === 'string') {
+      sizes = p.sizes.split(',').map(s=>s.trim()).filter(Boolean);
+      if(!sizes.length) sizes = ['XS','S','M','L','XL'];
+    }
+
+    let images = [];
+    if(Array.isArray(p.images) && p.images.length > 0) {
+      images = p.images;
+    } else if(typeof p.images === 'string' && p.images.trim().length > 0) {
+      images = p.images.split(',').map(s=>s.trim()).filter(Boolean);
+    }
+    if(!images.includes(mainImg)) {
+      images.unshift(mainImg);
+    }
+
+    document.getElementById('pName').innerText = name;
+    document.getElementById('pPrice').innerText = `$${price}`;
+    document.getElementById('priceBtn').innerText = `$${price}`;
+    
+    document.getElementById('mainImg').src = images[0];
+    document.getElementById('pGender').innerText = (p.category||p.gender||'ARCHIVE').toUpperCase();
+    
+    const stockEl = document.getElementById('pStock');
+    if(stock>10) stockEl.innerHTML = `<span class="stock-in">● IN STOCK - ${stock} AVAILABLE</span>`;
+    else if(stock>0) stockEl.innerHTML = `<span class="stock-low">● LOW STOCK - ONLY ${stock} LEFT</span>`;
+    else stockEl.innerHTML = `<span class="stock-out">○ OUT OF STOCK</span>`;
+
+    document.getElementById('pFabric').innerText = `Fabric: ${p.fabric||'Vintage Blend'}`;
+    document.getElementById('pEra').innerText = `Era: ${p.era||'1970s'}`;
+    document.getElementById('pCategory').innerText = `Category: ${p.category||'Archive'}`;
+    document.getElementById('pDesc').innerText = p.description || 'Curated 70s silhouette, re-cut for now. Small-batch, sustainable, genderless.';
+    document.getElementById('storyTitle').innerText = name;
+    document.getElementById('storyDesc').innerText = p.description || document.getElementById('storyDesc').innerText;
+
+    const sizeRow = document.getElementById('sizeRow');
+    sizeRow.innerHTML = sizes.map((s,i)=>`<button class="${i==0?'active':''}" ${stock==0?'disabled':''}>${s}</button>`).join('');
+
+    if(stock==0){ document.getElementById('addBtn').disabled=true; document.getElementById('addBtn').innerText='OUT OF STOCK'; }
+
+    // Render interactive thumbnails
+    const thumbs = document.getElementById('thumbs');
+    thumbs.innerHTML='';
+    images.forEach((src,i)=>{
+      const im=document.createElement('img');
+      im.src=src;
+      if(i==0) im.classList.add('active');
+      im.onclick=(e)=>{
+        document.getElementById('mainImg').src=src;
+        thumbs.querySelectorAll('img').forEach(x=>x.classList.remove('active'));
+        e.target.classList.add('active');
+      };
+      thumbs.appendChild(im);
+    });
+
+    // Render multi-angle shots seamlessly into the story grid
+    const detailGrid = document.getElementById('detailImagesGrid');
+    detailGrid.innerHTML = images.map(src => `<div><img src="${src}" alt="Detail Angle"></div>`).join('');
+
+    window._p = {id, name, price, image_path: images[0], stock};
+
+  }catch(e){
+    document.getElementById('pName').innerText='Error loading product: '+e.message;
+  }
+}
+load();
+
+document.getElementById('sizeRow').addEventListener('click',e=>{
+  if(e.target.tagName=='BUTTON'){
+    document.querySelectorAll('#sizeRow button').forEach(b=>b.classList.remove('active'));
+    e.target.classList.add('active');
+  }
+});
+
+document.getElementById('addBtn').addEventListener('click',()=>{
+  const p = window._p;
+  if(!p){alert('Product not loaded yet');return}
+  if(p.stock==0){alert('Out of stock');return}
+  const size = document.querySelector('#sizeRow button.active')?.innerText||'M';
+  const existing = cart.find(c=>c.id===p.id && c.size===size);
+  if(existing){ if(existing.qty < p.stock) existing.qty+=1; else alert('Only '+p.stock+' items available in stock'); }
+  else{ cart.push({id:p.id,name:p.name,price:parseInt(p.price),image_path:p.image_path,size,qty:1}) }
+  saveCart();
+  openCart(); // Smoothly open the slide drawer instead of abrupt redirects
+});
+
+updateBadge();
+
+// Interactive Zoom/Pan Effect on Main Image Container
+const mainContainer = document.getElementById('mainImgContainer');
+const mainImg = document.getElementById('mainImg');
+if(mainContainer && mainImg){
+  mainContainer.addEventListener('mousemove', (e) => {
+    const rect = mainContainer.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    mainImg.style.transformOrigin = `${x}% ${y}%`;
+  });
+  mainContainer.addEventListener('mouseenter', () => {
+    mainImg.style.transform = 'scale(1.15)';
+  });
+  mainContainer.addEventListener('mouseleave', () => {
+    mainImg.style.transform = 'scale(1)';
+    mainImg.style.transformOrigin = 'center center';
+  });
+}
+</script>
+<!-- GLOBAL AURA AI FLOATING CONCIERGE -->
+<button class="aura-ai-trigger" onclick="toggleAuraAI()" style="position:fixed; bottom:24px; right:24px; background:#1A1611; color:#C9A86A; border:1px solid #C9A86A; padding:12px 20px; border-radius:30px; font-family:'Fraunces', serif; font-size:13px; letter-spacing:1.5px; cursor:pointer; z-index:999; box-shadow:0 10px 30px rgba(0,0,0,0.15); transition:all 0.3s ease;">
+  <span>✨ Ask Aura AI</span>
+</button>
+
+<div class="aura-ai-modal" id="auraModal" style="position:fixed; bottom:85px; right:24px; width:360px; max-width:90vw; height:480px; background:#FFFEFB; border:1px solid #E2DBD0; border-radius:16px; box-shadow:0 20px 40px rgba(0,0,0,0.15); z-index:1000; display:flex; flex-direction:column; overflow:hidden; transform:scale(0.95); opacity:0; pointer-events:none; transition:all 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+  <div class="aura-ai-header" style="background:#1A1611; color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; font-family:'Fraunces', serif; letter-spacing:1px; font-size:13px;">
+    <span>AURAWEAR STYLIST CONCIERGE</span>
+    <button onclick="toggleAuraAI()" style="background:none; border:none; color:#fff; cursor:pointer; font-size:16px;">✕</button>
+  </div>
+  <div class="aura-ai-body" id="auraChatBody" style="flex:1; padding:16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; font-size:13px; background:#FAF7F2;">
+    <div class="aura-msg bot" style="padding:12px 16px; border-radius:10px; max-width:88%; line-height:1.5; background:#FFFEFB; border:1px solid #E2DBD0; align-self:flex-start; color:#1A1611;">
+      Greetings. I am your 1970s Haute-Couture Archivist. Ask me about any dress style, fabric, or let me recommend pieces from our archive!
+    </div>
+  </div>
+  <div class="aura-ai-footer" style="padding:12px; background:#FFFEFB; border-top:1px solid #E2DBD0; display:flex; gap:8px;">
+    <input type="text" id="auraInput" placeholder="Ask about dresses or fits..." onkeypress="if(event.key==='Enter')sendAuraAIQuery()" style="flex:1; padding:10px 14px; border:1px solid #E2DBD0; border-radius:8px; background:#FAF7F2; font-size:12px; outline:none;">
+    <button onclick="sendAuraAIQuery()" style="background:#1A1611; color:#fff; border:none; padding:0 16px; border-radius:8px; cursor:pointer; font-size:12px; letter-spacing:1px;">Send</button>
+  </div>
+</div>
+
+<script>
+function toggleAuraAI(){
+  const modal = document.getElementById('auraModal');
+  if(modal.style.opacity === "0" || modal.style.opacity === "") {
+      modal.style.opacity = "1";
+      modal.style.transform = "scale(1)";
+      modal.style.pointerEvents = "all";
+  } else {
+      modal.style.opacity = "0";
+      modal.style.transform = "scale(0.95)";
+      modal.style.pointerEvents = "none";
+  }
+}
+
+async function sendAuraAIQuery(){
+  const input = document.getElementById('auraInput');
+  const chatBody = document.getElementById('auraChatBody');
+  const text = input.value.trim();
+  if(!text) return;
+
+  chatBody.innerHTML += `<div class="aura-msg user" style="padding:12px 16px; border-radius:10px; max-width:88%; line-height:1.5; background:#1A1611; color:#fff; align-self:flex-end;">${text}</div>`;
+  input.value = '';
+  chatBody.scrollTop = chatBody.scrollHeight;
+
+  const loadingId = 'load_' + Date.now();
+  chatBody.innerHTML += `<div class="aura-msg bot" id="${loadingId}" style="padding:12px 16px; border-radius:10px; max-width:88%; line-height:1.5; background:#FFFEFB; border:1px solid #E2DBD0; align-self:flex-start; color:#1A1611; opacity:0.6;">Consulting archive records...</div>`;
+  chatBody.scrollTop = chatBody.scrollHeight;
+
+  try {
+    const res = await fetch('/api/aura-ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text })
+    });
+    const data = await res.json();
+    document.getElementById(loadingId).remove();
+    chatBody.innerHTML += `<div class="aura-msg bot" style="padding:12px 16px; border-radius:10px; max-width:88%; line-height:1.5; background:#FFFEFB; border:1px solid #E2DBD0; align-self:flex-start; color:#1A1611;">${data.reply}</div>`;
+  } catch(e) {
+    document.getElementById(loadingId).remove();
+    chatBody.innerHTML += `<div class="aura-msg bot" style="padding:12px 16px; border-radius:10px; max-width:88%; line-height:1.5; background:#FFFEFB; border:1px solid #E2DBD0; align-self:flex-start; color:#1A1611;">Pardon me, the archives are busy. Please try asking again.</div>`;
+  }
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+</script>
+</body>
+</html>
