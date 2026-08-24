@@ -60,7 +60,10 @@ pub async fn reply_contact(Extension(db): Extension<Database>, Path(id): Path<St
         let reply_clone = body.reply.clone();
         let id_string = id.clone();
         tokio::spawn(async move {
-            let _ = send_reply_email(&to_email, &name, &id_string, &orig, &reply_clone).await;
+            match send_reply_email(&to_email, &name, &id_string, &orig, &reply_clone).await {
+                Ok(_) => println!("Email background task successfully sent to {}", to_email),
+                Err(e) => eprintln!("Email background task failed to send: {}", e),
+            }
         });
         return Json(json!({"success":true}));
     }
