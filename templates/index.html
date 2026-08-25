@@ -476,15 +476,153 @@ loadHomeContact();
   if(token){ try{ const r=await fetch('/api/auth/me',{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token})}); const d=await r.json(); if(d.user){ document.getElementById('c_name').value=d.user.name||''; document.getElementById('c_email').value=d.user.email||''; } }catch{} }
 })();
 
+const CONTACT_TRACK_KEY = 'aurawear_contact_ids';
+
+function getTrackedContactIds(){
+  try{
+    const ids = JSON.parse(localStorage.getItem(CONTACT_TRACK_KEY) || '[]');
+    return Array.isArray(ids) ? ids.filter(Boolean) : [];
+  }catch(e){
+    return [];
+  }
+}
+
+function saveTrackedContactId(id){
+  if(!id) return;
+  const ids = getTrackedContactIds().filter(x => x !== id);
+  ids.unshift(id);
+  localStorage.setItem(CONTACT_TRACK_KEY, JSON.stringify(ids.slice(0, 20)));
+}
+
+function escapeContactHtml(value){
+  return String(value ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+}
+
+function showContactReply(contact){
+  if(!contact || !contact.admin_reply) return;
+
+  const reply = String(contact.admin_reply).trim();
+  if(!reply) return;
+
+  const replyKey = 'aurawear_reply_seen_' + String(contact._id || contact.id || '');
+  if(localStorage.getItem(replyKey) === reply) return;
+
+  const status = document.getElementById('c_status');
+  if(status){
+    status.innerHTML = '✓ <strong>Admin replied:</strong><br><span style="display:inline-block;margin-top:6px;line-height:1.6">' + escapeContactHtml(reply).replace(/\\n/g,'<br>') + '</span>';
+    status.style.color = '#1A1611';
+  }
+
+  if(contact._id || contact.id){
+    localStorage.setItem(replyKey, reply);
+  }
+}
+
+async function checkContactReplies(){
+  const ids = getTrackedContactIds();
+  if(!ids.length) return;
+
+  for(const id of ids){
+    try{
+      const r = await fetch('/api/contact/track?id=' + encodeURIComponent(id) + '&t=' + Date.now(), {
+        cache: 'no-store'
+      });
+      if(!r.ok) continue;
+
+      const d = await r.json();
+      if(d && d.success && d.contact){
+        showContactReply(d.contact);
+      }
+    }catch(e){
+      console.log('contact reply check failed', e);
+    }
+  }
+}
+
 async function sendContact(){
+  const status = document.getElementById('c_status');
   const f=document.getElementById('c_file').files[0];
   let imgPath="";
-  if(f){ const fd=new FormData(); fd.append('file',f); const up=await fetch('/api/upload',{method:'POST',body:fd}); const j=await up.json(); imgPath=j.path||j.url||""; }
-  const payload={ name:document.getElementById('c_name').value, email:document.getElementById('c_email').value, phone:"", message_type:selectedType, message:document.getElementById('c_msg').value, image:imgPath, user_email:document.getElementById('c_email').value };
-  const r=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-  const d=await r.json();
-  if(d.success){ document.getElementById('c_status').innerText="✓ Sent! Admin will reply to your email: "+payload.email; document.getElementById('c_msg').value=''; } else { document.getElementById('c_status').innerText=d.error||'Failed'; }
+
+  try{
+    if(status) status.innerText='Sending...';
+
+    if(f){
+      const fd=new FormData();
+      fd.append('file',f);
+
+      const up=await fetch('/api/upload',{method:'POST',body:fd});
+      if(!up.ok) throw new Error('Image upload failed');
+
+      const j=await up.json();
+      imgPath=j.path||j.url||"";
+    }
+
+    const payload={
+      name:document.getElementById('c_name').value.trim(),
+      email:document.getElementById('c_email').value.trim(),
+      phone:"",
+      message_type:selectedType,
+      message:document.getElementById('c_msg').value.trim(),
+      image:imgPath,
+      user_email:document.getElementById('c_email').value.trim()
+    };
+
+    if(!payload.name || !payload.email || !payload.message){
+      if(status) status.innerText='Please enter your name, email and message.';
+      return;
+    }
+
+    const r=await fetch('/api/contact',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+
+    const d=await r.json();
+
+    if(d.success){
+      /*
+       * The API returns the MongoDB contact ID after inserting the message.
+       * Keep that ID in this browser so this same guest/logged-in user can
+       * receive the admin reply by polling /api/contact/track.
+       */
+      if(d.id) saveTrackedContactId(d.id);
+
+      if(status){
+        status.innerText="✓ Sent! Admin will reply to your email: "+payload.email;
+        status.style.color='#1A1611';
+      }
+
+      document.getElementById('c_msg').value='';
+      document.getElementById('c_file').value='';
+
+      await checkContactReplies();
+    }else{
+      if(status) status.innerText=d.error||'Failed to send message.';
+    }
+  }catch(e){
+    console.error('sendContact failed:', e);
+    if(status) status.innerText='Failed to send message. Please try again.';
+  }
 }
+
+/*
+ * Check for admin replies when the page opens and continue checking while
+ * the user remains on the site. This works for both guest users and
+ * logged-in users because the contact IDs are stored in localStorage.
+ */
+checkContactReplies();
+setInterval(checkContactReplies, 10000);
+
+document.addEventListener('visibilitychange', ()=>{
+  if(!document.hidden) checkContactReplies();
+});
 </script>
 
 <footer style="background:#1A1611; color:#FBF8F3; padding:5vw 4vw; border-top:1px solid rgba(255,255,255,0.1)">

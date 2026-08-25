@@ -3026,35 +3026,117 @@ async function replyMsg(id){
   const reply=
     document
     .getElementById('reply_'+id)
-    .value;
+    .value
+    .trim();
 
 
   if(!reply)
     return alert('Type reply');
 
 
-  await fetch(
-    '/api/contact/'+id+'/reply',
-    {
+  try{
 
-      method:'POST',
+    const response =
+      await fetch(
+        '/api/contact/'+id+'/reply',
+        {
+          method:'POST',
 
-      headers:{
-        'Content-Type':'application/json'
-      },
+          headers:{
+            'Content-Type':'application/json'
+          },
 
-      body:
-        JSON.stringify({
-          reply
-        })
+          body:
+            JSON.stringify({
+              reply
+            })
+        }
+      );
 
+
+    let data = {};
+
+    try{
+      data = await response.json();
+    }catch(e){}
+
+
+    if(!response.ok || data.success === false){
+
+      alert(
+        'Reply failed: ' +
+        (data.error || ('HTTP '+response.status))
+      );
+
+      return;
     }
-  );
 
 
-  alert('Replied & Emailed');
+    /*
+     * Verify that the reply was actually written
+     * to the same MongoDB contact document.
+     *
+     * This uses the same endpoint the user side
+     * uses to receive the reply.
+     */
+    const verifyResponse =
+      await fetch(
+        '/api/contact/track?id=' +
+        encodeURIComponent(id) +
+        '&t=' +
+        Date.now(),
+        {
+          method:'GET',
+          cache:'no-store'
+        }
+      );
 
-  loadMessages();
+
+    let verifyData = {};
+
+    try{
+      verifyData =
+        await verifyResponse.json();
+    }catch(e){}
+
+
+    if(
+      !verifyResponse.ok ||
+      !verifyData.success ||
+      !verifyData.contact ||
+      String(verifyData.contact.admin_reply || '').trim() !== reply
+    ){
+
+      alert(
+        'The reply request completed, but the reply was not found in the contact record. Please check the server/MongoDB connection.'
+      );
+
+      loadMessages();
+      return;
+    }
+
+
+    document
+      .getElementById('reply_'+id)
+      .value = '';
+
+
+    alert('Reply saved successfully & email sent.');
+
+    loadMessages();
+
+  }catch(error){
+
+    console.error(
+      'replyMsg failed:',
+      error
+    );
+
+    alert(
+      'Reply failed: ' +
+      error.message
+    );
+  }
 
 }
 

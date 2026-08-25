@@ -68,7 +68,18 @@ h1{font-family:Fraunces;font-size:48px;font-weight:300;margin:0;letter-spacing:2
 </div>
 
 </div>
-<div><div style="font-family:Fraunces;letter-spacing:2px;font-size:18px;margin-bottom:12px">MY ORDERS</div><div id="orders"></div></div>
+<div>
+  <div style="font-family:Fraunces;letter-spacing:2px;font-size:18px;margin-bottom:12px">MY ORDERS</div>
+  <div id="orders"></div>
+  
+  <!-- MY MESSAGE & ADMIN REPLIES SECTION -->
+  <div style="margin-top: 40px;">
+    <h3 style="font-family: Fraunces; font-weight: 300; font-size: 24px; letter-spacing: 2px; margin-bottom: 16px;">MY MESSAGES & REPLIES</h3>
+    <div id="userMessagesList" style="display: flex; flex-direction: column; gap: 14px;">
+      <p style="opacity: 0.6; font-size: 13px;">Loading your messages...</p>
+    </div>
+  </div>
+</div>
 </div>
 </div>
 
@@ -276,6 +287,61 @@ async function confirmDeleteAccount(){
 }
 
 function logout(){localStorage.removeItem('aurawear_token');localStorage.removeItem('aurawear_email');location.href='/login.html';}
+
+
+async function loadUserMessages() {
+  try {
+    const userEmail = document.getElementById('editEmail')?.value || localStorage.getItem('aurawear_email') || '';
+    
+    const res = await fetch('/api/contact');
+    const data = await res.json();
+    const contacts = data.contacts || data || [];
+
+    const myMessages = contacts.filter(c => {
+      const email = c.email || c.user_email || '';
+      return email.toLowerCase().trim() === userEmail.toLowerCase().trim();
+    });
+
+    const container = document.getElementById('userMessagesList');
+    if (!container) return;
+
+    if (!myMessages.length) {
+      container.innerHTML = `<div style="background:#fff; border:1px solid rgba(0,0,0,.1); padding:20px; font-size:12px; opacity:.6;">No messages sent yet. Use the contact section on the home page to reach out!</div>`;
+      return;
+    }
+
+    container.innerHTML = myMessages.map(m => {
+      const isReplied = (m.reply && m.reply.length > 0) || (m.status === 'replied');
+      
+      // Safely parse MongoDB ObjectId or ticket string
+      let ticketId = 'N/A';
+      if (m.ticket_id) ticketId = m.ticket_id;
+      else if (m._id) {
+        ticketId = typeof m._id === 'object' && m._id.$oid ? m._id.$oid : String(m._id);
+        ticketId = ticketId.slice(-6).toUpperCase();
+      }
+
+      return `
+        <div style="background:#fff; border:1px solid rgba(0,0,0,.1); padding:20px; display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; letter-spacing:2px; opacity:.5;">
+            <span>TICKET: ${ticketId}</span>
+            <span style="background:${isReplied ? '#2d6a4f' : '#C9A86A'}; color:#fff; padding:2px 8px; font-weight:600;">${isReplied ? 'REPLIED' : 'PENDING'}</span>
+          </div>
+          <div style="font-size:13px; font-weight:500; margin-top:4px;"><strong>Your Message:</strong> ${m.message || ''}</div>
+          ${isReplied ? `
+            <div style="background:#F9F1E7; border-left:3px solid #C9A86A; padding:12px; margin-top:6px; font-size:13px;">
+              <strong>Admin Reply:</strong> ${m.reply || m.admin_reply || ''}
+            </div>
+          ` : `<div style="font-size:12px; opacity:.5; font-style:italic; margin-top:4px;">Awaiting response from admin...</div>`}
+        </div>
+      `;
+    }).join('');
+  } catch (e) {
+    console.error('Failed to load user messages', e);
+  }
+}
+
 load();
+setTimeout(loadUserMessages, 1200);
 </script>
 </body></html>

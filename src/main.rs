@@ -15,6 +15,12 @@ use std::{net::SocketAddr, collections::HashMap};
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
+
+    println!(
+        "SMTP_PASS loaded: {}",
+        std::env::var("SMTP_PASS").is_ok()
+    );
+
     tokio::fs::create_dir_all("public/uploads").await.unwrap();
     let database = db::init_db().await;
 
@@ -76,7 +82,9 @@ async fn main() {
     // Bind to all interfaces so Render can access the application.
     let addr = SocketAddr::from(([0, 0, 0, 0], port.parse::<u16>().unwrap()));
 
-    println!("AuraWear running on http://localhost:3000 - Admin http://localhost:3000/admin");
+    println!(
+        "AuraWear running on http://localhost:3000 - Admin http://localhost:3000/admin"
+    );
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
@@ -130,7 +138,9 @@ async fn product_page() -> Html<String> {
     )
 }
 
-async fn success_page(Query(params): Query<HashMap<String, String>>) -> Html<String> {
+async fn success_page(
+    Query(params): Query<HashMap<String, String>>
+) -> Html<String> {
     let id = params
         .get("id")
         .cloned()
@@ -145,16 +155,122 @@ async fn success_page(Query(params): Query<HashMap<String, String>>) -> Html<Str
 
     let html = if template.is_empty() {
         format!(
-            r#"<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Success - AURAWEAR</title>
-        <link href="https://fonts.googleapis.com/css2?family=Fraunces&display=swap" rel="stylesheet">
-        <style>body{{margin:0;background:#FBF8F3;font-family:Inter,sans-serif}}.wrap{{min-height:80vh;display:grid;place-items:center;text-align:center;padding:40px}}
-       .card{{background:#fff;border:1px solid rgba(0,0,0,.12);padding:48px;max-width:480px}} h1{{font-family:Fraunces;font-size:52px;font-weight:300;margin:0}}.id{{margin-top:20px;font-size:11px;letter-spacing:2px;opacity:.5;border:1px dashed rgba(0,0,0,.2);padding:12px}}
-       .btn{{display:inline-block;margin-top:20px;background:#1A1611;color:#fff;padding:14px 22px;text-decoration:none;font-size:11px;letter-spacing:2px}}</style></head>
-        <body><nav style="padding:20px 4vw;border-bottom:1px solid rgba(0,0,0,.12);font-family:Fraunces;letter-spacing:4px">AURAWEAR</nav>
-        <div class="wrap"><div class="card"><div style="width:56px;height:56px;border-radius:50%;background:#1A1611;color:#fff;display:grid;place-items:center;margin:0 auto 20px">✓</div>
-        <h1>Order<br><em style="font-family:serif">Placed</em></h1><p style="opacity:.6;margin-top:16px">Your archive is being packed.</p>
-        <div class="id">ORDER ID: {}</div><a class="btn" href="/">BACK TO ARCHIVE</a></div></div>
-        <script>localStorage.removeItem('aurawear_cart')</script></body></html>"#,
+            r#"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Success - AURAWEAR</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces&display=swap"
+        rel="stylesheet"
+    >
+
+    <style>
+        body {{
+            margin:0;
+            background:#FBF8F3;
+            font-family:Inter,sans-serif
+        }}
+
+        .wrap {{
+            min-height:80vh;
+            display:grid;
+            place-items:center;
+            text-align:center;
+            padding:40px
+        }}
+
+        .card {{
+            background:#fff;
+            border:1px solid rgba(0,0,0,.12);
+            padding:48px;
+            max-width:480px
+        }}
+
+        h1 {{
+            font-family:Fraunces;
+            font-size:52px;
+            font-weight:300;
+            margin:0
+        }}
+
+        .id {{
+            margin-top:20px;
+            font-size:11px;
+            letter-spacing:2px;
+            opacity:.5;
+            border:1px dashed rgba(0,0,0,.2);
+            padding:12px
+        }}
+
+        .btn {{
+            display:inline-block;
+            margin-top:20px;
+            background:#1A1611;
+            color:#fff;
+            padding:14px 22px;
+            text-decoration:none;
+            font-size:11px;
+            letter-spacing:2px
+        }}
+    </style>
+</head>
+
+<body>
+
+<nav style="
+    padding:20px 4vw;
+    border-bottom:1px solid rgba(0,0,0,.12);
+    font-family:Fraunces;
+    letter-spacing:4px
+">
+    AURAWEAR
+</nav>
+
+<div class="wrap">
+    <div class="card">
+
+        <div style="
+            width:56px;
+            height:56px;
+            border-radius:50%;
+            background:#1A1611;
+            color:#fff;
+            display:grid;
+            place-items:center;
+            margin:0 auto 20px
+        ">
+            ✓
+        </div>
+
+        <h1>
+            Order<br>
+            <em style="font-family:serif">Placed</em>
+        </h1>
+
+        <p style="opacity:.6;margin-top:16px">
+            Your archive is being packed.
+        </p>
+
+        <div class="id">
+            ORDER ID: {}
+        </div>
+
+        <a class="btn" href="/">
+            BACK TO ARCHIVE
+        </a>
+
+    </div>
+</div>
+
+<script>
+    localStorage.removeItem('aurawear_cart')
+</script>
+
+</body>
+</html>"#,
             id
         )
     } else {
