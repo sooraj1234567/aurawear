@@ -42,9 +42,10 @@ pub async fn send_reply_email(
 
     let creds = Credentials::new(smtp_user, smtp_pass);
 
-    // Connect securely using Port 465 (SSL/SMTPS) which works on Render cloud servers
-    let mailer = SmtpTransport::parser_builder(&smtp_host, 465)
+    // Configure SMTPS transport for port 465 compatible with lettre v0.11
+    let mailer = SmtpTransport::relay(&smtp_host)
         .map_err(|e| e.to_string())?
+        .port(465)
         .credentials(creds)
         .build();
 
