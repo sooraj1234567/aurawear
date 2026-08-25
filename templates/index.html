@@ -739,6 +739,11 @@ function renderProducts(list){
     const gl=(p.gender||p.category||'').toLowerCase()==='unisex'?'Kids':(p.gender||p.category||'Archive');
     const pid = getOid(p._id) || p._id || p.id || '';
     const stock = p.stock?? p.stock_count?? 10;
+    
+    // Check if this product is currently in the wishlist
+    const wishList = getWish();
+    const isWishlisted = wishList.some(item => (item.id || item._id) === pid);
+
     let stockHtml = '';
     let btnDisabled = '';
     if(stock <= 0){
@@ -750,7 +755,14 @@ function renderProducts(list){
       stockHtml = `<div style="color:#2d6a4f; font-size:10px; letter-spacing:1px; margin-top:8px">● IN STOCK: ${stock} available</div>`;
     }
 
-    return `<div class="product-card reveal">
+    return `<div class="product-card reveal" style="position: relative;">
+      <!-- Wishlist Heart Button Overlay -->
+      <button onclick="event.stopPropagation(); toggleWishlistFromHome('${pid}', \`${clean.replace(/`/g,'')}\`, '${p.image_path||p.image}', ${p.price})" style="position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.85); border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; transition: all 0.2s;" title="Toggle Wishlist">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="${isWishlisted ? '#C9A86A' : 'none'}" stroke="#1A1611" stroke-width="2">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+      </button>
+
       <div class="img-wrap" onclick="location.href='/product?id=${pid}'">
         <img src="${p.image_path||p.image}" loading="lazy">
         <span class="badge">${gl.toUpperCase()}</span>
@@ -767,6 +779,16 @@ function renderProducts(list){
     </div>`
   }).join('');
   observeReveals();
+}
+function toggleWishlistFromHome(id, name, image, price){
+  let w = getWish();
+  const index = w.findIndex(x => (x.id || x._id) === id);
+  if(index > -1){
+    w.splice(index, 1);
+  } else {
+    w.push({ id, _id: id, name, image_path: image, image, price });
+  }
+  saveWish(w);
 }
 
 function getOid(idField){
