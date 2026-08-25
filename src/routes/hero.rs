@@ -19,8 +19,8 @@ pub async fn get_hero(Extension(db): Extension<Database>) -> Json<Value> {
     
     // Fallback hero image path when no database document exists yet
     Json(json!({
-        "image": "/uploads/hero_6a86c72252ff92d890379272",
-        "image_path": "/uploads/hero_6a86c72252ff92d890379272",
-        "path": "/uploads/hero_6a86c72252ff92d890379272"
+        "image": "/uploads/hero_6a86c72252ff92d890379272.jpg",
+        "image_path": "/uploads/hero_6a86c72252ff92d890379272.jpg",
+        "path": "/uploads/hero_6a86c72252ff92d890379272.jpg"
     }))
 }
