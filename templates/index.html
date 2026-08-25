@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="preload" href="/uploads/hero.jpg" as="image">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AURAWEAR - Clothing With An Aura</title>
@@ -259,7 +260,7 @@ html{scroll-behavior:smooth}
     </div>
   </div>
   <div class="hero-visual" id="heroVisual">
-   <img id="heroImage" src="https://images.unsplash.com/photo-1495385794356-15371f348c19?q=80&w=1000" alt="Hero" onerror="if(!this.dataset.fb){this.dataset.fb=1; this.src='https://images.unsplash.com/photo-1495385794356-15371f348c19?q=80&w=1000'}">
+   <img id="heroImage" src="https://images.unsplash.com/photo-1495385794356-15371f348c19?q=80&w=1000" alt="Hero" loading="eager" onerror="if(!this.dataset.fb){this.dataset.fb=1; this.src='https://images.unsplash.com/photo-1495385794356-15371f348c19?q=80&w=1000'}">
   </div>
 </section>
 <div id="retroTicker" style="display:none; height:44px; overflow:hidden; border-top:1.5px solid #1A1611; border-bottom:1.5px solid #1A1611; position:relative; background:#E6F4FF">
@@ -587,11 +588,6 @@ async function sendContact(){
     const d=await r.json();
 
     if(d.success){
-      /*
-       * The API returns the MongoDB contact ID after inserting the message.
-       * Keep that ID in this browser so this same guest/logged-in user can
-       * receive the admin reply by polling /api/contact/track.
-       */
       if(d.id) saveTrackedContactId(d.id);
 
       if(status){
@@ -612,11 +608,6 @@ async function sendContact(){
   }
 }
 
-/*
- * Check for admin replies when the page opens and continue checking while
- * the user remains on the site. This works for both guest users and
- * logged-in users because the contact IDs are stored in localStorage.
- */
 checkContactReplies();
 setInterval(checkContactReplies, 10000);
 
@@ -715,7 +706,6 @@ function handleCheckout(event){
 function openCart(){
   document.getElementById('cartDrawer').classList.add('open');
   document.getElementById('cartOverlay').classList.add('open');
-  // Hide Aura AI button when cart is open
   const aiTrigger = document.querySelector('.aura-ai-trigger');
   if(aiTrigger) aiTrigger.style.display = 'none';
   const aiModal = document.getElementById('auraModal');
@@ -725,7 +715,6 @@ function openCart(){
 function closeCart(){
   document.getElementById('cartDrawer').classList.remove('open');
   document.getElementById('cartOverlay').classList.remove('open');
-  // Show Aura AI button again when cart closes
   const aiTrigger = document.querySelector('.aura-ai-trigger');
   if(aiTrigger) aiTrigger.style.display = 'flex';
 }
@@ -740,7 +729,6 @@ function renderProducts(list){
     const pid = getOid(p._id) || p._id || p.id || '';
     const stock = p.stock?? p.stock_count?? 10;
     
-    // Check if this product is currently in the wishlist
     const wishList = getWish();
     const isWishlisted = wishList.some(item => (item.id || item._id) === pid);
 
