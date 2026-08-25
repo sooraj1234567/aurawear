@@ -54,11 +54,32 @@
       <div id="pDesc" style="margin-top:12px; line-height:1.6; color:var(--ink);"></div>
     </div>
 
-    <span class="size-label">SELECT SIZE</span>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px;">
+      <span class="size-label" style="margin:0;">SELECT SIZE</span>
+      <button onclick="openSizeGuide()" style="background: none; border: none; text-decoration: underline; font-size: 11px; letter-spacing: 1.5px; cursor: pointer; opacity: 0.7;">
+        VIEW SIZE GUIDE
+      </button>
+    </div>
     <div class="size-row" id="sizeRow"></div>
 
     <button id="addBtn" class="btn-gold">Add to Cart — <span id="priceBtn"></span></button>
     <a href="/" class="back-link">← BACK TO ARCHIVE</a>
+
+    <!-- PRODUCT REVIEWS SECTION (Inside PDP Details Sidebar or below) -->
+    <div style="margin-top: 40px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 30px;">
+      <h3 style="font-family: Fraunces; font-size: 22px; font-weight: 300;">ARCHIVE REVIEWS</h3>
+      <div id="productReviewsList" style="margin: 16px 0; display: flex; flex-direction: column; gap: 12px;">
+        <div style="font-size: 12px; opacity: 0.6;">Loading reviews...</div>
+      </div>
+      
+      <div style="background: #FAF7F2; padding: 20px; border-radius: 8px; margin-top: 20px; border: 1px solid #E2DBD0;">
+        <h4 style="font-family: Fraunces; font-size: 16px; margin: 0 0 10px 0;">Leave Your Review</h4>
+        <input id="revName" placeholder="Your Name" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; background: #fff; box-sizing:border-box;">
+        <textarea id="revText" placeholder="Share your thoughts on the fit and aura..." rows="2" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; background: #fff; box-sizing:border-box; resize:none;"></textarea>
+        <button onclick="submitReview()" style="background: #1A1611; color: #fff; border: none; padding: 10px 20px; font-size: 10px; letter-spacing: 2px; cursor: pointer;">SUBMIT REVIEW</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -85,6 +106,53 @@
       <span id="cartSubtotal" style="font-weight:500; font-size:16px;">$0</span>
     </div>
     <a href="/checkout" class="btn-gold" style="display:block; text-align:center; text-decoration:none;">PROCEED TO CHECKOUT</a>
+  </div>
+</div>
+
+<!-- SIZE GUIDE MODAL -->
+<div id="sizeGuideModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px;">
+  <div style="background: #FFFEFB; border-radius: 12px; max-width: 500px; width: 100%; padding: 32px; position: relative; border: 1px solid #E2DBD0;">
+    <button onclick="closeSizeGuide()" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 18px; cursor: pointer;">✕</button>
+    <h3 style="font-family: Fraunces; font-size: 24px; font-weight: 300; margin-top: 0; letter-spacing: 1px;">TAILORING & FIT GUIDE</h3>
+    <p style="font-size: 12px; opacity: 0.6; margin-bottom: 20px;">Inspired by 1970s relaxed structural cuts. All measurements are in inches.</p>
+    
+    <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+      <thead>
+        <tr style="border-bottom: 1px solid #1A1611;">
+          <th style="padding: 8px;">Size</th>
+          <th style="padding: 8px;">Chest</th>
+          <th style="padding: 8px;">Length</th>
+          <th style="padding: 8px;">Shoulder</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px; font-weight: 600;">S</td><td style="padding: 8px;">38-40"</td><td style="padding: 8px;">26"</td><td style="padding: 8px;">18"</td></tr>
+        <tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px; font-weight: 600;">M</td><td style="padding: 8px;">40-42"</td><td style="padding: 8px;">27"</td><td style="padding: 8px;">19"</td></tr>
+        <tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px; font-weight: 600;">L</td><td style="padding: 8px;">42-44"</td><td style="padding: 8px;">28"</td><td style="padding: 8px;">20"</td></tr>
+        <tr><td style="padding: 8px; font-weight: 600;">XL</td><td style="padding: 8px;">44-46"</td><td style="padding: 8px;">29"</td><td style="padding: 8px;">21"</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- GLOBAL AURA AI FLOATING CONCIERGE -->
+<button class="aura-ai-trigger" onclick="toggleAuraAI()" style="position:fixed; bottom:24px; right:24px; background:#1A1611; color:#C9A86A; border:1px solid #C9A86A; padding:12px 20px; border-radius:30px; font-family:'Fraunces', serif; font-size:13px; letter-spacing:1.5px; cursor:pointer; z-index:999; box-shadow:0 10px 30px rgba(0,0,0,0.15); transition:all 0.3s ease;">
+  <span>✨ Ask Aura AI</span>
+</button>
+
+<div class="aura-ai-modal" id="auraModal" style="position:fixed; bottom:85px; right:24px; width:360px; max-width:90vw; height:480px; background:#FFFEFB; border:1px solid #E2DBD0; border-radius:16px; box-shadow:0 20px 40px rgba(0,0,0,0.15); z-index:1000; display:flex; flex-direction:column; overflow:hidden; transform:scale(0.95); opacity:0; pointer-events:none; transition:all 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+  <div class="aura-ai-header" style="background:#1A1611; color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; font-family:'Fraunces', serif; letter-spacing:1px; font-size:13px;">
+    <span>AURAWEAR STYLIST CONCIERGE</span>
+    <button onclick="toggleAuraAI()" style="background:none; border:none; color:#fff; cursor:pointer; font-size:16px;">✕</button>
+  </div>
+  <div class="aura-ai-body" id="auraChatBody" style="flex:1; padding:16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; font-size:13px; background:#FAF7F2;">
+    <div class="aura-msg bot" style="padding:12px 16px; border-radius:10px; max-width:88%; line-height:1.5; background:#FFFEFB; border:1px solid #E2DBD0; align-self:flex-start; color:#1A1611;">
+      Greetings. I am your 1970s Haute-Couture Archivist. Ask me about any dress style, fabric, or let me recommend pieces from our archive!
+    </div>
+  </div>
+  <div class="aura-ai-footer" style="padding:12px; background:#FFFEFB; border-top:1px solid #E2DBD0; display:flex; gap:8px;">
+    <input type="text" id="auraInput" placeholder="Ask about dresses or fits..." onkeypress="if(event.key==='Enter')sendAuraAIQuery()" style="flex:1; padding:10px 14px; border:1px solid #E2DBD0; border-radius:8px; background:#FAF7F2; font-size:12px; outline:none;">
+    <button onclick="sendAuraAIQuery()" style="background:#1A1611; color:#fff; border:none; padding:0 16px; border-radius:8px; cursor:pointer; font-size:12px; letter-spacing:1px;">Send</button>
   </div>
 </div>
 
@@ -211,6 +279,9 @@ async function load(){
 
     window._p = {id, name, price, image_path: images[0], stock};
 
+    // Load reviews from MongoDB database for this product ID
+    loadReviews(id);
+
   }catch(e){
     document.getElementById('pName').innerText='Error loading product: '+e.message;
   }
@@ -233,7 +304,7 @@ document.getElementById('addBtn').addEventListener('click',()=>{
   if(existing){ if(existing.qty < p.stock) existing.qty+=1; else alert('Only '+p.stock+' items available in stock'); }
   else{ cart.push({id:p.id,name:p.name,price:parseInt(p.price),image_path:p.image_path,size,qty:1}) }
   saveCart();
-  openCart(); // Smoothly open the slide drawer instead of abrupt redirects
+  openCart();
 });
 
 updateBadge();
@@ -256,29 +327,69 @@ if(mainContainer && mainImg){
     mainImg.style.transformOrigin = 'center center';
   });
 }
-</script>
-<!-- GLOBAL AURA AI FLOATING CONCIERGE -->
-<button class="aura-ai-trigger" onclick="toggleAuraAI()" style="position:fixed; bottom:24px; right:24px; background:#1A1611; color:#C9A86A; border:1px solid #C9A86A; padding:12px 20px; border-radius:30px; font-family:'Fraunces', serif; font-size:13px; letter-spacing:1.5px; cursor:pointer; z-index:999; box-shadow:0 10px 30px rgba(0,0,0,0.15); transition:all 0.3s ease;">
-  <span>✨ Ask Aura AI</span>
-</button>
 
-<div class="aura-ai-modal" id="auraModal" style="position:fixed; bottom:85px; right:24px; width:360px; max-width:90vw; height:480px; background:#FFFEFB; border:1px solid #E2DBD0; border-radius:16px; box-shadow:0 20px 40px rgba(0,0,0,0.15); z-index:1000; display:flex; flex-direction:column; overflow:hidden; transform:scale(0.95); opacity:0; pointer-events:none; transition:all 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
-  <div class="aura-ai-header" style="background:#1A1611; color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; font-family:'Fraunces', serif; letter-spacing:1px; font-size:13px;">
-    <span>AURAWEAR STYLIST CONCIERGE</span>
-    <button onclick="toggleAuraAI()" style="background:none; border:none; color:#fff; cursor:pointer; font-size:16px;">✕</button>
-  </div>
-  <div class="aura-ai-body" id="auraChatBody" style="flex:1; padding:16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; font-size:13px; background:#FAF7F2;">
-    <div class="aura-msg bot" style="padding:12px 16px; border-radius:10px; max-width:88%; line-height:1.5; background:#FFFEFB; border:1px solid #E2DBD0; align-self:flex-start; color:#1A1611;">
-      Greetings. I am your 1970s Haute-Couture Archivist. Ask me about any dress style, fabric, or let me recommend pieces from our archive!
-    </div>
-  </div>
-  <div class="aura-ai-footer" style="padding:12px; background:#FFFEFB; border-top:1px solid #E2DBD0; display:flex; gap:8px;">
-    <input type="text" id="auraInput" placeholder="Ask about dresses or fits..." onkeypress="if(event.key==='Enter')sendAuraAIQuery()" style="flex:1; padding:10px 14px; border:1px solid #E2DBD0; border-radius:8px; background:#FAF7F2; font-size:12px; outline:none;">
-    <button onclick="sendAuraAIQuery()" style="background:#1A1611; color:#fff; border:none; padding:0 16px; border-radius:8px; cursor:pointer; font-size:12px; letter-spacing:1px;">Send</button>
-  </div>
-</div>
+// Size Guide Modals
+function openSizeGuide() { document.getElementById('sizeGuideModal').style.display = 'flex'; }
+function closeSizeGuide() { document.getElementById('sizeGuideModal').style.display = 'none'; }
+window.onclick = function(e) {
+  const modal = document.getElementById('sizeGuideModal');
+  if (e.target === modal) closeSizeGuide();
+}
 
-<script>
+// Reviews Database Handlers
+async function loadReviews(productId) {
+  const list = document.getElementById('productReviewsList');
+  try {
+    const res = await fetch(`/api/reviews/${productId}`);
+    const data = await res.json();
+    const reviews = data.reviews || [];
+
+    if (!reviews.length) {
+      list.innerHTML = `<div style="font-size: 12px; opacity: 0.6;">No reviews yet. Be the first to leave one!</div>`;
+      return;
+    }
+
+    list.innerHTML = reviews.map(r => `
+      <div style="font-size: 12px; opacity: 0.8; margin-top: 8px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px;">
+        ${'★ '.repeat(r.rating || 5)} — "${r.text}" — <strong>${r.name}</strong>
+      </div>
+    `).join('');
+  } catch (e) {
+    console.error('Failed to load reviews', e);
+  }
+}
+
+async function submitReview(){
+  const name = document.getElementById('revName').value.trim();
+  const text = document.getElementById('revText').value.trim();
+  if(!name || !text){ alert('Please enter your name and review.'); return; }
+  
+  const params = new URLSearchParams(location.search);
+  const productId = params.get('id');
+  if(!productId){ alert('Product ID missing'); return; }
+
+  try {
+    const res = await fetch('/api/reviews', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId, name, text, rating: 5 })
+    });
+    const data = await res.json();
+
+    if(data.success){
+      alert('Thank you! Your review has been saved to the archive database.');
+      document.getElementById('revName').value = '';
+      document.getElementById('revText').value = '';
+      loadReviews(productId);
+    } else {
+      alert(data.error || 'Failed to save review.');
+    }
+  } catch(e) {
+    alert('Server error saving review.');
+  }
+}
+
+// Aura AI Handlers
 function toggleAuraAI(){
   const modal = document.getElementById('auraModal');
   if(modal.style.opacity === "0" || modal.style.opacity === "") {

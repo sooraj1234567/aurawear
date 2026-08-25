@@ -1,4 +1,6 @@
-<!DOCTYPE html><html><head>
+<!DOCTYPE html>
+<html>
+<head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>My Archive - AURAWEAR</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@300&family=Inter:wght@300;400&display=swap" rel="stylesheet">
@@ -28,14 +30,15 @@ h1{font-family:Fraunces;font-size:48px;font-weight:300;margin:0;letter-spacing:2
 
 @media(max-width:900px){.grid{grid-template-columns:1fr}}
 </style>
-</head><body>
+</head>
+<body>
 <div class="nav"><span>AuraWear</span><a href="/" style="text-decoration:none;color:#000;font-size:11px">SHOP • ACCOUNT</a></div>
 <div class="wrap">
 <h1>MY ARCHIVE</h1><p id="welcome" style="opacity:.6"></p>
 <div class="grid">
 <div class="card">
 
-<!-- PROFILE IMAGE ADDED -->
+<!-- PROFILE IMAGE SECTION -->
 <div style="display:flex;align-items:center;gap:14px">
 <div style="position:relative;width:64px;height:64px">
 <div style="width:64px;height:64px;border:1px solid #000;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#fff">
@@ -106,7 +109,7 @@ h1{font-family:Fraunces;font-size:48px;font-weight:300;margin:0;letter-spacing:2
 
     <label style="font-size:11px;font-weight:600;display:block;margin-top:12px;letter-spacing:1px">ADDITIONAL DETAILS (OPTIONAL):</label>
     <textarea id="delCustomReason" rows="3" placeholder="Tell us why you are leaving..." style="width:100%;padding:10px;margin-top:6px;border:1px solid rgba(0,0,0,.2);background:#fff;font-size:12px;resize:none;box-sizing:border-box"></textarea>
-
+    
     <div style="display:flex;gap:10px;margin-top:20px">
       <button onclick="closeDeleteModal()" style="flex:1;background:#fff;border:1px solid #1A1611;padding:12px;font-size:10px;letter-spacing:2px;cursor:pointer">CANCEL</button>
       <button onclick="confirmDeleteAccount()" style="flex:1;background:#b00;color:#fff;border:none;padding:12px;font-size:10px;letter-spacing:2px;cursor:pointer">CONFIRM DELETE</button>
@@ -209,7 +212,7 @@ async function saveProfile(){
  }catch(e){document.getElementById('saveMsg').innerText='Server error';}
 }
 
-// PROFILE IMAGE UPLOAD - FIXED WITH INSTANT PREVIEW
+// PROFILE IMAGE UPLOAD
 document.getElementById('avatarInput').addEventListener('change', async (e)=>{
  const file = e.target.files[0]; if(!file) return;
 
@@ -288,7 +291,6 @@ async function confirmDeleteAccount(){
 
 function logout(){localStorage.removeItem('aurawear_token');localStorage.removeItem('aurawear_email');location.href='/login.html';}
 
-
 async function loadUserMessages() {
   try {
     const userEmail = document.getElementById('editEmail')?.value || localStorage.getItem('aurawear_email') || '';
@@ -313,7 +315,6 @@ async function loadUserMessages() {
     container.innerHTML = myMessages.map(m => {
       const isReplied = (m.reply && m.reply.length > 0) || (m.status === 'replied');
       
-      // Safely parse MongoDB ObjectId or ticket string
       let ticketId = 'N/A';
       if (m.ticket_id) ticketId = m.ticket_id;
       else if (m._id) {
@@ -344,4 +345,5 @@ async function loadUserMessages() {
 load();
 setTimeout(loadUserMessages, 1200);
 </script>
-</body></html>
+</body>
+</html>

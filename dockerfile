@@ -17,7 +17,7 @@ RUN apt-get update && \
 # Copy the complete project
 COPY . .
 
-# Build the application
+# Build the application in release mode
 RUN cargo build --release
 
 
@@ -35,7 +35,7 @@ RUN apt-get update && \
         libssl3 && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy compiled application
+# Copy compiled application binary from builder stage
 COPY --from=builder /app/target/release/aurawear /app/aurawear
 
 # Copy application assets
@@ -45,4 +45,5 @@ COPY --from=builder /app/public /app/public
 # Render's default web-service port
 EXPOSE 10000
 
+# Start the application
 CMD ["./aurawear"]

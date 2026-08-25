@@ -50,6 +50,9 @@ async fn main() {
        .route("/api/orders/{id}/cancel", post(routes::orders::cancel_order))
        .route("/api/orders/{id}/payment_status", post(routes::orders::update_payment_status))
        .route("/api/orders/{id}", get(routes::orders::get_order_by_id).delete(routes::orders::delete_order))
+       // Inside your Router::new() block in src/main.rs:
+.route("/api/reviews", post(routes::reviews::create_review))
+.route("/api/reviews/{productId}", get(routes::reviews::get_reviews))
        // Account deletion and admin deletion logs
        .route("/api/auth/delete-account", post(crate::routes::auth::delete_user_account))
        .route("/api/admin/deletion-logs", get(crate::routes::auth::get_deletion_logs))
