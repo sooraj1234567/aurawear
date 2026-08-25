@@ -17,8 +17,8 @@ async fn main() {
     dotenvy::dotenv().ok();
 
     println!(
-        "SMTP_PASS loaded: {}",
-        std::env::var("SMTP_PASS").is_ok()
+        "Brevo API Key loaded: {}",
+        std::env::var("BREVO_API_KEY").is_ok()
     );
 
     tokio::fs::create_dir_all("public/uploads").await.unwrap();

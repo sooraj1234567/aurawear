@@ -16,7 +16,7 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 use std::collections::HashMap;
 use futures_util::StreamExt;
-use crate::email::send_reply_email;
+use crate::email::{send_admin_notification, send_reply_email};
 
 #[derive(Deserialize)]
 pub struct ContactBody {
@@ -41,21 +41,26 @@ pub async fn create_contact(
 ) -> Json<Value> {
     let col: Collection<Document> = db.collection("contacts");
 
+    let name = body.name.clone();
     let email = body.email.trim().to_lowercase();
     let user_email = body
         .user_email
         .unwrap_or_default()
         .trim()
         .to_lowercase();
+    let phone = body.phone.unwrap_or_default();
+    let message_type = body.message_type.to_lowercase();
+    let message = body.message.clone();
+    let image = body.image.unwrap_or_default();
 
     let doc = doc! {
-        "name": body.name,
-        "email": email,
-        "user_email": user_email,
-        "phone": body.phone.unwrap_or_default(),
-        "message_type": body.message_type.to_lowercase(),
-        "message": body.message,
-        "image": body.image.unwrap_or_default(),
+        "name": &name,
+        "email": &email,
+        "user_email": &user_email,
+        "phone": &phone,
+        "message_type": &message_type,
+        "message": &message,
+        "image": &image,
         "status": "pending",
         "admin_reply": "",
         "created_at": chrono::Utc::now().to_rfc3339(),
@@ -69,6 +74,28 @@ pub async fn create_contact(
                 "Contact message created successfully. Contact ID: {}",
                 id
             );
+
+            // Send instant email notification to the official brand inbox in the background
+            let email_clone = email.clone();
+            let name_clone = name.clone();
+            let message_clone = message.clone();
+            let id_string = id.clone();
+            let image_clone = image.clone();
+
+            tokio::spawn(async move {
+                match send_admin_notification(
+                    &name_clone,
+                    &email_clone,
+                    &message_clone,
+                    &id_string,
+                    &image_clone,
+                )
+                .await
+                {
+                    Ok(_) => println!("Admin email notification sent for ticket #{}", id_string),
+                    Err(e) => eprintln!("Failed to send admin email notification: {}", e),
+                }
+            });
 
             Json(json!({
                 "success": true,
@@ -336,7 +363,7 @@ pub async fn reply_contact(
         }));
     }
 
-    // Sends the email in the background using Resend HTTP API
+    // Sends the email to user and archives a copy record in the brand email inbox/sent view
     if !to_email.is_empty() {
         let reply_clone = reply.clone();
         let id_string = id.clone();
@@ -356,7 +383,7 @@ pub async fn reply_contact(
             {
                 Ok(_) => {
                     println!(
-                        "Reply email successfully sent to {}",
+                        "Reply email successfully sent to {} and recorded in admin sent history",
                         email_clone
                     );
                 }
