@@ -1,5 +1,6 @@
-use reqwest::Client;
-use serde_json::json;
+use lettre::message::header::ContentType;
+use lettre::{Message, SmtpTransport, Transport};
+use lettre::transport::smtp::authentication::Credentials;
 use std::env;
 
 pub async fn send_reply_email(
@@ -9,15 +10,15 @@ pub async fn send_reply_email(
     original_message: &str,
     admin_reply: &str,
 ) -> Result<(), String> {
-    let api_key = env::var("RESEND_API_KEY").map_err(|_| "RESEND_API_KEY environment variable is not set")?;
-    
-    let client = Client::new();
-    let url = "https://api.resend.com/emails";
+    let smtp_host = env::var("SMTP_HOST").unwrap_or_else(|_| "smtp.gmail.com".to_string());
+    let smtp_user = env::var("SMTP_USER").map_err(|_| "SMTP_USER environment variable is not set")?;
+    let smtp_pass = env::var("SMTP_PASS").map_err(|_| "SMTP_PASS environment variable is not set")?;
+    let smtp_from = env::var("SMTP_FROM").unwrap_or_else(|_| smtp_user.clone());
 
     let html_content = format!(
         r#"
         <div style="font-family:sans-serif; padding:20px; background:#FBF8F3; color:#1A1611;">
-            <h2>AURAWEAR — Archive Support Reply</h2>
+            <h2>AURAWEAR — Official Support Reply</h2>
             <p>Hello <b>{}</b>,</p>
             <p>An administrator has replied to your contact ticket <b>#{}</b>:</p>
             <div style="background:#fff; padding:15px; border-left:3px solid #C9A86A; margin:15px 0;">
@@ -31,24 +32,29 @@ pub async fn send_reply_email(
         name, ticket_id, original_message, admin_reply
     );
 
-    let payload = json!({
-        "from": "AuraWear Support <onboarding@resend.dev>",
-        "to": [to_email],
-        "subject": format!("Update on your AuraWear Ticket #{}", ticket_id),
-        "html": html_content
-    });
-
-    let res = client.post(url)
-        .bearer_auth(api_key)
-        .json(&payload)
-        .send()
-        .await
+    let email = Message::builder()
+        .from(smtp_from.parse().map_err(|e: lettre::address::AddressError| e.to_string())?)
+        .to(to_email.parse().map_err(|e: lettre::address::AddressError| e.to_string())?)
+        .subject(format!("Update on your AuraWear Ticket #{}", ticket_id))
+        .header(ContentType::TEXT_HTML)
+        .body(html_content)
         .map_err(|e| e.to_string())?;
 
-    if res.status().is_success() {
-        Ok(())
-    } else {
-        let err_text = res.text().await.unwrap_or_default();
-        Err(format!("Resend API error: {}", err_text))
-    }
+    let creds = Credentials::new(smtp_user, smtp_pass);
+
+    // Connect securely using Port 465 (SSL/SMTPS) which works on Render cloud servers
+    let mailer = SmtpTransport::parser_builder(&smtp_host, 465)
+        .map_err(|e| e.to_string())?
+        .credentials(creds)
+        .build();
+
+    let email_clone = email;
+    tokio::task::spawn_blocking(move || {
+        mailer.send(&email_clone)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+    .map_err(|e| e.to_string())?;
+
+    Ok(())
 }
