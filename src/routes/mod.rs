@@ -9,3 +9,5 @@ pub mod announcement;
 pub mod contact_section;
 pub mod ai; 
 pub mod reviews;
+pub mod newsletter;
+pub mod analytics;

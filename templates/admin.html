@@ -9,10 +9,57 @@
 <link rel="stylesheet" href="/css/admin-retro.css">
 
 </head>
-
 <body>
 
-<div class="admin-top">
+<!-- 3-LINE SIDEBAR TOGGLE BUTTON -->
+<button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle Navigation">☰</button>
+
+<!-- ADVANCED ADMIN ANALYTICS GRID -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 24px 0;">
+  <div style="background: #1A1611; color: #FAF7F2; padding: 20px; border-radius: 8px; border: 1px solid #C9A86A;">
+    <div style="font-size: 10px; letter-spacing: 2px; opacity: 0.7;">TOTAL REVENUE</div>
+    <div id="statRevenue" style="font-family: 'Fraunces', serif; font-size: 28px; margin-top: 8px; color: #C9A86A;">$0</div>
+  </div>
+  <div style="background: #FFFEFB; padding: 20px; border-radius: 8px; border: 1px solid #E2DBD0;">
+    <div style="font-size: 10px; letter-spacing: 2px; opacity: 0.6;">TOTAL ORDERS</div>
+    <div id="statOrders" style="font-family: 'Fraunces', serif; font-size: 28px; margin-top: 8px; color: #1A1611;">0</div>
+  </div>
+  <div style="background: #FFFEFB; padding: 20px; border-radius: 8px; border: 1px solid #E2DBD0;">
+    <div style="font-size: 10px; letter-spacing: 2px; opacity: 0.6;">ARCHIVE PRODUCTS</div>
+    <div id="statProducts" style="font-family: 'Fraunces', serif; font-size: 28px; margin-top: 8px; color: #1A1611;">0</div>
+  </div>
+  <div style="background: #FFFEFB; padding: 20px; border-radius: 8px; border: 1px solid #E2DBD0;">
+    <div style="font-size: 10px; letter-spacing: 2px; opacity: 0.6;">NEWSLETTER SUBSCRIBERS</div>
+    <div id="statSubscribers" style="font-family: 'Fraunces', serif; font-size: 28px; margin-top: 8px; color: #1A1611;">0</div>
+  </div>
+  <div style="background: #FFF1F1; padding: 20px; border-radius: 8px; border: 1px solid #ffcccc;">
+    <div style="font-size: 10px; letter-spacing: 2px; opacity: 0.7; color: #b00;">LOW STOCK ALERTS</div>
+    <div id="statLowStock" style="font-family: 'Fraunces', serif; font-size: 28px; margin-top: 8px; color: #b00;">0</div>
+  </div>
+</div>
+
+<script>
+async function loadAdminAnalytics() {
+  try {
+    const res = await fetch('/api/admin/analytics');
+    const data = await res.json();
+    if(data.success && data.analytics) {
+      const a = data.analytics;
+      document.getElementById('statRevenue').innerText = `$${a.total_revenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      document.getElementById('statOrders').innerText = a.total_orders;
+      document.getElementById('statProducts').innerText = a.total_products;
+      document.getElementById('statSubscribers').innerText = a.total_subscribers;
+      document.getElementById('statLowStock').innerText = a.low_stock_count;
+    }
+  } catch(e) {
+    console.error('Failed to load analytics', e);
+  }
+}
+// Call when admin page loads
+loadAdminAnalytics();
+</script>
+
+<div class="admin-top" id="adminSidebar">
 
   <h1>
     AURAWEAR ADMIN
@@ -1949,7 +1996,7 @@ function applyFilter(){
           ?
             `<div style="font-size:8px;opacity:.6;margin-top:2px">
               ${o.transaction_id}
-             </div>`
+            </div>`
           :
             '';
 
@@ -3863,7 +3910,19 @@ document
 loadProducts();
 loadHero();
 
-</script>
 
+function toggleSidebar() {
+  const sidebar = document.getElementById('adminSidebar');
+  if (sidebar) {
+    sidebar.classList.toggle('collapsed');
+    document.body.classList.toggle('sidebar-collapsed');
+  }
+}
+</script>
+<!-- MOBILE SIDEBAR BACKDROP OVERLAY -->
+<div class="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+<!-- 3-LINE SIDEBAR TOGGLE BUTTON -->
+<button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle Navigation">☰</button>
 </body>
 </html>

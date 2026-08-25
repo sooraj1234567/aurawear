@@ -23,3 +23,15 @@ pub struct CreateReviewRequest {
     pub text: String,
     pub rating: Option<i32>,
 }
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Subscriber {
+    #[serde(skip_serializing_if = "Option::is_none", rename = "_id")]
+    pub id: Option<mongodb::bson::oid::ObjectId>,
+    pub email: String,
+    pub created_at: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CreateSubscriberRequest {
+    pub email: String,
+}

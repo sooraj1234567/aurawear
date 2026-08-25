@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+  <link rel="stylesheet" href="storefront.css">
   <link rel="preload" href="/uploads/hero.jpg" as="image">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1003,5 +1005,53 @@ async function sendAuraAIQuery(){
   chatBody.scrollTop = chatBody.scrollHeight;
 }
 </script> 
+
+<!-- PRIVATE ARCHIVE NEWSLETTER FOOTER -->
+<footer style="background:#1A1611; color:#FAF7F2; padding:60px 4vw; text-align:center; border-top:1px solid rgba(255,255,255,0.1); margin-top:60px;">
+  <h3 style="font-family:'Fraunces',serif; font-size:26px; font-weight:300; margin-bottom:12px; letter-spacing:1px;">JOIN THE PRIVATE ARCHIVE</h3>
+  <p style="font-size:13px; opacity:0.7; margin-bottom:24px; max-width:500px; margin-left:auto; margin-right:auto; line-height:1.6;">Subscribe for early access to small-batch 1970s drops and receive an exclusive 10% discount code.</p>
+  
+  <div style="display:inline-flex; max-width:440px; width:100%; gap:8px; flex-wrap:wrap; justify-content:center;">
+    <input type="email" id="subEmail" placeholder="Enter your email address..." style="flex:1; min-width:240px; padding:14px 16px; border:1px solid #C9A86A; background:transparent; color:#fff; font-size:12px; outline:none; border-radius:4px;">
+    <button onclick="subscribeNewsletter()" style="background:#C9A86A; color:#1A1611; border:none; padding:0 24px; font-size:11px; font-weight:600; letter-spacing:2px; cursor:pointer; border-radius:4px;">SUBSCRIBE</button>
+  </div>
+  <div id="subMsg" style="font-size:12px; margin-top:14px; color:#C9A86A; min-height:18px;"></div>
+  
+  <div style="margin-top:40px; font-size:11px; opacity:0.4; letter-spacing:2px;">
+    © 2026 AURAWEAR ARCHIVE • ALL RIGHTS RESERVED
+  </div>
+</footer>
+
+<script>
+async function subscribeNewsletter() {
+  const email = document.getElementById('subEmail').value.trim();
+  const msgEl = document.getElementById('subMsg');
+  if(!email || !email.includes('@')) {
+    msgEl.style.color = '#ff8888';
+    msgEl.innerText = 'Please enter a valid email address.';
+    return;
+  }
+  msgEl.style.color = '#C9A86A';
+  msgEl.innerText = 'Subscribing to archive...';
+  try {
+    const res = await fetch('/api/newsletter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if(data.success) {
+      msgEl.innerText = data.message;
+      document.getElementById('subEmail').value = '';
+    } else {
+      msgEl.style.color = '#ff8888';
+      msgEl.innerText = data.error || 'Subscription failed.';
+    }
+  } catch(e) {
+    msgEl.style.color = '#ff8888';
+    msgEl.innerText = 'Server connection error.';
+  }
+}
+</script>
 </body>
 </html>

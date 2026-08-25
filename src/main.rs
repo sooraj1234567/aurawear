@@ -50,6 +50,8 @@ async fn main() {
        .route("/api/orders/{id}/cancel", post(routes::orders::cancel_order))
        .route("/api/orders/{id}/payment_status", post(routes::orders::update_payment_status))
        .route("/api/orders/{id}", get(routes::orders::get_order_by_id).delete(routes::orders::delete_order))
+       .route("/api/newsletter", post(routes::newsletter::subscribe))
+       .route("/api/admin/analytics", get(routes::analytics::get_admin_analytics))
        // Inside your Router::new() block in src/main.rs:
 .route("/api/reviews", post(routes::reviews::create_review))
 .route("/api/reviews/{productId}", get(routes::reviews::get_reviews))

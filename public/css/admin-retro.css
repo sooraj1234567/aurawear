@@ -1,8 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&family=Courier+Prime:wght@400;700&display=swap');
 
 /* =========================================
-   AURAWEAR ADMIN — RETRO SIDEBAR DESIGN
-   ONLY UI / LAYOUT CHANGED
+   AURAWEAR ADMIN — PREMIUM RETRO DESIGN
 ========================================= */
 
 :root{
@@ -36,7 +35,6 @@ body{
 }
 
 /* PAPER TEXTURE */
-
 body::before{
   content:'';
   position:fixed;
@@ -51,7 +49,7 @@ body::before{
 
 
 /* =========================================
-   LEFT SIDEBAR
+   LEFT SIDEBAR & PREMIUM TRANSITIONS
 ========================================= */
 
 .admin-top{
@@ -59,23 +57,83 @@ body::before{
   top:0;
   left:0;
   bottom:0;
-
-  width:270px;
+  width:280px;
   min-height:100vh;
-
-  z-index:30;
-
+  z-index:40;
   display:flex;
   flex-direction:column;
-
-  padding:32px 18px 24px;
-
-  background:rgba(244,238,227,.97);
-
+  padding:36px 20px 24px;
+  background:rgba(244,238,227,.96);
   border-right:1.5px solid var(--ink);
-  border-bottom:none;
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  box-shadow: 10px 0 30px rgba(27,24,20,0.05);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
 
-  backdrop-filter:blur(14px);
+.admin-top.collapsed{
+  transform: translateX(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+/* =========================================
+   SIDEBAR TOGGLE BUTTON (Smooth Fade/Slide)
+========================================= */
+
+.sidebar-toggle-btn{
+  position: fixed;
+  top: 22px;
+  left: 300px;
+  z-index: 50;
+  width: 44px;
+  height: 44px;
+  background: var(--paper-light);
+  border: 1.5px solid var(--ink);
+  border-radius: 12px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  box-shadow: 4px 4px 0 var(--ink);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, background 0.2s ease, left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.sidebar-collapsed .sidebar-toggle-btn{
+  left: 24px;
+}
+
+.sidebar-toggle-btn:hover{
+  background: var(--cream);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.sidebar-toggle-btn:active{
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+
+/* =========================================
+   MOBILE BACKDROP OVERLAY
+========================================= */
+
+.sidebar-backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(27,24,20,0.45);
+  backdrop-filter: blur(4px);
+  z-index: 35;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+body:not(.sidebar-collapsed) .sidebar-backdrop {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 
@@ -85,16 +143,14 @@ body::before{
 
 .admin-top h1{
   margin:0 0 36px;
-
   display:flex;
   flex-direction:column;
   align-items:flex-start;
   gap:12px;
-
   font-family:Fraunces,serif;
   font-weight:300;
-  font-size:27px;
-  letter-spacing:7px;
+  font-size:26px;
+  letter-spacing:6px;
   line-height:1.1;
 }
 
@@ -102,15 +158,11 @@ body::before{
   font-family:'Courier Prime',monospace;
   font-size:8px;
   letter-spacing:2px;
-
   color:#fff;
   background:var(--rust);
-
   border:1px solid var(--ink);
   border-radius:999px;
-
   padding:6px 10px;
-
   box-shadow:2px 2px 0 var(--ink);
 }
 
@@ -123,16 +175,18 @@ body::before{
   display:flex;
   flex-direction:column;
   align-items:stretch;
-
-  gap:7px;
-
-  margin-top:0;
-
-  overflow:visible;
+  gap:8px;
+  overflow-y:auto;
+  max-height: calc(100vh - 220px);
+  padding-right: 4px;
 }
 
 .tabs::-webkit-scrollbar{
-  display:none;
+  width: 4px;
+}
+.tabs::-webkit-scrollbar-thumb{
+  background: var(--line);
+  border-radius: 4px;
 }
 
 
@@ -140,87 +194,45 @@ body::before{
 
 .tab{
   position:relative;
-
   width:100%;
-
   padding:13px 16px;
-
   cursor:pointer;
-
-  white-space:normal;
-
   font-family:'Courier Prime',monospace;
   font-size:10px;
   letter-spacing:2px;
-
-  opacity:.58;
-
+  opacity:.6;
   border:1px solid transparent;
-
-  border-radius:10px;
-
-  transform:none;
-
-  transition:
-    transform .2s ease,
-    background .2s ease,
-    opacity .2s ease,
-    border-color .2s ease;
+  border-radius:12px;
+  transition: transform .2s ease, background .2s ease, opacity .2s ease, border-color .2s ease, box-shadow .2s ease;
 }
-
-
-/* BULLET */
 
 .tab::before{
   content:'○';
-
   display:inline-block;
-
   width:18px;
-
   font-size:10px;
 }
 
-
-/* HOVER */
-
 .tab:hover{
   opacity:1;
-
-  background:rgba(255,253,248,.7);
-
-  border-color:rgba(27,24,20,.2);
-
+  background:rgba(255,253,248,.8);
+  border-color:rgba(27,24,20,.15);
   transform:translateX(4px);
 }
 
-
-/* ACTIVE TAB */
-
 .tab.active{
   opacity:1;
-
   color:var(--ink);
-
   background:var(--paper-light);
-
   border:1px solid var(--ink);
-
-  border-radius:10px;
-
+  border-radius:12px;
   font-weight:700;
-
   transform:none;
-
   box-shadow:3px 3px 0 var(--tan);
 }
 
-
-/* ACTIVE BULLET */
-
 .tab.active::before{
   content:'●';
-
   color:var(--rust);
 }
 
@@ -231,40 +243,24 @@ body::before{
 
 .view-store{
   margin-top:auto;
-  margin-left:0;
-
   width:100%;
-
-  padding:13px 16px;
-
+  padding:14px 16px;
   border:1px solid var(--ink);
-
   border-radius:999px;
-
   background:var(--ink);
-
   color:var(--paper-light);
-
   text-align:center;
-
   text-decoration:none;
-
   font-family:'Courier Prime',monospace;
-
   font-size:10px;
-
   letter-spacing:2.5px;
-
   box-shadow:4px 4px 0 var(--rust);
-
-  transition:.22s ease;
+  transition:.25s ease;
 }
 
 .view-store:hover{
   background:var(--rust);
-
   transform:translate(-2px,-2px);
-
   box-shadow:6px 6px 0 var(--ink);
 }
 
@@ -275,12 +271,14 @@ body::before{
 
 .wrap{
   width:auto;
-
   max-width:1600px;
+  margin-left:280px;
+  padding:36px 42px 70px;
+  transition: margin-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-  margin-left:270px;
-
-  padding:34px 38px 70px;
+body.sidebar-collapsed .wrap{
+  margin-left: 0;
 }
 
 
@@ -290,56 +288,35 @@ body::before{
 
 .form{
   position:relative;
-
   display:grid;
-
   grid-template-columns:repeat(4,minmax(0,1fr));
-
   gap:18px;
-
   margin-bottom:28px;
-
-  padding:25px;
-
+  padding:26px;
   background:var(--paper-light);
-
   border:1px solid var(--ink);
-
   border-radius:22px;
-
   box-shadow:7px 7px 0 var(--ink);
-
   overflow:hidden;
 }
 
 .form::before{
   content:'AURAWEAR / ADMIN ARCHIVE';
-
   position:absolute;
-
   top:10px;
   right:20px;
-
   font-family:'Courier Prime',monospace;
-
   font-size:7px;
-
   letter-spacing:2px;
-
   opacity:.35;
 }
 
 .form::after{
   content:'';
-
   position:absolute;
-
   inset:9px;
-
   border:1px dashed rgba(27,24,20,.17);
-
   border-radius:16px;
-
   pointer-events:none;
 }
 
@@ -350,17 +327,11 @@ body::before{
 
 .form label{
   display:block;
-
   margin-bottom:7px;
-
   font-family:'Courier Prime',monospace;
-
   font-size:9px;
-
   letter-spacing:2.3px;
-
   text-transform:uppercase;
-
   opacity:.62;
 }
 
@@ -368,23 +339,14 @@ body::before{
 .form textarea,
 .form select{
   width:100%;
-
   padding:13px 14px;
-
   border:1px solid rgba(27,24,20,.48);
-
   border-radius:10px;
-
   outline:none;
-
   background:#f8f4ec;
-
   color:var(--ink);
-
   font-family:Inter,sans-serif;
-
   font-size:13px;
-
   transition:.2s ease;
 }
 
@@ -392,7 +354,6 @@ body::before{
 .form textarea:hover,
 .form select:hover{
   border-color:var(--ink);
-
   background:#fffdf8;
 }
 
@@ -400,45 +361,34 @@ body::before{
 .form textarea:focus,
 .form select:focus{
   background:#fff;
-
   border-color:var(--rust);
-
   box-shadow:0 0 0 3px rgba(168,93,53,.13);
 }
 
 .form textarea{
   min-height:110px;
-
   resize:vertical;
 }
 
 .form input[type="file"]{
   padding:9px;
-
   cursor:pointer;
 }
 
 .form input[type="file"]::file-selector-button{
   border:1px solid var(--ink);
-
   background:var(--cream);
-
   padding:7px 11px;
-
   margin-right:10px;
-
   font-family:'Courier Prime',monospace;
-
   font-size:9px;
-
   cursor:pointer;
-
   border-radius:6px;
 }
 
 
 /* =========================================
-   GRID HELPERS
+   GRID HELPERS & BUTTONS
 ========================================= */
 
 .full{
@@ -449,133 +399,86 @@ body::before{
   grid-column:span 2;
 }
 
-
-/* =========================================
-   BUTTON
-========================================= */
-
 .btn{
   position:relative;
-
   overflow:hidden;
-
   border:1px solid var(--ink);
-
   border-radius:999px;
-
   padding:12px 22px;
-
   background:var(--ink);
-
   color:#fffdf8;
-
   cursor:pointer;
-
   font-family:'Courier Prime',monospace;
-
   font-size:10px;
-
   letter-spacing:2px;
-
   transition:.2s ease;
-
   box-shadow:3px 3px 0 var(--rust);
 }
 
 .btn:hover{
   background:var(--rust);
-
   transform:translate(-1px,-1px);
-
   box-shadow:5px 5px 0 var(--ink);
 }
 
 .btn:active{
   transform:translate(2px,2px);
-
   box-shadow:1px 1px 0 var(--ink);
 }
 
 
 /* =========================================
-   PRODUCT GRID
+   PRODUCT GRID & CARDS
 ========================================= */
 
 .grid{
   display:grid;
-
   grid-template-columns:repeat(auto-fill,minmax(245px,1fr));
-
   gap:23px;
 }
 
 .card{
   position:relative;
-
   display:flex;
-
   flex-direction:column;
-
   overflow:hidden;
-
   background:var(--paper-light);
-
   border:1px solid var(--ink);
-
   border-radius:18px;
-
   box-shadow:5px 5px 0 var(--ink);
-
-  transition:
-    transform .22s ease,
-    box-shadow .22s ease;
+  transition: transform .22s ease, box-shadow .22s ease;
 }
 
 .card:hover{
   transform:translateY(-6px) rotate(-.4deg);
-
   box-shadow:9px 10px 0 var(--ink);
 }
 
 .img-wrap{
   position:relative;
-
   aspect-ratio:3/4;
-
   overflow:hidden;
-
   background:var(--cream);
-
   border-bottom:1px solid var(--ink);
 }
 
 .img-wrap::after{
   content:'ARCHIVE PIECE';
-
   position:absolute;
-
   bottom:9px;
   left:10px;
-
   padding:5px 8px;
-
   background:rgba(255,253,248,.92);
-
   border:1px solid var(--ink);
-
   font-family:'Courier Prime',monospace;
-
   font-size:7px;
-
   letter-spacing:1.5px;
 }
 
 .img-wrap img{
   width:100%;
   height:100%;
-
   object-fit:cover;
-
   transition:transform .5s ease;
 }
 
@@ -585,116 +488,75 @@ body::before{
 
 .info{
   display:flex;
-
   flex:1;
-
   flex-direction:column;
-
   padding:15px;
 }
 
 .name{
   font-family:Fraunces,serif;
-
   font-size:18px;
-
   line-height:1.2;
 }
 
 .meta{
   margin-top:6px;
-
   font-family:'Courier Prime',monospace;
-
   font-size:10px;
-
   line-height:1.6;
-
   opacity:.62;
 }
 
 
 /* =========================================
-   DELETE BUTTON
+   DELETE BUTTON & STATS
 ========================================= */
 
 .btn-del{
   margin-top:12px;
-
   padding:8px 14px;
-
   border:1px solid var(--ink);
-
   border-radius:999px;
-
   background:transparent;
-
   color:var(--ink);
-
   cursor:pointer;
-
   font-family:'Courier Prime',monospace;
-
   font-size:9px;
-
   letter-spacing:1.5px;
-
   transition:.2s ease;
 }
 
 .btn-del:hover{
   background:var(--rust);
-
   color:#fff;
-
   border-color:var(--rust);
 }
 
-
-/* =========================================
-   STATISTICS
-========================================= */
-
 .stats{
   display:grid;
-
   grid-template-columns:repeat(3,1fr);
-
   gap:18px;
-
   margin-bottom:25px;
 }
 
 .stat{
   position:relative;
-
   overflow:hidden;
-
   padding:20px;
-
   background:var(--paper-light);
-
   border:1px solid var(--ink);
-
   border-radius:18px;
-
   box-shadow:4px 4px 0 var(--ink);
-
   transition:.2s ease;
 }
 
 .stat::before{
   content:'';
-
   position:absolute;
-
   top:0;
   left:0;
-
   width:100%;
-
   height:5px;
-
   background:var(--tan);
 }
 
@@ -708,180 +570,112 @@ body::before{
 
 .stat:hover{
   transform:translateY(-3px);
-
   box-shadow:7px 7px 0 var(--ink);
 }
 
 .stat b{
   display:block;
-
   margin-bottom:6px;
-
   font-family:Fraunces,serif;
-
   font-size:31px;
-
   font-weight:400;
 }
 
 .stat span{
   font-family:'Courier Prime',monospace;
-
   font-size:9px;
-
   letter-spacing:2px;
-
   text-transform:uppercase;
-
   opacity:.55;
 }
 
 
 /* =========================================
-   TOOLBAR
+   TOOLBAR, FILTERS & TABLES
 ========================================= */
 
 .toolbar{
   display:flex;
-
   flex-wrap:wrap;
-
   gap:11px;
-
   margin-bottom:20px;
 }
 
 .toolbar input,
 .toolbar select{
   min-height:42px;
-
   padding:11px 15px;
-
   border:1px solid var(--ink);
-
   border-radius:999px;
-
   outline:none;
-
   background:var(--paper-light);
-
   font-family:Inter,sans-serif;
-
   font-size:12px;
 }
 
-
-/* =========================================
-   FILTERS
-========================================= */
-
 .filters{
   display:flex;
-
   flex-wrap:wrap;
-
   gap:8px;
-
   width:fit-content;
-
   max-width:100%;
-
   margin-bottom:22px;
-
   padding:9px;
-
   border:1px solid var(--ink);
-
   border-radius:999px;
-
   background:var(--paper-light);
-
   box-shadow:3px 3px 0 var(--ink);
 }
 
 .fbtn{
   padding:9px 15px;
-
   border:1px solid transparent;
-
   border-radius:999px;
-
   background:transparent;
-
   color:var(--ink);
-
   cursor:pointer;
-
   font-family:'Courier Prime',monospace;
-
   font-size:9px;
-
   letter-spacing:1.4px;
-
   transition:.2s ease;
 }
 
 .fbtn:hover{
   background:var(--cream);
-
   border-color:var(--ink);
 }
 
 .fbtn.active{
   background:var(--ink);
-
   color:#fffdf8;
-
   border-color:var(--ink);
 }
 
-
-/* =========================================
-   TABLE
-========================================= */
-
 table{
   width:100%;
-
   border-collapse:separate;
-
   border-spacing:0;
-
   overflow:hidden;
-
   background:var(--paper-light);
-
   border:1px solid var(--ink);
-
   border-radius:18px;
-
   box-shadow:5px 5px 0 var(--ink);
 }
 
-th,
-td{
+th, td{
   padding:14px 13px;
-
   border-bottom:1px solid rgba(27,24,20,.11);
-
   text-align:left;
-
   vertical-align:top;
-
   font-size:12px;
 }
 
 th{
   background:var(--cream);
-
   font-family:'Courier Prime',monospace;
-
   font-size:9px;
-
   letter-spacing:1.8px;
-
   text-transform:uppercase;
-
   opacity:.8;
 }
 
@@ -899,122 +693,66 @@ tbody tr:last-child td{
 
 
 /* =========================================
-   BADGES
+   BADGES & PILLS
 ========================================= */
 
 .badge{
   display:inline-block;
-
   min-width:78px;
-
   padding:6px 9px;
-
   border:1px solid var(--ink);
-
   border-radius:999px;
-
   background:var(--paper-light);
-
   text-align:center;
-
   font-family:'Courier Prime',monospace;
-
   font-size:8px;
-
   font-weight:700;
-
   letter-spacing:1px;
 }
 
-.badge.pending{
-  background:#f6df9d;
-}
-
-.badge.confirmed{
-  background:#b8d6b8;
-}
-
-.badge.packed{
-  background:#d8c5e7;
-}
-
-.badge.shipped{
-  background:#b9dce4;
-}
-
-.badge.delivered{
-  background:var(--ink);
-
-  color:#fff;
-}
-
-.badge.cancelled{
-  background:#e8b7ae;
-}
+.badge.pending{ background:#f6df9d; }
+.badge.confirmed{ background:#b8d6b8; }
+.badge.packed{ background:#d8c5e7; }
+.badge.shipped{ background:#b9dce4; }
+.badge.delivered{ background:var(--ink); color:#fff; }
+.badge.cancelled{ background:#e8b7ae; }
 
 .badge-pay{
   display:inline-block;
-
   margin-top:5px;
-
   padding:5px 8px;
-
   border:1px dashed var(--ink);
-
   border-radius:999px;
-
   font-family:'Courier Prime',monospace;
-
   font-size:8px;
-
   letter-spacing:1px;
 }
 
-
-/* =========================================
-   PILLS
-========================================= */
-
 .pill{
   display:inline-block;
-
   margin:2px;
-
   padding:6px 11px;
-
   border:1px solid var(--ink);
-
   border-radius:999px;
-
   background:#f7f1e7;
-
   font-family:'Courier Prime',monospace;
-
   font-size:9px;
-
   letter-spacing:.8px;
 }
 
 
 /* =========================================
-   MODAL
+   MODAL & AVATAR
 ========================================= */
 
 .modal{
   position:fixed;
-
   inset:0;
-
   z-index:100;
-
   display:none;
-
   place-items:center;
-
   padding:22px;
-
   background:rgba(27,24,20,.62);
-
   backdrop-filter:blur(7px);
 }
 
@@ -1024,77 +762,46 @@ tbody tr:last-child td{
 
 .modal-card{
   position:relative;
-
   display:grid;
-
   grid-template-columns:minmax(0,1fr) 300px;
-
   gap:22px;
-
   width:min(900px,96vw);
-
   max-height:91vh;
-
   overflow:auto;
-
   padding:25px;
-
   background:var(--paper-light);
-
   border:1px solid var(--ink);
-
   border-radius:22px;
-
   box-shadow:11px 11px 0 var(--ink);
 }
 
 .modal-card::before{
   content:'AURAWEAR — ARCHIVE RECORD';
-
   position:absolute;
-
   top:10px;
   right:20px;
-
   font-family:'Courier Prime',monospace;
-
   font-size:7px;
-
   letter-spacing:2px;
-
   opacity:.35;
 }
 
-
-/* =========================================
-   AVATAR
-========================================= */
-
 .avatar{
   display:grid;
-
   place-items:center;
-
   width:48px;
   height:48px;
-
   overflow:hidden;
-
   border:1px solid var(--ink);
-
   border-radius:50%;
-
   background:var(--cream);
-
   font-family:Fraunces,serif;
-
   font-size:18px;
 }
 
 .avatar img{
   width:100%;
   height:100%;
-
   object-fit:cover;
 }
 
@@ -1104,118 +811,68 @@ tbody tr:last-child td{
 ========================================= */
 
 ::-webkit-scrollbar{
-  width:10px;
-  height:10px;
+  width:8px;
+  height:8px;
 }
-
 ::-webkit-scrollbar-track{
   background:var(--paper);
 }
-
 ::-webkit-scrollbar-thumb{
   background:var(--ink);
-
   border:2px solid var(--paper);
-
-  border-radius:10px;
+  border-radius:8px;
 }
 
 
 /* =========================================
-   TABLET
+   TABLET & MOBILE RESPONSIVE
 ========================================= */
 
 @media(max-width:1100px){
-
   .admin-top{
-    width:230px;
+    width:250px;
   }
-
   .wrap{
-    margin-left:230px;
-
+    margin-left:250px;
     padding:28px;
   }
-
+  .sidebar-toggle-btn{
+    left: 270px;
+  }
   .form{
     grid-template-columns:repeat(2,minmax(0,1fr));
   }
 }
 
-
-/* =========================================
-   MOBILE
-   SIDEBAR RETURNS TO TOP NAVIGATION
-========================================= */
-
 @media(max-width:800px){
-
+  /* Mobile Sidebar Drawer Layout */
   .admin-top{
-    position:relative;
-
-    width:100%;
-
-    min-height:auto;
-
-    display:block;
-
-    padding:18px 16px 0;
-
-    border-right:none;
-
-    border-bottom:1px solid var(--ink);
+    width: 270px;
+    transform: translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 20px 0 50px rgba(0,0,0,0.2);
   }
 
-  .admin-top h1{
-    margin-bottom:18px;
-
-    flex-direction:row;
-
-    align-items:center;
-
-    font-size:22px;
-
-    letter-spacing:5px;
+  /* When toggled open on mobile */
+  body:not(.sidebar-collapsed) .admin-top{
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
   }
 
-  .tabs{
-    flex-direction:row;
-
-    align-items:flex-end;
-
-    overflow-x:auto;
-
-    gap:4px;
-  }
-
-  .tab{
-    width:auto;
-
-    white-space:nowrap;
-
-    padding:12px 14px;
-  }
-
-  .tab:hover{
-    transform:none;
-  }
-
-  .tab::before{
-    display:none;
-  }
-
-  .view-store{
-    width:auto;
-
-    display:block;
-
-    margin:14px 0 16px;
+  /* Toggle button stays pinned cleanly at top-left */
+  .sidebar-toggle-btn{
+    left: 20px !important;
+    top: 20px;
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
   }
 
   .wrap{
-    margin-left:0;
-
-    padding:22px 16px 55px;
+    margin-left: 0 !important;
+    padding: 80px 18px 60px 18px; /* Extra top clearance so cards never touch toggle */
   }
 
   .stats{
@@ -1225,56 +882,36 @@ tbody tr:last-child td{
   .modal-card{
     grid-template-columns:1fr;
   }
-
-  .table{
-    min-width:700px;
-  }
 }
 
-
 @media(max-width:600px){
-
   .form{
     grid-template-columns:1fr;
-
     padding:18px;
   }
-
-  .col2,
-  .full{
+  .col2, .full{
     grid-column:auto;
   }
-
   .grid{
     grid-template-columns:1fr;
   }
-
   .filters{
     width:100%;
-
     border-radius:16px;
   }
-
   .fbtn{
     flex:1;
-
     min-width:110px;
   }
-
-  .toolbar input,
-  .toolbar select{
+  .toolbar input, .toolbar select{
     width:100%;
   }
-
   .modal{
     padding:12px;
   }
-
   .modal-card{
     padding:18px;
-
     border-radius:16px;
-
     box-shadow:6px 6px 0 var(--ink);
   }
 }
