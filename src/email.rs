@@ -1,6 +1,5 @@
-use lettre::message::header::ContentType;
-use lettre::{Message, SmtpTransport, Transport};
-use lettre::transport::smtp::authentication::Credentials;
+use reqwest::Client;
+use serde_json::json;
 use std::env;
 
 pub async fn send_reply_email(
@@ -10,11 +9,10 @@ pub async fn send_reply_email(
     original_message: &str,
     admin_reply: &str,
 ) -> Result<(), String> {
-    // Load environment variables for Gmail SMTP
-    let smtp_host = env::var("SMTP_HOST").unwrap_or_else(|_| "smtp.gmail.com".to_string());
-    let smtp_user = env::var("SMTP_USER").map_err(|_| "ammavishnu9605@gmail.com")?;
-    let smtp_pass = env::var("SMTP_PASS").map_err(|_| "oqvh zrud vfgb jees")?;
-    let smtp_from = env::var("SMTP_FROM").unwrap_or_else(|_| smtp_user.clone());
+    let api_key = env::var("RESEND_API_KEY").map_err(|_| "RESEND_API_KEY environment variable is not set")?;
+    
+    let client = Client::new();
+    let url = "https://api.resend.com/emails";
 
     let html_content = format!(
         r#"
@@ -26,37 +24,31 @@ pub async fn send_reply_email(
                 <p style="margin:0 0 10px 0; opacity:0.7; font-size:12px;"><b>Your Message:</b> {}</p>
                 <p style="margin:0; font-size:14px;"><b>Admin Reply:</b> {}</p>
             </div>
-            <p>You can view your message history and order tracking anytime in your <a href="http://localhost:3000/profile.html">AuraWear Profile</a>.</p>
+            <p>You can view your message history and order tracking anytime in your <a href="https://aurawear-o0eq.onrender.com/profile.html">AuraWear Profile</a>.</p>
             <p style="font-size:11px; opacity:0.5; margin-top:30px;">EST. 1972 • REIMAGINED TODAY</p>
         </div>
         "#,
         name, ticket_id, original_message, admin_reply
     );
 
-    let email = Message::builder()
-        .from(smtp_from.parse().map_err(|e: lettre::address::AddressError| e.to_string())?)
-        .to(to_email.parse().map_err(|e: lettre::address::AddressError| e.to_string())?)
-        .subject(format!("Update on your AuraWear Ticket #{}", ticket_id))
-        .header(ContentType::TEXT_HTML)
-        .body(html_content)
+    let payload = json!({
+        "from": "AuraWear Support <onboarding@resend.dev>",
+        "to": [to_email],
+        "subject": format!("Update on your AuraWear Ticket #{}", ticket_id),
+        "html": html_content
+    });
+
+    let res = client.post(url)
+        .bearer_auth(api_key)
+        .json(&payload)
+        .send()
+        .await
         .map_err(|e| e.to_string())?;
 
-    let creds = Credentials::new(smtp_user, smtp_pass);
-
-    // Open a remote connection to Gmail SMTP server using STARTTLS
-    let mailer = SmtpTransport::starttls_relay(&smtp_host)
-        .map_err(|e| e.to_string())?
-        .credentials(creds)
-        .build();
-
-    // Send the email synchronously in a blocking task to fit async boundaries
-    let email_clone = email;
-    tokio::task::spawn_blocking(move || {
-        mailer.send(&email_clone)
-    })
-    .await
-    .map_err(|e| e.to_string())?
-    .map_err(|e| e.to_string())?;
-
-    Ok(())
+    if res.status().is_success() {
+        Ok(())
+    } else {
+        let err_text = res.text().await.unwrap_or_default();
+        Err(format!("Resend API error: {}", err_text))
+    }
 }
