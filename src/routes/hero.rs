@@ -17,9 +17,10 @@ pub async fn get_hero(Extension(db): Extension<Database>) -> Json<Value> {
         }
     }
     
-    // Fallback professional 1970s aesthetic image URL that always works on Render
+    // Fallback hero image path when no database document exists yet
     Json(json!({
-        "image": "https://images.unsplash.com/photo-1495385794356-15371f348c19?q=80&w=1000",
-        "path": "https://images.unsplash.com/photo-1495385794356-15371f348c19?q=80&w=1000"
+        "image": "/uploads/hero_6a86c72252ff92d890379272",
+        "image_path": "/uploads/hero_6a86c72252ff92d890379272",
+        "path": "/uploads/hero_6a86c72252ff92d890379272"
     }))
 }
