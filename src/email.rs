@@ -1,6 +1,5 @@
-use lettre::message::header::ContentType;
-use lettre::{Message, SmtpTransport, Transport};
-use lettre::transport::smtp::authentication::Credentials;
+use reqwest::Client;
+use serde_json::json;
 use std::env;
 
 pub async fn send_reply_email(
@@ -10,10 +9,14 @@ pub async fn send_reply_email(
     original_message: &str,
     admin_reply: &str,
 ) -> Result<(), String> {
-    let smtp_host = env::var("SMTP_HOST").unwrap_or_else(|_| "smtp.gmail.com".to_string());
-    let smtp_user = env::var("SMTP_USER").map_err(|_| "SMTP_USER environment variable is not set")?;
-    let smtp_pass = env::var("SMTP_PASS").map_err(|_| "SMTP_PASS environment variable is not set")?;
-    let smtp_from = env::var("SMTP_FROM").unwrap_or_else(|_| smtp_user.clone());
+    let api_key = env::var("BREVO_API_KEY")
+        .map_err(|_| "BREVO_API_KEY environment variable is not set")?;
+    
+    let sender_email = env::var("SENDER_EMAIL")
+        .unwrap_or_else(|_| "ammavishnu9605@gmail.com".to_string());
+
+    let client = Client::new();
+    let url = "https://api.brevo.com/v3/smtp/email";
 
     let html_content = format!(
         r#"
@@ -32,30 +35,34 @@ pub async fn send_reply_email(
         name, ticket_id, original_message, admin_reply
     );
 
-    let email = Message::builder()
-        .from(smtp_from.parse().map_err(|e: lettre::address::AddressError| e.to_string())?)
-        .to(to_email.parse().map_err(|e: lettre::address::AddressError| e.to_string())?)
-        .subject(format!("Update on your AuraWear Ticket #{}", ticket_id))
-        .header(ContentType::TEXT_HTML)
-        .body(html_content)
+    let payload = json!({
+        "sender": {
+            "name": "AuraWear Support",
+            "email": sender_email
+        },
+        "to": [
+            {
+                "email": to_email,
+                "name": name
+            }
+        ],
+        "subject": format!("Update on your AuraWear Ticket #{}", ticket_id),
+        "htmlContent": html_content
+    });
+
+    let res = client.post(url)
+        .header("accept", "application/json")
+        .header("api-key", api_key)
+        .header("content-type", "application/json")
+        .json(&payload)
+        .send()
+        .await
         .map_err(|e| e.to_string())?;
 
-    let creds = Credentials::new(smtp_user, smtp_pass);
-
-    // Configure SMTPS transport for port 465 compatible with lettre v0.11
-    let mailer = SmtpTransport::relay(&smtp_host)
-        .map_err(|e| e.to_string())?
-        .port(465)
-        .credentials(creds)
-        .build();
-
-    let email_clone = email;
-    tokio::task::spawn_blocking(move || {
-        mailer.send(&email_clone)
-    })
-    .await
-    .map_err(|e| e.to_string())?
-    .map_err(|e| e.to_string())?;
-
-    Ok(())
+    if res.status().is_success() {
+        Ok(())
+    } else {
+        let err_text = res.text().await.unwrap_or_default();
+        Err(format!("Brevo API error: {}", err_text))
+    }
 }
