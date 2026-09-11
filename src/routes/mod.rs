@@ -11,3 +11,4 @@ pub mod ai;
 pub mod reviews;
 pub mod newsletter;
 pub mod analytics;
+pub mod cms;

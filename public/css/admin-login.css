@@ -1,0 +1,136 @@
+:root {
+    --bg-paper: #FBF8F3;
+    --text-ink: #1A1611;
+    --gold: #C9A86A;
+    --border-dark: #1A1611;
+    --border-light: rgba(26, 22, 17, 0.15);
+    --error-red: #900;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-paper);
+    color: var(--text-ink);
+    font-family: 'Courier Prime', monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background-image: radial-gradient(rgba(0,0,0,.04) 1px, transparent 1px);
+    background-size: 16px 16px;
+}
+
+.login-card {
+    background: #fff;
+    border: 2px solid var(--border-dark);
+    width: min(440px, 100%);
+    padding: 40px 32px;
+    box-shadow: 8px 8px 0px var(--text-ink);
+    position: relative;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 300;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+}
+
+.badge-admin {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--text-ink);
+    font-size: 9px;
+    letter-spacing: 2px;
+    padding: 4px 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.retro-label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.retro-input {
+    width: 100%;
+    background: var(--bg-paper);
+    border: 1.5px solid var(--border-dark);
+    padding: 12px 14px;
+    font-family: 'Courier Prime', monospace;
+    font-size: 13px;
+    color: var(--text-ink);
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.retro-input:focus {
+    border-color: var(--gold);
+    box-shadow: 3px 3px 0px var(--gold);
+}
+
+.btn-submit {
+    width: 100%;
+    background: var(--text-ink);
+    color: #fff;
+    border: 1.5px solid var(--text-ink);
+    padding: 14px;
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.25s ease;
+    margin-top: 10px;
+}
+
+.btn-submit:hover {
+    background: var(--gold);
+    color: var(--text-ink);
+    box-shadow: 4px 4px 0px var(--text-ink);
+    transform: translate(-2px, -2px);
+}
+
+#error-msg {
+    color: var(--error-red);
+    font-size: 11px;
+    margin-top: 15px;
+    text-align: center;
+    min-height: 16px;
+}
+
+.login-footer {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 1px;
+    opacity: 0.6;
+    border-top: 1px dashed var(--border-light);
+    padding-top: 20px;
+}
+
+.login-footer a {
+    color: var(--text-ink);
+    text-decoration: underline;
+}

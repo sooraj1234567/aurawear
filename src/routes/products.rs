@@ -6,10 +6,12 @@ use futures_util::StreamExt;
 pub async fn get_products(Extension(db): Extension<Database>) -> Json<Value> {
     let col: Collection<Document> = db.collection("products");
     let uploads: Collection<Document> = db.collection("uploads");
-    let mut cursor = col.find(doc!{}).await.unwrap();
+    let mut cursor = match col.find(doc!{}).await {
+        Ok(c) => c,
+        Err(_) => return Json(json!({"success": true, "products": []}))
+    };
     let mut list = Vec::new();
     while let Some(Ok(mut d)) = cursor.next().await {
-        // AUTO-FIX old /api/file/id -> /uploads/filename
         if let Ok(path) = d.get_str("image_path") {
             if path.starts_with("/api/file/") {
                 let id = path.replace("/api/file/", "");
@@ -26,7 +28,56 @@ pub async fn get_products(Extension(db): Extension<Database>) -> Json<Value> {
         }
         list.push(d);
     }
-    Json(json!({"success":true, "products": list}))
+    Json(json!({"success": true, "products": list}))
+}
+
+pub async fn get_vendor_products(
+    Extension(db): Extension<Database>,
+    axum::extract::Query(params): axum::extract::Query<std::collections::HashMap<String, String>>
+) -> Json<Value> {
+    let col: Collection<Document> = db.collection("products");
+    let users_col: Collection<Document> = db.collection("users");
+    let vendor_str = params.get("vendor_id").cloned().unwrap_or_default();
+    
+    let mut or_conditions = vec![];
+
+    if !vendor_str.is_empty() {
+        or_conditions.push(doc! { "vendor_id": vendor_str.clone() });
+
+        if let Ok(v_oid) = ObjectId::parse_str(&vendor_str) {
+            or_conditions.push(doc! { "vendor_id": v_oid });
+            
+            if let Ok(Some(user_doc)) = users_col.find_one(doc! { "_id": v_oid }).await {
+                if let Ok(email) = user_doc.get_str("email") {
+                    or_conditions.push(doc! { "vendor_id": email.to_string() });
+                }
+            }
+        }
+
+        if let Ok(Some(user_doc)) = users_col.find_one(doc! { "email": &vendor_str }).await {
+            if let Ok(user_oid) = user_doc.get_object_id("_id") {
+                or_conditions.push(doc! { "vendor_id": user_oid });
+                or_conditions.push(doc! { "vendor_id": user_oid.to_hex() });
+            }
+        }
+    }
+
+    let filter = if !or_conditions.is_empty() {
+        doc! { "$or": or_conditions }
+    } else {
+        doc! { "vendor_id": { "$exists": true } }
+    };
+
+    let mut cursor = match col.find(filter).await {
+        Ok(c) => c,
+        Err(_) => return Json(json!({"success": false, "products": []}))
+    };
+
+    let mut list = Vec::new();
+    while let Some(Ok(d)) = cursor.next().await {
+        list.push(d);
+    }
+    Json(json!({"success": true, "products": list}))
 }
 
 pub async fn get_product_by_id(Extension(db): Extension<Database>, Path(id): Path<String>) -> Json<Value> {
@@ -41,10 +92,19 @@ pub async fn get_product_by_id(Extension(db): Extension<Database>, Path(id): Pat
 
 pub async fn create_product(Extension(db): Extension<Database>, Json(body): Json<Value>) -> Json<Value> {
     let col: Collection<Document> = db.collection("products");
+    let users_col: Collection<Document> = db.collection("users");
     let mut doc = Document::new();
+    let mut has_vendor = false;
+    let mut has_status = false;
+    let mut raw_price: f64 = 0.0;
+    let mut vendor_id_str = String::new();
+
     if let Some(obj) = body.as_object() {
-        for (k,v) in obj {
-            if k == "sizes" {
+        for (k, v) in obj {
+            if k == "price" {
+                if let Some(n) = v.as_f64() { raw_price = n; }
+                else if let Some(n) = v.as_i64() { raw_price = n as f64; }
+            } else if k == "sizes" {
                 if let Some(arr) = v.as_array() {
                     let vec_str: Vec<String> = arr.iter().filter_map(|x| x.as_str().map(|s| s.to_string())).collect();
                     doc.insert(k.clone(), mongodb::bson::to_bson(&vec_str).unwrap());
@@ -57,6 +117,21 @@ pub async fn create_product(Extension(db): Extension<Database>, Json(body): Json
                     let vec_str: Vec<String> = arr.iter().filter_map(|x| x.as_str().map(|s| s.to_string())).collect();
                     doc.insert(k.clone(), mongodb::bson::to_bson(&vec_str).unwrap());
                 }
+            } else if k == "vendor_id" {
+                has_vendor = true;
+                if let Some(s) = v.as_str() {
+                    vendor_id_str = s.to_string();
+                    if let Ok(v_oid) = ObjectId::parse_str(s) {
+                        doc.insert(k.clone(), v_oid);
+                    } else {
+                        doc.insert(k.clone(), s.to_string());
+                    }
+                }
+            } else if k == "status" {
+                has_status = true;
+                if let Some(s) = v.as_str() {
+                    doc.insert(k.clone(), s.to_string());
+                }
             } else if let Some(s) = v.as_str() { 
                 doc.insert(k.clone(), s.to_string()); 
             } else if let Some(n) = v.as_i64() { 
@@ -68,6 +143,38 @@ pub async fn create_product(Extension(db): Extension<Database>, Json(body): Json
             }
         }
     }
+
+    // Strict Server-Side Validation: Block product creation if the vendor account status is not active
+    if has_vendor && !vendor_id_str.is_empty() {
+        let mut is_active = false;
+        if let Ok(oid) = ObjectId::parse_str(&vendor_id_str) {
+            if let Ok(Some(user)) = users_col.find_one(doc!{"_id": oid}).await {
+                if user.get_str("status").unwrap_or("pending") == "active" {
+                    is_active = true;
+                }
+            }
+        }
+        if !is_active {
+            if let Ok(Some(user)) = users_col.find_one(doc!{"email": &vendor_id_str}).await {
+                if user.get_str("status").unwrap_or("pending") == "active" {
+                    is_active = true;
+                }
+            }
+        }
+        if !is_active {
+            return Json(json!({"success": false, "error": "Account approval required. Store status is PENDING. You cannot publish products until an administrator activates your store."}));
+        }
+    }
+
+    doc.insert("seller_price", raw_price);
+    let final_buyer_price = raw_price * 1.15;
+    doc.insert("price", final_buyer_price);
+
+    if !has_status {
+        let default_status = if has_vendor { "live" } else { "approved" };
+        doc.insert("status", default_status.to_string());
+    }
+
     doc.insert("created_at", chrono::Utc::now().to_rfc3339());
     match col.insert_one(doc).await {
         Ok(r) => Json(json!({"success":true, "id": r.inserted_id})),
@@ -89,17 +196,33 @@ pub async fn update_product(Extension(db): Extension<Database>, Path(id): Path<S
     };
     let mut set = doc!{};
     if let Some(v) = body.get("name").and_then(|x| x.as_str()) { set.insert("name", v.to_string()); }
-    if let Some(v) = body.get("price") { if let Some(n) = v.as_f64() { set.insert("price", n); } else if let Some(n) = v.as_i64() { set.insert("price", n as f64); } }
+    
+    if let Some(v) = body.get("price") {
+        let raw_p = if let Some(n) = v.as_f64() { n } else if let Some(n) = v.as_i64() { n as f64 } else { 0.0 };
+        set.insert("seller_price", raw_p);
+        set.insert("price", raw_p * 1.15);
+    }
+
     if let Some(v) = body.get("stock") { if let Some(n) = v.as_i64() { set.insert("stock", n); } else if let Some(n) = v.as_f64() { set.insert("stock", n as i64); } }
     if let Some(v) = body.get("category").and_then(|x| x.as_str()) { set.insert("category", v.to_string()); }
     if let Some(v) = body.get("gender").and_then(|x| x.as_str()) { set.insert("gender", v.to_string()); }
     if let Some(v) = body.get("fabric").and_then(|x| x.as_str()) { set.insert("fabric", v.to_string()); }
     if let Some(v) = body.get("era").and_then(|x| x.as_str()) { set.insert("era", v.to_string()); }
+    if let Some(v) = body.get("size").and_then(|x| x.as_str()) { set.insert("size", v.to_string()); }
+    if let Some(v) = body.get("condition").and_then(|x| x.as_str()) { set.insert("condition", v.to_string()); }
     if let Some(v) = body.get("description").and_then(|x| x.as_str()) { set.insert("description", v.to_string()); }
+    if let Some(v) = body.get("status").and_then(|x| x.as_str()) { set.insert("status", v.to_string()); }
     if let Some(v) = body.get("image").and_then(|x| x.as_str()) { set.insert("image", v.to_string()); set.insert("image_path", v.to_string()); }
     if let Some(v) = body.get("image_path").and_then(|x| x.as_str()) { set.insert("image_path", v.to_string()); set.insert("image", v.to_string()); }
     
-    // Handle sizes array parsing safely whether string or array provided
+    if let Some(v) = body.get("vendor_id").and_then(|x| x.as_str()) {
+        if let Ok(v_oid) = ObjectId::parse_str(v) {
+            set.insert("vendor_id", v_oid);
+        } else {
+            set.insert("vendor_id", v.to_string());
+        }
+    }
+
     if let Some(v) = body.get("sizes") {
         if let Some(arr) = v.as_array() {
             let vec_str: Vec<String> = arr.iter().filter_map(|x| x.as_str().map(|s| s.to_string())).collect();
@@ -110,7 +233,6 @@ pub async fn update_product(Extension(db): Extension<Database>, Path(id): Path<S
         }
     }
 
-    // Handle multiple product images array
     if let Some(v) = body.get("images") {
         if let Some(arr) = v.as_array() {
             let vec_str: Vec<String> = arr.iter().filter_map(|x| x.as_str().map(|s| s.to_string())).collect();

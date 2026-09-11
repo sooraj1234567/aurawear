@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Account - AURAWEAR</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-<!-- Separate Luxury Stylesheet -->
 <link rel="stylesheet" href="/css/login-luxury.css">
 </head>
 <body>
@@ -25,7 +24,6 @@
       <div id="t2" class="tab" onclick="showReg()">CREATE ACCOUNT</div>
     </div>
 
-    <!-- Login Box -->
     <div id="loginBox">
       <div class="input-group">
         <input id="lemail" type="email" placeholder="Email Address">
@@ -33,11 +31,16 @@
       <div class="input-group">
         <input id="lpass" type="password" placeholder="Password">
       </div>
-      <button class="btn" onclick="doLogin()">ACCESS ARCHIVE</button>
+      <button class="btn" onclick="doLogin()">LOGIN</button>
     </div>
 
-    <!-- Register Box -->
     <div id="regBox" style="display:none">
+      <div class="input-group">
+        <select id="rrole" style="width:100%; padding:14px 16px; border:1px solid rgba(0,0,0,.15); background:transparent; font-family:Inter,sans-serif; font-size:13px; outline:none; box-sizing:border-box; color:inherit;">
+          <option value="customer" style="color:#000;">Buyer / Customer</option>
+          <option value="vendor" style="color:#000;">Seller / Vendor</option>
+        </select>
+      </div>
       <div class="input-group">
         <input id="rname" placeholder="Full Name">
       </div>
@@ -57,7 +60,126 @@
   </div>
 </div>
 
-<!-- Separate Luxury JavaScript -->
-<script src="/js/login.js"></script>
+<script>
+function showLogin() {
+  document.getElementById('loginBox').style.display = 'block';
+  document.getElementById('regBox').style.display = 'none';
+  document.getElementById('t1').classList.add('active');
+  document.getElementById('t2').classList.remove('active');
+  document.getElementById('msg').innerText = '';
+}
+
+function showReg() {
+  document.getElementById('loginBox').style.display = 'none';
+  document.getElementById('regBox').style.display = 'block';
+  document.getElementById('t2').classList.add('active');
+  document.getElementById('t1').classList.remove('active');
+  document.getElementById('msg').innerText = '';
+}
+
+async function doLogin() {
+  const email = document.getElementById('lemail').value.trim();
+  const password = document.getElementById('lpass').value.trim();
+  const msg = document.getElementById('msg');
+  msg.style.color = '#1A1611';
+  msg.innerText = 'Authenticating...';
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (data.success) {
+      localStorage.setItem('aurawear_token', data.token);
+      
+      // Clear out any stale checkout redirect flags
+      localStorage.removeItem('aurawear_redirect_after_login');
+
+      const user = data.user || {};
+      const role = (user.role || data.role || '').toLowerCase();
+      
+      localStorage.setItem('user', JSON.stringify({
+        id: user.id || user._id || '',
+        name: user.name || email,
+        email: email,
+        role: role
+      }));
+
+      if (role === 'vendor' || role === 'seller') {
+        window.location.href = '/vendor';
+      } else {
+        // Always redirect normal buyers to home page
+        window.location.href = '/';
+      }
+    } else {
+      msg.style.color = '#a85d35';
+      msg.innerText = data.error || 'Login failed or account terminated.';
+    }
+  } catch (e) {
+    msg.style.color = '#a85d35';
+    msg.innerText = 'Connection error.';
+  }
+}
+
+async function doRegister() {
+  const name = document.getElementById('rname').value.trim();
+  const email = document.getElementById('remail').value.trim();
+  const phone = document.getElementById('rphone').value.trim();
+  const password = document.getElementById('rpass').value.trim();
+  const role = document.getElementById('rrole').value.toLowerCase();
+  const msg = document.getElementById('msg');
+  
+  msg.style.color = '#1A1611';
+  msg.innerText = 'Creating account...';
+
+  try {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, phone, password, role })
+    });
+    const data = await res.json();
+    if (data.success) {
+      if (data.token) {
+        localStorage.setItem('aurawear_token', data.token);
+      }
+      
+      localStorage.removeItem('aurawear_redirect_after_login');
+
+      const user = data.user || {};
+      const userRole = (user.role || role).toLowerCase();
+
+      localStorage.setItem('user', JSON.stringify({
+        id: user.id || user._id || '',
+        name: user.name || name,
+        email: email,
+        role: userRole
+      }));
+
+      const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+      registeredUsers.push({
+        name: name,
+        email: email,
+        role: userRole
+      });
+      localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+      
+      if (userRole === 'vendor' || userRole === 'seller') {
+        window.location.href = '/vendor';
+      } else {
+        window.location.href = '/';
+      }
+    } else {
+      msg.style.color = '#a85d35';
+      msg.innerText = data.error || 'Registration failed.';
+    }
+  } catch (e) {
+    msg.style.color = '#a85d35';
+    msg.innerText = 'Connection error.';
+  }
+}
+</script>
 </body>
 </html>

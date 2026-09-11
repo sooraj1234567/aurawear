@@ -2,6 +2,30 @@ use reqwest::Client;
 use serde_json::json;
 use std::env;
 
+/// Helper to ensure images use the production public URL (Render/Live domain) 
+/// rather than localhost, so they render correctly on mobile phones and external mail clients.
+fn get_full_image_url(image_url: &str) -> String {
+    if image_url.is_empty() {
+        return "".to_string();
+    }
+    if image_url.starts_with("http") {
+        image_url.to_string()
+    } else {
+        let base_url = env::var("BASE_URL")
+            .or_else(|_| env::var("RENDER_EXTERNAL_URL"))
+            .unwrap_or_else(|_| "https://aurawear-o0eq.onrender.com".to_string());
+        format!(
+            "{}{}",
+            base_url.trim_end_matches('/'),
+            if image_url.starts_with('/') {
+                image_url.to_string()
+            } else {
+                format!("/{}", image_url)
+            }
+        )
+    }
+}
+
 pub async fn send_admin_notification(
     user_name: &str,
     user_email: &str,
@@ -16,19 +40,13 @@ pub async fn send_admin_notification(
         .unwrap_or_else(|_| "ammavishnu9605@gmail.com".to_string());
 
     let client = Client::new();
-    let url = "https://api.v3.brevo.com/v3/smtp/email"; // or your endpoint url
+    let url = "https://api.brevo.com/v3/smtp/email";
 
-    // If the user uploaded an image, create an HTML preview snippet for it
     let image_section = if !image_url.is_empty() {
-        // Ensure the URL is absolute so Gmail can fetch and display it
-        let full_img_url = if image_url.starts_with("http") {
-            image_url.to_string()
-        } else {
-            format!("http://localhost:3000{}", image_url)
-        };
+        let full_img_url = get_full_image_url(image_url);
 
         format!(
-            r#"<p><b>Attached Image:</b><br/><a href="{}" target="_blank"><img src="{}" alt="User Attachment" style="max-width:300px; border-radius:4px; margin-top:8px; border:1px solid #ccc;"/></a></p>"#,
+            r#"<p><b>Attached Image / File:</b><br/><a href="{}" target="_blank"><img src="{}" alt="User Attachment" style="max-width:300px; border-radius:4px; margin-top:8px; border:1px solid #ccc;"/></a></p>"#,
             full_img_url, full_img_url
         )
     } else {
@@ -68,7 +86,7 @@ pub async fn send_admin_notification(
         "htmlContent": html_content
     });
 
-    let res = client.post("https://api.brevo.com/v3/smtp/email")
+    let res = client.post(url)
         .header("accept", "application/json")
         .header("api-key", api_key)
         .header("content-type", "application/json")
@@ -85,13 +103,14 @@ pub async fn send_admin_notification(
     }
 }
 
-/// 2. Sends the admin reply to the user, and a copy to the admin brand email for records
+/// Sends the admin reply to the user, and a copy to the admin brand email for records (including image attachment)
 pub async fn send_reply_email(
     to_email: &str,
     name: &str,
     ticket_id: &str,
     original_message: &str,
     admin_reply: &str,
+    image_url: &str,
 ) -> Result<(), String> {
     let api_key = env::var("BREVO_API_KEY")
         .map_err(|_| "BREVO_API_KEY environment variable is not set")?;
@@ -102,6 +121,17 @@ pub async fn send_reply_email(
     let client = Client::new();
     let url = "https://api.brevo.com/v3/smtp/email";
 
+    let image_section = if !image_url.is_empty() {
+        let full_img_url = get_full_image_url(image_url);
+
+        format!(
+            r#"<p><b>Your Attachment:</b><br/><a href="{}" target="_blank"><img src="{}" alt="User Attachment" style="max-width:250px; border-radius:4px; margin-top:8px; border:1px solid #ccc;"/></a></p>"#,
+            full_img_url, full_img_url
+        )
+    } else {
+        "".to_string()
+    };
+
     // Content for the User
     let user_html = format!(
         r#"
@@ -111,12 +141,12 @@ pub async fn send_reply_email(
             <p>An administrator has replied to your contact ticket <b>#{}</b>:</p>
             <div style="background:#fff; padding:15px; border-left:3px solid #C9A86A; margin:15px 0;">
                 <p style="margin:0 0 10px 0; opacity:0.7; font-size:12px;"><b>Your Message:</b> {}</p>
-                <p style="margin:0; font-size:14px;"><b>Admin Reply:</b> {}</p>
+                {}
+                <p style="margin:10px 0 0 0; font-size:14px;"><b>Admin Reply:</b> {}</p>
             </div>
-            <p>You can view your message history anytime in your <a href="https://aurawear-o0eq.onrender.com/profile.html">AuraWear Profile</a>.</p>
         </div>
         "#,
-        name, ticket_id, original_message, admin_reply
+        name, ticket_id, original_message, image_section, admin_reply
     );
 
     let user_payload = json!({
@@ -148,11 +178,12 @@ pub async fn send_reply_email(
             <h2>[Sent Reply Record] Ticket #{}</h2>
             <p><b>Recipient:</b> {} ({})</p>
             <p><b>Original Message:</b> {}</p>
+            {}
             <hr/>
             <p><b>Admin Reply Sent:</b> {}</p>
         </div>
         "#,
-        ticket_id, name, to_email, original_message, admin_reply
+        ticket_id, name, to_email, original_message, image_section, admin_reply
     );
 
     let admin_copy_payload = json!({

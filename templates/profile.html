@@ -13,7 +13,7 @@ h1{font-family:Fraunces;font-size:48px;font-weight:300;margin:0;letter-spacing:2
 .card{background:#EAE1CF;border:1px solid rgba(0,0,0,.1);padding:18px;height:fit-content}
 .order{background:#FFFBF1;border:1px solid rgba(0,0,0,.12);padding:16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .badge{padding:6px 14px;border-radius:20px;font-size:10px;letter-spacing:1px;font-weight:700}
-.PENDING{background:#E7C86A}.CONFIRMED{background:#A8C4B0}.SHIPPED{background:#8AA899;color:#fff}.DELIVERED{background:#1A1611;color:#fff}.CANCELLED{background:#b00;color:#fff}
+.PENDING{background:#E7C86A}.CONFIRMED{background:#A8C4B0}.PROCESSING{background:#caf0f8;color:#0077b6}.SHIPPED{background:#8AA899;color:#fff}.DELIVERED{background:#1A1611;color:#fff}.CANCELLED{background:#b00;color:#fff}
 .btn{width:100%;border:1px solid #1A1611;background:transparent;padding:12px;letter-spacing:2px;cursor:pointer;margin-top:16px}
 .order-imgs{display:flex;gap:6px;margin-top:8px}
 .order-imgs img{width:54px;height:68px;object-fit:cover;border:1px solid rgba(0,0,0,.12);background:#F3F0EB}
@@ -120,6 +120,15 @@ h1{font-family:Fraunces;font-size:48px;font-weight:300;margin:0;letter-spacing:2
 
 <script>
 let allOrders=[];
+
+function getOrderIdStr(id) {
+  if (!id) return 'ORD000';
+  if (typeof id === 'string') return id;
+  if (typeof id === 'object' && id.$oid) return id.$oid;
+  if (typeof id === 'object' && id.id) return String(id.id);
+  return String(id);
+}
+
 async function load(){
  const token=localStorage.getItem('aurawear_token'); if(!token){location.href='/login.html';return;}
  const r=await fetch('/api/auth/me',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
@@ -156,8 +165,19 @@ async function load(){
      const src=it.image_path||it.image||'/uploads/hero.jpg';
      return `<img src="${src}" onerror="this.src='https://images.unsplash.com/photo-1495385794356-15371f348c19?q=80&w=200'">`;
    }).join('');
+
+   const rawId = getOrderIdStr(o._id || o.id);
+   const displayId = rawId.length >= 6 ? rawId.slice(-6).toUpperCase() : rawId.toUpperCase();
+
+   // Render tracking snippet if order is shipped
+   let trackingSnippet = '';
+   if(st === 'SHIPPED' && (o.tracking_number || o.courier)) {
+     trackingSnippet = `<div style="margin-top:6px; font-size:11px; font-family:monospace; background:#fff; padding:6px; border:1px solid rgba(0,0,0,.1)">📦 Courier: <b>${o.courier || 'Standard'}</b><br>🔢 Tracking: <b>${o.tracking_number}</b></div>`;
+   }
+
    return `<div class="order">
-     <div><b>ORDER #${(o._id||'').toString().slice(-6).toUpperCase()}</b><br><span style="opacity:.6;font-size:12px">Placed • ${dateStr} • ${o.items?.length||0} items • ${o.payment_method||'COD'}</span><div class="order-imgs">${imgs}</div>
+     <div><b>ORDER #${displayId}</b><br><span style="opacity:.6;font-size:12px">Placed • ${dateStr} • ${o.items?.length||0} items • ${o.payment_method||'COD'}</span><div class="order-imgs">${imgs}</div>
+     ${trackingSnippet}
      ${canCancel? `<div style="margin-top:8px"><button onclick="cancelOrder('${o._id}', event)" style="background:#1A1611;color:#fff;border:none;padding:8px 12px;font-size:9px;letter-spacing:2px;cursor:pointer">CANCEL ORDER</button></div>` : st==='CANCELLED'? `<div style="margin-top:8px;font-size:9px;letter-spacing:2px;color:#b00">CANCELLED</div>` : `<div style="margin-top:8px;font-size:9px;letter-spacing:1px;opacity:.4">Cannot cancel after shipping</div>`}
      </div>
      <div style="text-align:right"><span class="badge ${st}">${st}</span><div style="margin-top:8px;font-weight:600">$${o.total||o.subtotal||0}</div><div class="view-link" onclick="openOrder(${idx})">VIEW DETAILS →</div></div>
@@ -172,9 +192,25 @@ function openOrder(i){
    const src=it.image_path||it.image||'/uploads/hero.jpg';
    return `<div style="display:flex;gap:12px;margin-bottom:12px"><img src="${src}" style="width:60px;height:76px;object-fit:cover;border:1px solid rgba(0,0,0,.1)" onerror="this.src='https://images.unsplash.com/photo-1495385794356-15371f348c19?q=80&w=200'"><div><div style="font-family:Fraunces">${it.name}</div><div style="font-size:12px;opacity:.6">Qty ${it.qty||1} • $${it.price}</div></div></div>`;
  }).join('');
- document.getElementById('mTitle').innerText='ORDER #'+(o._id||'').toString().slice(-6).toUpperCase();
+
+ const rawId = getOrderIdStr(o._id || o.id);
+ const displayId = rawId.length >= 6 ? rawId.slice(-6).toUpperCase() : rawId.toUpperCase();
+
+ let trackingDetailsHtml = '';
+ if(st === 'SHIPPED' && (o.tracking_number || o.courier)) {
+   trackingDetailsHtml = `
+     <div style="background:#fff; border:1px solid rgba(0,0,0,.12); padding:12px; margin:12px 0; font-size:12px;">
+       <div style="font-weight:600; margin-bottom:4px; letter-spacing:1px;">SHIPPING & TRACKING INFO</div>
+       <div>Courier: <b>${o.courier || 'Standard'}</b></div>
+       <div>Tracking Number: <b style="font-family:monospace">${o.tracking_number}</b></div>
+     </div>
+   `;
+ }
+
+ document.getElementById('mTitle').innerText='ORDER #'+displayId;
  document.getElementById('mBody').innerHTML=`
    <div style="font-size:12px;opacity:.7;margin-bottom:12px">Status: <b>${st}</b> • ${new Date(o.created_at).toLocaleString()}<br>Payment: ${o.payment_method||'COD'} - ${o.payment_status||''}</div>
+   ${trackingDetailsHtml}
    <div>${itemsHtml}</div>
    <div style="border-top:1px solid rgba(0,0,0,.12);margin-top:12px;padding-top:12px">
      <div style="display:flex;justify-content:space-between"><span>Subtotal</span><span>$${o.subtotal||o.total||0}</span></div>
@@ -315,12 +351,8 @@ async function loadUserMessages() {
     container.innerHTML = myMessages.map(m => {
       const isReplied = (m.reply && m.reply.length > 0) || (m.status === 'replied');
       
-      let ticketId = 'N/A';
-      if (m.ticket_id) ticketId = m.ticket_id;
-      else if (m._id) {
-        ticketId = typeof m._id === 'object' && m._id.$oid ? m._id.$oid : String(m._id);
-        ticketId = ticketId.slice(-6).toUpperCase();
-      }
+      const rawTicketId = getOrderIdStr(m._id || m.ticket_id);
+      const ticketId = rawTicketId.length >= 6 ? rawTicketId.slice(-6).toUpperCase() : rawTicketId.toUpperCase();
 
       return `
         <div style="background:#fff; border:1px solid rgba(0,0,0,.1); padding:20px; display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">

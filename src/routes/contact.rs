@@ -35,6 +35,49 @@ pub struct ReplyBody {
     pub reply: String,
 }
 
+// Robust helper to safely serialize a MongoDB Document to JSON Value, handling any Bson type variations safely
+fn doc_to_json(doc: &Document) -> Value {
+    let id_str = match doc.get("_id") {
+        Some(mongodb::bson::Bson::ObjectId(oid)) => oid.to_hex(),
+        Some(mongodb::bson::Bson::String(s)) => s.clone(),
+        _ => "".to_string(),
+    };
+
+    let get_string = |key: &str| -> String {
+        match doc.get(key) {
+            Some(mongodb::bson::Bson::String(s)) => s.clone(),
+            Some(mongodb::bson::Bson::ObjectId(o)) => o.to_hex(),
+            Some(mongodb::bson::Bson::Int32(i)) => i.to_string(),
+            Some(mongodb::bson::Bson::Int64(i)) => i.to_string(),
+            Some(mongodb::bson::Bson::Boolean(b)) => b.to_string(),
+            _ => "".to_string(),
+        }
+    };
+
+    let status = get_string("status");
+    let final_status = if status.is_empty() { "pending".to_string() } else { status };
+
+    let mut image_val = get_string("image");
+    if !image_val.is_empty() && !image_val.starts_with("http") && !image_val.starts_with('/') {
+        image_val = format!("/{}", image_val);
+    }
+
+    json!({
+        "id": id_str,
+        "_id": id_str,
+        "name": get_string("name"),
+        "email": get_string("email"),
+        "user_email": get_string("user_email"),
+        "phone": get_string("phone"),
+        "message_type": get_string("message_type"),
+        "message": get_string("message"),
+        "image": image_val,
+        "status": final_status,
+        "admin_reply": get_string("admin_reply"),
+        "created_at": get_string("created_at"),
+    })
+}
+
 pub async fn create_contact(
     Extension(db): Extension<Database>,
     Json(body): Json<ContactBody>,
@@ -68,14 +111,13 @@ pub async fn create_contact(
 
     match col.insert_one(doc).await {
         Ok(r) => {
-            let id = r.inserted_id.to_string();
+            let id = r.inserted_id.as_object_id().map(|o| o.to_hex()).unwrap_or_else(|| r.inserted_id.to_string());
 
             println!(
                 "Contact message created successfully. Contact ID: {}",
                 id
             );
 
-            // Send instant email notification to the official brand inbox in the background
             let email_clone = email.clone();
             let name_clone = name.clone();
             let message_clone = message.clone();
@@ -144,7 +186,7 @@ pub async fn get_contacts(
     while let Some(result) = cursor.next().await {
         match result {
             Ok(document) => {
-                list.push(document);
+                list.push(doc_to_json(&document));
             }
 
             Err(e) => {
@@ -157,12 +199,9 @@ pub async fn get_contacts(
     }
 
     list.sort_by(|a, b| {
-        b.get_str("created_at")
-            .unwrap_or("")
-            .cmp(
-                a.get_str("created_at")
-                    .unwrap_or("")
-            )
+        let a_date = a.get("created_at").and_then(|v| v.as_str()).unwrap_or("");
+        let b_date = b.get("created_at").and_then(|v| v.as_str()).unwrap_or("");
+        b_date.cmp(a_date)
     });
 
     Json(json!({
@@ -254,6 +293,11 @@ pub async fn reply_contact(
         .unwrap_or("")
         .to_string();
 
+    let image_url = contact
+        .get_str("image")
+        .unwrap_or_default()
+        .to_string();
+
     let update_result = match col
         .update_one(
             doc! {
@@ -299,13 +343,6 @@ pub async fn reply_contact(
             "error": "Contact was not found while saving the reply"
         }));
     }
-
-    println!(
-        "Admin reply saved for contact {}. Matched: {}, Modified: {}",
-        id,
-        update_result.matched_count,
-        update_result.modified_count
-    );
 
     let updated_contact = match col
         .find_one(doc! {
@@ -363,13 +400,13 @@ pub async fn reply_contact(
         }));
     }
 
-    // Sends the email to user and archives a copy record in the brand email inbox/sent view
     if !to_email.is_empty() {
         let reply_clone = reply.clone();
         let id_string = id.clone();
         let email_clone = to_email.clone();
         let name_clone = name.clone();
         let orig_clone = orig.clone();
+        let image_clone = image_url.clone();
 
         tokio::spawn(async move {
             match send_reply_email(
@@ -378,12 +415,13 @@ pub async fn reply_contact(
                 &id_string,
                 &orig_clone,
                 &reply_clone,
+                &image_clone,
             )
             .await
             {
                 Ok(_) => {
                     println!(
-                        "Reply email successfully sent to {} and recorded in admin sent history",
+                        "Reply email successfully sent with attachment to {} and recorded in admin sent history",
                         email_clone
                     );
                 }
@@ -407,7 +445,7 @@ pub async fn reply_contact(
     Json(json!({
         "success": true,
         "id": id,
-        "contact": updated_contact
+        "contact": doc_to_json(&updated_contact)
     }))
 }
 
@@ -493,24 +531,13 @@ pub async fn track_contact(
 
                         return Json(json!({
                             "success": true,
-                            "contact": contact
+                            "contact": doc_to_json(&contact)
                         }));
                     }
 
-                    Ok(None) => {
-                        println!(
-                            "No contact found for ID: {}",
-                            id_raw
-                        );
-                    }
+                    Ok(None) => {}
 
                     Err(e) => {
-                        eprintln!(
-                            "Contact tracking database error for ID {}: {}",
-                            id_raw,
-                            e
-                        );
-
                         return Json(json!({
                             "success": false,
                             "error": e.to_string()
@@ -539,26 +566,15 @@ pub async fn track_contact(
             .await
         {
             Ok(Some(contact)) => {
-                println!(
-                    "Contact tracking successful by email: {}",
-                    email
-                );
-
                 return Json(json!({
                     "success": true,
-                    "contact": contact
+                    "contact": doc_to_json(&contact)
                 }));
             }
 
             Ok(None) => {}
 
-            Err(e) => {
-                eprintln!(
-                    "Contact email lookup failed for {}: {}",
-                    email,
-                    e
-                );
-            }
+            Err(_) => {}
         }
 
         match col
@@ -571,26 +587,15 @@ pub async fn track_contact(
             .await
         {
             Ok(Some(contact)) => {
-                println!(
-                    "Contact tracking successful by user_email: {}",
-                    email
-                );
-
                 return Json(json!({
                     "success": true,
-                    "contact": contact
+                    "contact": doc_to_json(&contact)
                 }));
             }
 
             Ok(None) => {}
 
-            Err(e) => {
-                eprintln!(
-                    "Contact user_email lookup failed for {}: {}",
-                    email,
-                    e
-                );
-            }
+            Err(_) => {}
         }
     }
 

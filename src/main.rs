@@ -6,7 +6,7 @@ mod email;
 use axum::{
     routing::{get, post, delete, put},
     Router, Extension,
-    extract::{DefaultBodyLimit, Query},
+    extract::{Query},
     response::Html,
 };
 use tower_http::services::ServeDir;
@@ -24,6 +24,9 @@ async fn main() {
     tokio::fs::create_dir_all("public/uploads").await.unwrap();
     let database = db::init_db().await;
 
+    // Seed default admin user into the database if none exists
+    db_seed_admin(&database).await;
+
     let app = Router::new()
        .route("/api/upload", post(routes::uploads::upload_image))
        .route("/api/file/{id}", get(routes::uploads::get_file))
@@ -36,35 +39,60 @@ async fn main() {
        .route("/api/auth/update", post(routes::auth::update))
        .route("/api/users", get(routes::auth::get_users))
        .route("/api/users/{id}", delete(routes::auth::delete_user))
+       .route("/api/admin/users/{id}", delete(routes::auth::delete_user))
+       .route("/api/admin/crm/users/{id}", delete(routes::auth::delete_user))
+       .route("/api/users/{id}/anonymize", post(routes::auth::anonymize_user))
+       .route("/api/admin/users/{id}/anonymize", post(routes::auth::anonymize_user))
+       
+       // Contact Routes (supporting both singular & plural endpoints to eliminate admin fetching errors)
        .route("/api/contact", post(routes::contact::create_contact).get(routes::contact::get_contacts))
+       .route("/api/contacts", get(routes::contact::get_contacts).post(routes::contact::create_contact))
        .route("/api/contact/{id}/reply", post(routes::contact::reply_contact))
+       .route("/api/contacts/{id}/reply", post(routes::contact::reply_contact))
        .route("/api/contact/{id}", delete(routes::contact::delete_contact))
+       .route("/api/contacts/{id}", delete(routes::contact::delete_contact))
        .route("/api/contact/track", get(routes::contact::track_contact))
        .route("/api/announcement", get(routes::announcement::get_announcement).put(routes::announcement::save_announcement))
+       
+       // Product Routes (including multi-vendor endpoint)
        .route("/api/products", get(routes::products::get_products).post(routes::products::create_product))
+       .route("/api/vendor/products", get(routes::products::get_vendor_products))
        .route("/api/products/{id}", get(routes::products::get_product_by_id).delete(routes::products::delete_product).put(routes::products::update_product))
+       
+       // Order Routes (including multi-vendor endpoint and PUT support for status updates)
        .route("/api/orders", get(routes::orders::get_orders).post(routes::orders::create_order))
-       .route("/api/orders/{id}/status", post(routes::orders::update_status))
+       .route("/api/vendor/orders", get(routes::orders::get_vendor_orders))
+       .route("/api/orders/{id}/status", put(routes::orders::update_status).post(routes::orders::update_status))
        .route("/api/orders/{id}/tracking", post(routes::orders::update_tracking))
        .route("/api/orders/{id}/note", post(routes::orders::update_note))
        .route("/api/orders/{id}/cancel", post(routes::orders::cancel_order))
        .route("/api/orders/{id}/payment_status", post(routes::orders::update_payment_status))
        .route("/api/orders/{id}", get(routes::orders::get_order_by_id).delete(routes::orders::delete_order))
+       
+       // Admin CRM, Sellers & Status Routes
+       .route("/api/admin/crm", get(routes::auth::get_admin_crm_customers))
+       .route("/api/admin/sellers", get(routes::auth::get_admin_sellers))
+       .route("/api/vendors/{id}/status", post(routes::auth::update_vendor_status))
+
        .route("/api/newsletter", post(routes::newsletter::subscribe))
        .route("/api/admin/analytics", get(routes::analytics::get_admin_analytics))
-       // Inside your Router::new() block in src/main.rs:
-.route("/api/reviews", post(routes::reviews::create_review))
-.route("/api/reviews/{productId}", get(routes::reviews::get_reviews))
-       // Account deletion and admin deletion logs
+       .route("/api/reviews", post(routes::reviews::create_review))
+       .route("/api/reviews/{productId}", get(routes::reviews::get_reviews))
        .route("/api/auth/delete-account", post(crate::routes::auth::delete_user_account))
        .route("/api/admin/deletion-logs", get(crate::routes::auth::get_deletion_logs))
-       // AURA AI CONCIERGE ENDPOINT
        .route("/api/aura-ai", post(routes::ai::aura_ai_handler))
+       .route("/api/finance/payouts", get(routes::orders::get_payouts))
+       .route("/api/finance/payout", post(routes::orders::process_payout))
+       .route("/api/cms/popup", get(routes::cms::get_popup).post(routes::cms::update_popup))
 
        .route("/", get(index_page))
        .route("/index.html", get(index_page))
        .route("/admin", get(admin_page))
        .route("/admin.html", get(admin_page))
+       .route("/admin/login", get(admin_login_page))
+       .route("/admin-login.html", get(admin_login_page))
+       .route("/vendor", get(vendor_page))
+       .route("/vendor.html", get(vendor_page))
        .route("/login", get(login_page))
        .route("/login.html", get(login_page))
        .route("/profile", get(profile_page))
@@ -79,12 +107,10 @@ async fn main() {
        .nest_service("/uploads", ServeDir::new("public/uploads"))
        .nest_service("/js", ServeDir::new("public/js"))
        .fallback_service(ServeDir::new("templates").append_index_html_on_directories(true))
-       .layer(DefaultBodyLimit::disable())
+       .layer(axum::extract::DefaultBodyLimit::disable())
        .layer(Extension(database));
 
     let port = std::env::var("PORT").unwrap_or_else(|_| "3000".to_string());
-
-    // Bind to all interfaces so Render can access the application.
     let addr = SocketAddr::from(([0, 0, 0, 0], port.parse::<u16>().unwrap()));
 
     println!(
@@ -93,6 +119,29 @@ async fn main() {
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
+}
+
+async fn db_seed_admin(db: &mongodb::Database) {
+    use mongodb::bson::doc;
+    let users_collection = db.collection::<mongodb::bson::Document>("users");
+    
+    if let Ok(Some(_)) = users_collection.find_one(doc! { "role": "admin" }).await {
+        return;
+    }
+
+    if let Ok(hashed_password) = bcrypt::hash("Admin@123", bcrypt::DEFAULT_COST) {
+        let admin_doc = doc! {
+            "name": "System Admin",
+            "email": "admin@aurawear.com",
+            "password": hashed_password,
+            "role": "admin",
+            "status": "active",
+            "created_at": mongodb::bson::DateTime::now()
+        };
+        
+        let _ = users_collection.insert_one(admin_doc).await;
+        println!("Default admin user created: admin@aurawear.com / Admin@123");
+    }
 }
 
 async fn index_page() -> Html<String> {
@@ -108,6 +157,22 @@ async fn admin_page() -> Html<String> {
         tokio::fs::read_to_string("templates/admin.html")
             .await
             .unwrap_or_else(|_| "<h1>admin.html missing</h1>".into()),
+    )
+}
+
+async fn admin_login_page() -> Html<String> {
+    Html(
+        tokio::fs::read_to_string("templates/admin-login.html")
+            .await
+            .unwrap_or_else(|_| "<h1>admin-login.html missing</h1>".into()),
+    )
+}
+
+async fn vendor_page() -> Html<String> {
+    Html(
+        tokio::fs::read_to_string("templates/vendor.html")
+            .await
+            .unwrap_or_else(|_| "<h1>vendor.html missing</h1>".into()),
     )
 }
 

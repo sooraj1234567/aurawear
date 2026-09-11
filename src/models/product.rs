@@ -15,5 +15,7 @@ pub struct Product {
     pub sizes: Vec<String>,
     pub description: String,
     pub image_path: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub vendor_id: Option<ObjectId>, // Links product to a specific vendor/seller
     pub created_at: chrono::DateTime<chrono::Utc>,
 }

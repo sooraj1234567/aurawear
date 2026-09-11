@@ -33,7 +33,7 @@
       <div class="input-group"><label>PHONE</label><input id="phone"></div>
     </div>
 
-    <!-- PAYMENT METHOD - ONLY ADDED SECTION -->
+    <!-- PAYMENT METHOD -->
     <div style="margin-top:32px">
       <label style="font-size:11px;letter-spacing:2px;opacity:.6">PAYMENT METHOD</label>
       <div style="margin-top:16px;border:1px solid rgba(0,0,0,.12);background:#fff">
@@ -60,7 +60,7 @@
     <div id="summary"></div>
     <div style="border-top:1px solid rgba(0,0,0,.12);margin-top:20px;padding-top:16px">
       <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px"><span>Subtotal</span><span id="subtotal">$0</span></div>
-      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:12px"><span>Shipping</span><span id="shipping">$15</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:12px"><span>Platform Fee</span><span id="platformFee">$0</span></div>
       <div style="display:flex;justify-content:space-between;font-weight:600;font-size:16px"><span>TOTAL</span><span id="total">$0</span></div>
     </div>
   </div>
@@ -73,33 +73,75 @@ let cart = getCart();
 function render(){
   const box = document.getElementById('summary');
   const subEl = document.getElementById('subtotal');
+  const platformFeeEl = document.getElementById('platformFee');
   const totalEl = document.getElementById('total');
   const totalBtnEl = document.getElementById('totalBtn');
-  const shippingEl = document.getElementById('shipping');
 
   if(!cart.length){
     box.innerHTML='<p style="opacity:.5">Cart empty</p>';
     if(subEl) subEl.innerText='$0';
+    if(platformFeeEl) platformFeeEl.innerText='$0';
     if(totalEl) totalEl.innerText='$0';
     if(totalBtnEl) totalBtnEl.innerText='$0';
-    if(shippingEl) shippingEl.innerText='$0';
     return;
   }
-  let sub=0;
+
+  let baseSub = 0;
+  let feeSub = 0;
+
   box.innerHTML = cart.map(c=>{
     const img = c.image_path||c.image||'/uploads/hero.jpg';
-    sub+= (c.price||0)*(c.qty||1);
-    return `<div class="order-item"><img src="${img}"><div style="flex:1"><div style="font-family:Fraunces;font-size:14px">${c.name}</div><div style="font-size:11px;opacity:.6">QTY ${c.qty||1} ${c.size? '• SIZE '+c.size:''}</div></div><div>$${c.price}</div></div>`
+    
+    const platformFee = Number(c.platform_fee || 10);
+    let basePrice;
+    if (c.seller_price !== undefined && c.seller_price !== null) {
+      basePrice = Number(c.seller_price);
+    } else {
+      basePrice = Number(c.price || 135) - platformFee;
+      if (basePrice <= 0) basePrice = Number(c.price || 125);
+    }
+    
+    const customerPrice = basePrice + platformFee; 
+    const qty = Number(c.qty || 1);
+
+    baseSub += basePrice * qty;
+    feeSub += platformFee * qty;
+
+    c.seller_price = basePrice;
+    c.platform_fee = platformFee;
+    c.customer_price = customerPrice;
+    c.price = customerPrice;
+
+    return `
+      <div class="order-item">
+        <img src="${img}">
+        <div style="flex:1">
+          <div style="font-family:Fraunces;font-size:14px">${c.name}</div>
+          <div style="font-size:11px;opacity:.6">
+            QTY ${qty} ${c.size? '• SIZE '+c.size:''}
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:600;font-size:15px;">$${customerPrice * qty}</div>
+          <div style="font-size:10px;opacity:0.6;">($${basePrice}+$${platformFee})</div>
+        </div>
+      </div>
+    `;
   }).join('');
-  if(subEl) subEl.innerText='$'+sub;
-  if(totalEl) totalEl.innerText='$'+(sub+15);
-  if(totalBtnEl) totalBtnEl.innerText='$'+(sub+15);
-  if(shippingEl) shippingEl.innerText='$15';
-  window._subtotal = sub;
+
+  const orderTotal = baseSub + feeSub;
+
+  if(subEl) subEl.innerText = '$' + baseSub;
+  if(platformFeeEl) platformFeeEl.innerText = '$' + feeSub;
+  if(totalEl) totalEl.innerText = '$' + orderTotal;
+  if(totalBtnEl) totalBtnEl.innerText = '$' + orderTotal;
+
+  window._baseSubtotal = baseSub;
+  window._totalPlatformFee = feeSub;
+  window._orderTotal = orderTotal;
 }
 render();
 
-// --- ONLY LOGIN AUTO-FILL ADDED - NO OTHER CHANGE ---
 async function loadUser(){
   const token = localStorage.getItem('aurawear_token');
   if(!token) return;
@@ -118,7 +160,6 @@ async function loadUser(){
   }catch(e){}
 }
 loadUser();
-// --- END LOGIN FIX ---
 
 document.getElementById('placeBtn').addEventListener('click', async ()=>{
   const btn = document.getElementById('placeBtn');
@@ -140,11 +181,10 @@ document.getElementById('placeBtn').addEventListener('click', async ()=>{
   const phone = document.getElementById('phone').value.trim();
   const payment_method = document.querySelector('input[name="pay"]:checked').value;
 
-  if(!email ||!firstName ||!address){msg.innerText='Fill email, name and address';msg.style.color='red';return}
+  if(!email || !firstName || !address){msg.innerText='Fill email, name and address';msg.style.color='red';return}
 
-  // Mock online payment confirmation
   if(payment_method!== 'COD'){
-    const ok = confirm(`Mock Payment: Pay $${(window._subtotal||0)+15} via ${payment_method}?\n\n[OK] = Success\n[Cancel] = Fail`);
+    const ok = confirm(`Mock Payment: Pay $${window._orderTotal||0} via ${payment_method}?\n\n[OK] = Success\n[Cancel] = Fail`);
     if(!ok){ msg.innerText='Payment cancelled'; msg.style.color='red'; return; }
   }
 
@@ -158,12 +198,13 @@ document.getElementById('placeBtn').addEventListener('click', async ()=>{
       email: email.toLowerCase().trim(),
       first_name: firstName, last_name: lastName, address, city, zip, phone,
       items: cart,
-      subtotal: window._subtotal||0,
-      total: (window._subtotal||0)+15,
+      subtotal: window._baseSubtotal || 0,
+      platform_fee: window._totalPlatformFee || 0,
+      total: window._orderTotal || 0,
       payment_method: payment_method,
-      payment_status: payment_method==='COD'? 'COD_PENDING' : 'PAID',
-      transaction_id: payment_method!=='COD'? 'TXN_'+Date.now() : null,
-      status: payment_method==='COD'? 'PENDING' : 'CONFIRMED'
+      payment_status: payment_method === 'COD' ? 'COD_PENDING' : 'PAID',
+      transaction_id: payment_method !== 'COD' ? 'TXN_'+Date.now() : null,
+      status: payment_method === 'COD' ? 'PENDING' : 'CONFIRMED'
     };
     const res = await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(order)});
     const data = await res.json();

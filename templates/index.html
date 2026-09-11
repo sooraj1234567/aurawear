@@ -1,9 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-  <link rel="stylesheet" href="storefront.css">
-  <link rel="preload" href="/uploads/hero.jpg" as="image">
+<script>
+  (function() {
+    try {
+      const sessionUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const role = (sessionUser.role || '').toLowerCase();
+      if (role === 'vendor' || role === 'seller') {
+        window.location.replace('/vendor.html');
+      }
+    } catch (e) {}
+  })();
+</script>
+<link rel="preload" href="/uploads/hero.jpg" as="image">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AURAWEAR - Clothing With An Aura</title>
@@ -123,7 +132,6 @@
 .search-top input{flex:1;background:transparent;border:none;font-family:Fraunces;font-size:28px;outline:none}
 .search-top button{background:none;border:1px solid rgba(0,0,0,.2);width:42px;height:42px;cursor:pointer}
 
-/* Fixed search results grid to align items cleanly like product cards */
 #searchResults{
   display:grid;
   grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
@@ -193,23 +201,31 @@
   opacity:.8;
 }
 
+/* POPUP PROMOTIONAL BANNER STYLES */
+.popup-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(3px);
+    display: flex; align-items: center; justify-content: center; z-index: 10000;
+}
+.popup-content {
+    position: relative; max-width: 420px; width: 90%; background: #fff; 
+    padding: 8px; border-radius: 8px; box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+}
+.popup-close {
+    position: absolute; top: -14px; right: -14px; background: #111; color: #fff; 
+    border: 2px solid #fff; border-radius: 50%; width: 32px; height: 32px; 
+    font-size: 14px; font-weight: bold; cursor: pointer; display: flex; 
+    align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
 @media(max-width:600px){
   #searchResults{
     grid-template-columns:repeat(2,minmax(0,1fr));
     gap:12px;
   }
-
-  .search-item .s-info{
-    padding:10px;
-  }
-
-  .search-item .s-name{
-    font-size:15px;
-  }
-
-  .search-item .s-price{
-    font-size:10px;
-  }
+  .search-item .s-info{padding:10px;}
+  .search-item .s-name{font-size:15px;}
+  .search-item .s-price{font-size:10px;}
 }
 @media(max-width:900px){
 .hero{grid-template-columns:1fr;min-height:auto;max-height:none}
@@ -222,6 +238,16 @@ html{scroll-behavior:smooth}
 </style>
 </head>
 <body>
+
+<!-- PROMOTIONAL POPUP MODAL -->
+<div id="promo-popup-modal" class="popup-overlay" style="display:none;">
+    <div class="popup-content">
+        <button class="popup-close" onclick="closePromoPopup()">✕</button>
+        <a id="popup-link" href="#" target="_blank">
+            <img id="popup-img" src="" alt="Special Promotion" style="width:100%; display:block; border-radius:6px;">
+        </a>
+    </div>
+</div>
 
 <div class="announce">
   <div class="announce-track">
@@ -381,17 +407,160 @@ loadTicker();
 }
 </style>
 
-<section id="lookbook" style="padding:5vw 4vw;background:#FBF8F3">
-  <h2 style="font-family:Fraunces;font-weight:300;font-size:42px;letter-spacing:2px;margin:0">LOOKBOOK</h2>
-  <p style="opacity:.6;font-size:13px;margin:8px 0 24px">Worn in the wild — 1970s aura, today</p>
-  <div style="display:grid;grid-template-columns:repeat(12,1fr);grid-auto-rows:24vw;gap:12px">
-    <div style="grid-column:span 8;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,.1)"><img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200" style="width:100%;height:100%;object-fit:cover"></div>
-    <div style="grid-column:span 4;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,.1)"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800" style="width:100%;height:100%;object-fit:cover"></div>
-    <div style="grid-column:span 4;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,.1)"><img src="https://images.unsplash.com/photo-1495385794356-15371f348c19?w=800" style="width:100%;height:100%;object-fit:cover"></div>
-    <div style="grid-column:span 4;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,.1)"><img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800" style="width:100%;height:100%;object-fit:cover"></div>
-    <div style="grid-column:span 4;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,.1)"><img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800" style="width:100%;height:100%;object-fit:cover"></div>
+<section id="lookbook" style="padding:6vw 4vw;background:#FBF8F3">
+  <div style="max-width:1100px; margin:0 auto;">
+    <div style="text-align:center; margin-bottom:32px;">
+      <h2 style="font-family:Fraunces;font-weight:300;font-size:clamp(36px, 4.5vw, 48px);letter-spacing:2px;margin:0">LOOKBOOK</h2>
+      <p style="opacity:.6;font-size:13px;margin:8px 0 0;letter-spacing:1px">Worn in the wild — 1970s aura, today</p>
+    </div>
+    
+    <!-- Dynamic Collage-Style Video Reels Container (Renders all published video reels in a stylish grid mosaic) -->
+    <div id="lookbookReelsContainer" style="display:grid; grid-template-columns:repeat(12, 1fr); gap:16px; margin-bottom:30px; display:none;"></div>
+
+    <!-- Static Grid (Fallback if no reels are published) -->
+    <div id="lookbookStaticGrid" style="display:grid;grid-template-columns:repeat(12,1fr);grid-auto-rows:24vw;gap:12px">
+      <div style="grid-column:span 8;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,.1)"><img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200" style="width:100%;height:100%;object-fit:cover"></div>
+      <div style="grid-column:span 4;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,.1)"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800" style="width:100%;height:100%;object-fit:cover"></div>
+      <div style="grid-column:span 4;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,.1)"><img src="https://images.unsplash.com/photo-1495385794356-15371f348c19?w=800" style="width:100%;height:100%;object-fit:cover"></div>
+      <div style="grid-column:span 4;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,.1)"><img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800" style="width:100%;height:100%;object-fit:cover"></div>
+      <div style="grid-column:span 4;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,.1)"><img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800" style="width:100%;height:100%;object-fit:cover"></div>
+    </div>
   </div>
 </section>
+
+<script>
+async function loadStorefrontLookbookReels() {
+  try {
+    let reelsList = [];
+    
+    // Check admin's 'marketplace_reels' first
+    const marketReels = localStorage.getItem('marketplace_reels');
+    if (marketReels) {
+      try {
+        const parsed = JSON.parse(marketReels);
+        if (Array.isArray(parsed)) {
+          reelsList = parsed.map(r => ({
+            video_url: r.videoUrl || r.video_url || r.image_url || r.url,
+            title: r.caption || r.title,
+            hotspots: r.hotspots || []
+          }));
+        }
+      } catch(e) {}
+    }
+
+    if (!reelsList.length) {
+      const localReels = localStorage.getItem('saved_lookbook_reels');
+      if (localReels) {
+        try { 
+          const parsedLocal = JSON.parse(localReels);
+          if (Array.isArray(parsedLocal)) {
+            reelsList = parsedLocal.map(r => ({
+              video_url: r.videoUrl || r.video_url || r.image_url || r.url,
+              title: r.caption || r.title,
+              hotspots: r.hotspots || []
+            }));
+          }
+        } catch(e) {}
+      }
+    }
+
+    if (!reelsList.length) {
+      const localSingle = localStorage.getItem('saved_lookbook_reel');
+      if (localSingle) {
+        try { 
+          const single = JSON.parse(localSingle); 
+          if(single && (single.video_url || single.videoUrl || single.image_url)) {
+            reelsList.push({
+              video_url: single.video_url || single.videoUrl || single.image_url, 
+              title: single.title || single.caption,
+              hotspots: single.hotspots || []
+            }); 
+          }
+        } catch(e) {}
+      }
+    }
+
+    if (!reelsList.length) {
+      try {
+        const res = await fetch('/api/cms/lookbook-reel');
+        const data = await res.json();
+        if(data.success && data.reel && (data.reel.video_url || data.reel.videoUrl)) {
+          reelsList.push({
+            video_url: data.reel.video_url || data.reel.videoUrl,
+            title: data.reel.title || data.reel.caption,
+            hotspots: data.reel.hotspots || []
+          });
+        }
+      } catch(e) {}
+    }
+
+    const container = document.getElementById('lookbookReelsContainer');
+    const staticGrid = document.getElementById('lookbookStaticGrid');
+
+    if(reelsList && reelsList.length > 0) {
+      if(staticGrid) staticGrid.style.display = 'none';
+      if(container) container.style.display = 'grid';
+      
+      if(container) {
+        container.innerHTML = reelsList.map((reel, index) => {
+          let spanStyle = "grid-column: span 6;";
+          if (reelsList.length === 1) {
+            spanStyle = "grid-column: span 12;";
+          } else if (index % 3 === 0) {
+            spanStyle = "grid-column: span 7;";
+          } else if (index % 3 === 1) {
+            spanStyle = "grid-column: span 5;";
+          } else {
+            spanStyle = "grid-column: span 12;";
+          }
+
+          const hotspotsHtml = (reel.hotspots || []).map(h => `
+            <div style="position:absolute; top:${h.top}%; left:${h.left}%; pointer-events:auto; transform:translate(-50%, -50%);">
+              <div style="width:18px; height:18px; background:#C9A86A; border:2px solid #fff; border-radius:50%; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,0.5); position:relative; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'" onclick="alert('Featured Piece: ${h.name} — $${h.price}')" title="${h.name} ($${h.price})">
+                <div style="position:absolute; bottom:26px; left:50%; transform:translateX(-50%); background:rgba(26,22,17,0.92); color:#FBF8F3; padding:6px 12px; font-size:11px; font-family:'Courier Prime',monospace; white-space:nowrap; border-radius:4px; box-shadow:0 4px 12px rgba(0,0,0,0.3); opacity:0; transition:opacity 0.2s; pointer-events:none;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">${h.name} — $${h.price}</div>
+              </div>
+            </div>
+          `).join('');
+
+          const isVideo = reel.video_url && (reel.video_url.includes('.mp4') || reel.video_url.includes('.webm') || reel.video_url.includes('blob:') || reel.video_url.includes('video'));
+          
+          let mediaHtml = isVideo 
+            ? `<video autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover; display:block;" src="${reel.video_url}"></video>`
+            : `<img src="${reel.video_url || 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200'}" style="width:100%; height:100%; object-fit:cover; display:block;">`;
+
+          return `
+            <div style="${spanStyle} position:relative; height:420px; overflow:hidden; border-radius:12px; background:#1A1611; box-shadow:0 15px 35px rgba(0,0,0,0.15);">
+              ${mediaHtml}
+              <div style="position:absolute; inset:0; pointer-events:none;">
+                ${hotspotsHtml}
+              </div>
+              <div style="position:absolute; bottom:20px; left:20px; background:rgba(26,22,17,0.88); color:#FBF8F3; padding:10px 18px; font-family:Fraunces,serif; font-size:16px; letter-spacing:1.5px; border-radius:6px; box-shadow:0 4px 20px rgba(0,0,0,0.3);">${reel.title || 'Archival Motion'}</div>
+            </div>
+          `;
+        }).join('');
+      }
+    } else {
+      if(container) container.style.display = 'none';
+      if(staticGrid) staticGrid.style.display = 'grid';
+    }
+  } catch(e) {
+    console.error('Failed to load lookbook reels on storefront', e);
+  }
+}
+loadStorefrontLookbookReels();
+</script>
+
+<style>
+@media(max-width:900px){
+  #lookbookReelsContainer {
+    grid-template-columns: 1fr !important;
+  }
+  #lookbookReelsContainer > div {
+    grid-column: span 12 !important;
+    height: 360px !important;
+  }
+}
+</style>
 
 <section id="about" style="padding:6vw 4vw;background:#1A1611;color:#FBF8F3;display:grid;grid-template-columns:1fr 1fr;gap:4vw">
   <div>
@@ -681,30 +850,47 @@ function renderCart(){
   const cart=getCart();
   const wish=getWish();
   const count=cart.reduce((s,i)=>s+(i.qty||1),0);
-  const sub=cart.reduce((s,i)=>s+(i.price||0)*(i.qty||1),0);
+  const sub=cart.reduce((s,i)=> {
+    const baseP = Number(i.seller_price !== undefined ? i.seller_price : (i.base_price || (i.price - (i.platform_fee || 10))));
+    const pFee = Number(getCategoryFee(i.category) || i.platform_fee || 10);
+    return s + (baseP + pFee)*(i.qty||1);
+  },0);
   const cartEl=document.getElementById('cartCount');
   if(cartEl) cartEl.innerText=count;
   document.getElementById('cartCountDrawer').innerText=count;
-  document.getElementById('cartSubtotal').innerText='$'+sub;
+  document.getElementById('cartSubtotal').innerText='$'+sub.toFixed(2);
   const wishEl=document.getElementById('wishCount');
   if(wishEl) wishEl.innerText=wish.length;
-  document.getElementById('cartBody').innerHTML=cart.length?cart.map((it,idx)=>`
-    <div class="cart-item"><img src="${it.image_path}"><div><div class="cart-name">${it.name.replace(/\*\*/g,'')}</div>
-    <div class="cart-meta">$${it.price} × ${it.qty}</div>
-    <div class="cart-qty"><button onclick="updateQty(${idx},-1)">—</button><span>${it.qty}</span><button onclick="updateQty(${idx},1)">+</button><button onclick="removeItem(${idx})" class="remove">REMOVE</button></div></div></div>`).join(''):'<p style="padding:20px;opacity:.5">Your archive is empty</p>';
+  document.getElementById('cartBody').innerHTML=cart.length?cart.map((it,idx)=>{
+    const basePrice = Number(it.seller_price !== undefined ? it.seller_price : (it.base_price || (it.price - (it.platform_fee || 10))));
+    const platformFee = Number(getCategoryFee(it.category) || it.platform_fee || 10);
+    const finalItemPrice = basePrice + platformFee;
+    return `
+      <div class="cart-item">
+        <img src="${it.image_path}">
+        <div>
+          <div class="cart-name">${it.name.replace(/\*\*/g,'')}</div>
+          <div class="cart-meta">$${finalItemPrice.toFixed(2)} × ${it.qty}</div>
+          <div style="font-size:10px; opacity:0.6; margin-top:2px;">($${basePrice}+$${platformFee})</div>
+          <div class="cart-qty"><button onclick="updateQty(${idx},-1)">—</button><span>${it.qty}</span><button onclick="updateQty(${idx},1)">+</button><button onclick="removeItem(${idx})" class="remove">REMOVE</button></div>
+        </div>
+      </div>`;
+  }).join(''):'<p style="padding:20px;opacity:.5">Your archive is empty</p>';
 }
 function updateQty(i,d){let c=getCart();c[i].qty=(c[i].qty||1)+d;if(c[i].qty<=0)c.splice(i,1);saveCart(c)}
 function removeItem(i){let c=getCart();c.splice(i,1);saveCart(c)}
+
 function handleCheckout(event){
-  const token=localStorage.getItem('aurawear_token');
+  const token = localStorage.getItem('aurawear_token') || localStorage.getItem('token');
   if(!token){
     event.preventDefault();
     localStorage.setItem('aurawear_redirect_after_login','/checkout.html');
-    window.location.href='/login';
+    window.location.href='/login.html';
     return false;
   }
   return true;
 }
+
 function openCart(){
   document.getElementById('cartDrawer').classList.add('open');
   document.getElementById('cartOverlay').classList.add('open');
@@ -722,6 +908,57 @@ function closeCart(){
 }
 function openSearch(){document.getElementById('searchOverlay').classList.add('open');document.getElementById('searchInput').focus(); renderSearch('');}
 function closeSearch(){document.getElementById('searchOverlay').classList.remove('open')}
+
+// Helper function to dynamically retrieve category fee lookup from localStorage with fallback to default map and live storage listener
+function getCategoryFee(categoryName) {
+  let categoryFeesMap = {
+    'Jackets': 10,
+    'Outerwear': 40,
+    'T-Shirts': 15,
+    'Shoes': 25,
+    'Dresses': 20,
+    'Archive': 10,
+    'Suits': 30,
+    'Shirts': 12,
+    'Tops': 10,
+    'Bottoms': 15,
+    'Accessories': 8
+  };
+  try {
+    const saved = localStorage.getItem('marketplace_category_fees');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        parsed.forEach(c => {
+          if (c && c.name && !isNaN(c.fee)) {
+            categoryFeesMap[c.name] = Number(c.fee);
+          }
+        });
+      }
+    }
+  } catch(e) {}
+
+  if (!categoryName) return 10;
+  const match = Object.keys(categoryFeesMap).find(k => k.toLowerCase() === categoryName.toLowerCase());
+  return match !== undefined ? categoryFeesMap[match] : 10;
+}
+
+// Live listener to auto-refresh product pricing if admin updates category fees in another window/tab
+window.addEventListener('storage', (e) => {
+  if (e.key === 'marketplace_category_fees') {
+    if (typeof allProducts !== 'undefined' && allProducts.length > 0) {
+      renderProducts(allProducts);
+      renderCart();
+    }
+  }
+});
+
+// Ensure every product computes base price + platform fee dynamically correctly on the index page
+function getProductCustomerPrice(p) {
+  const base = Number(p.seller_price != null ? p.seller_price : (p.price || 0));
+  const fee = Number(getCategoryFee(p.category) || p.platform_fee || 10);
+  return base + fee;
+}
 
 function renderProducts(list){
   document.getElementById('product-grid').innerHTML=list.map(p=>{
@@ -745,9 +982,13 @@ function renderProducts(list){
       stockHtml = `<div style="color:#2d6a4f; font-size:10px; letter-spacing:1px; margin-top:8px">● IN STOCK: ${stock} available</div>`;
     }
 
+    const sellerPrice = Number(p.seller_price !== undefined ? p.seller_price : (p.price || 0));
+    const platformFee = Number(getCategoryFee(p.category) || p.platform_fee || 10);
+    const finalPrice = sellerPrice + platformFee;
+    const roundedPrice = Math.round(finalPrice);
+
     return `<div class="product-card reveal" style="position: relative;">
-      <!-- Wishlist Heart Button Overlay -->
-      <button onclick="event.stopPropagation(); toggleWishlistFromHome('${pid}', \`${clean.replace(/`/g,'')}\`, '${p.image_path||p.image}', ${p.price})" style="position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.85); border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; transition: all 0.2s;" title="Toggle Wishlist">
+      <button onclick="event.stopPropagation(); toggleWishlistFromHome('${pid}', \`${clean.replace(/`/g,'')}\`, '${p.image_path||p.image}', ${roundedPrice})" style="position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.85); border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; transition: all 0.2s;" title="Toggle Wishlist">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="${isWishlisted ? '#C9A86A' : 'none'}" stroke="#1A1611" stroke-width="2">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
         </svg>
@@ -760,9 +1001,12 @@ function renderProducts(list){
       <div class="p-info">
         <div class="p-name">${clean}</div>
         <div class="p-desc">${desc || 'Vintage archive piece'}</div>
-        <div class="p-price">$${p.price}</div>
+        <div class="p-price">
+          $${roundedPrice}
+          <div style="font-size:10px; opacity:0.6; font-weight:normal; margin-top:2px;">($${sellerPrice}+$${platformFee})</div>
+        </div>
         ${stockHtml}
-        <button ${btnDisabled} onclick="event.stopPropagation(); if(${stock}>0) addToCart({id:'${pid}',_id:'${pid}',name:\`${clean.replace(/`/g,'')}\`,price:${p.price},image_path:'${p.image_path||p.image}', stock:${stock}})" class="add-btn">
+        <button ${btnDisabled} onclick="event.stopPropagation(); if(${stock}>0) addToCart({id:'${pid}',_id:'${pid}',name:\`${clean.replace(/`/g,'')}\`,price:${roundedPrice},seller_price:${sellerPrice},platform_fee:${platformFee},customer_price:${roundedPrice},image_path:'${p.image_path||p.image}', stock:${stock}, category:\`${p.category || 'Archive'}\`})" class="add-btn">
           ${stock<=0? 'SOLD OUT' : 'ADD TO CART'}
         </button>
       </div>
@@ -819,6 +1063,10 @@ function renderSearch(query){
     const clean=(p.name||'').replace(/\*\*/g,'').trim();
     const pid=p._id||p.id||'';
     const gl=(p.gender||p.category||'').toUpperCase()||'ARCHIVE';
+    const sellerPrice = Number(p.seller_price !== undefined ? p.seller_price : (p.price || 0));
+    const platformFee = Number(getCategoryFee(p.category) || p.platform_fee || 10);
+    const finalPrice = sellerPrice + platformFee;
+    const roundedPrice = Math.round(finalPrice);
     return `<div class="search-item" onclick="location.href='/product?id=${pid}'">
       <div class="s-img">
         <img src="${p.image_path||p.image}" loading="lazy">
@@ -826,7 +1074,10 @@ function renderSearch(query){
       </div>
       <div class="s-info">
         <div class="s-name">${clean}</div>
-        <div class="s-price">$${p.price} • ${(p.gender||'').toUpperCase()} • ${p.fabric||''}</div>
+        <div class="s-price">
+          $${roundedPrice} • ${(p.gender||'').toUpperCase()} • ${p.fabric||''}
+          <div style="font-size:10px; opacity:0.6; font-weight:normal; margin-top:2px;">($${sellerPrice}+$${platformFee})</div>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -837,12 +1088,12 @@ document.getElementById('searchInput').addEventListener('keydown', e=>{if(e.key=
 
 function goAccount(e){
   e.preventDefault();
-  const token=localStorage.getItem('aurawear_token');
+  const token=localStorage.getItem('aurawear_token') || localStorage.getItem('token');
   if(token) location.href='/profile.html';
   else location.href='/login.html';
 }
 async function checkAuth(){
-  const token=localStorage.getItem('aurawear_token');
+  const token=localStorage.getItem('aurawear_token') || localStorage.getItem('token');
   if(!token) return;
   try{
     const r=await fetch('/api/auth/me',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
@@ -884,7 +1135,45 @@ document.getElementById('col-outerwear').addEventListener('click', ()=> filterCo
 document.getElementById('col-bottoms').addEventListener('click', ()=> filterCollection('bottoms'));
 
 fetch('/api/products').then(r=>r.json()).then(d=>{
-  allProducts=d.products||d||[];
+  const serverProducts = d.products || d || [];
+  const localProducts = JSON.parse(localStorage.getItem('marketplace_products') || '[]');
+  const savedStatuses = JSON.parse(localStorage.getItem('saved_product_statuses') || '{}');
+  
+  const productMap = new Map();
+  serverProducts.forEach(p => {
+    const pid = getOid(p._id) || p.id;
+    const status = savedStatuses[pid] || savedStatuses[p._id] || p.status || 'live';
+    productMap.set(pid, { ...p, status });
+  });
+  localProducts.forEach(p => {
+    const pid = getOid(p._id) || p.id;
+    const status = savedStatuses[pid] || savedStatuses[p._id] || p.status || 'live';
+    productMap.set(pid, { ...p, status });
+  });
+  
+  allProducts = Array.from(productMap.values()).filter(p => {
+    const pid = getOid(p._id) || p.id;
+    const finalStatus = savedStatuses[pid] || savedStatuses[p._id] || p.status || 'live';
+    return String(finalStatus).toLowerCase() !== 'hidden';
+  });
+
+  renderProducts(allProducts);
+  renderCart();
+  updateCollectionCounts();
+}).catch(() => {
+  const localProducts = JSON.parse(localStorage.getItem('marketplace_products') || '[]');
+  const savedStatuses = JSON.parse(localStorage.getItem('saved_product_statuses') || '{}');
+  
+  allProducts = localProducts.map(p => {
+    const pid = getOid(p._id) || p.id;
+    const status = savedStatuses[pid] || savedStatuses[p._id] || p.status || 'live';
+    return { ...p, status };
+  }).filter(p => {
+    const pid = getOid(p._id) || p.id;
+    const finalStatus = savedStatuses[pid] || savedStatuses[p._id] || p.status || 'live';
+    return String(finalStatus).toLowerCase() !== 'hidden';
+  });
+
   renderProducts(allProducts);
   renderCart();
   updateCollectionCounts();
@@ -1006,52 +1295,189 @@ async function sendAuraAIQuery(){
 }
 </script> 
 
-<!-- PRIVATE ARCHIVE NEWSLETTER FOOTER -->
-<footer style="background:#1A1611; color:#FAF7F2; padding:60px 4vw; text-align:center; border-top:1px solid rgba(255,255,255,0.1); margin-top:60px;">
-  <h3 style="font-family:'Fraunces',serif; font-size:26px; font-weight:300; margin-bottom:12px; letter-spacing:1px;">JOIN THE PRIVATE ARCHIVE</h3>
-  <p style="font-size:13px; opacity:0.7; margin-bottom:24px; max-width:500px; margin-left:auto; margin-right:auto; line-height:1.6;">Subscribe for early access to small-batch 1970s drops and receive an exclusive 10% discount code.</p>
-  
-  <div style="display:inline-flex; max-width:440px; width:100%; gap:8px; flex-wrap:wrap; justify-content:center;">
-    <input type="email" id="subEmail" placeholder="Enter your email address..." style="flex:1; min-width:240px; padding:14px 16px; border:1px solid #C9A86A; background:transparent; color:#fff; font-size:12px; outline:none; border-radius:4px;">
-    <button onclick="subscribeNewsletter()" style="background:#C9A86A; color:#1A1611; border:none; padding:0 24px; font-size:11px; font-weight:600; letter-spacing:2px; cursor:pointer; border-radius:4px;">SUBSCRIBE</button>
-  </div>
-  <div id="subMsg" style="font-size:12px; margin-top:14px; color:#C9A86A; min-height:18px;"></div>
-  
-  <div style="margin-top:40px; font-size:11px; opacity:0.4; letter-spacing:2px;">
-    © 2026 AURAWEAR ARCHIVE • ALL RIGHTS RESERVED
-  </div>
-</footer>
+<!-- PROMOTIONAL POPUP FRONTEND LOGIC SCRIPT -->
+<script>
+async function checkAndShowPromoPopup() {
+    if (sessionStorage.getItem('promo_seen')) return;
+    
+    try {
+        const res = await fetch('/api/cms/popup');
+        const data = await res.json();
+        
+        if (data.success && data.popup && data.popup.active && data.popup.image_url) {
+            document.getElementById('popup-img').src = data.popup.image_url;
+            const linkElem = document.getElementById('popup-link');
+            if (data.popup.target_url) {
+                linkElem.href = data.popup.target_url;
+                linkElem.style.pointerEvents = 'auto';
+            } else {
+                linkElem.removeAttribute('href');
+                linkElem.style.pointerEvents = 'none';
+            }
+            document.getElementById('promo-popup-modal').style.display = 'flex';
+        }
+    } catch (e) {
+        console.error('Failed to load promotional popup', e);
+    }
+}
+
+function closePromoPopup() {
+    document.getElementById('promo-popup-modal').style.display = 'none';
+    sessionStorage.setItem('promo_seen', 'true');
+}
+
+document.addEventListener("DOMContentLoaded", checkAndShowPromoPopup);
+</script>
+
+<!-- ADMIN STOREFRONT PREVIEW HANDLER -->
+<script>
+(function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('preview') === 'true') {
+        window.addEventListener('DOMContentLoaded', () => {
+            const accountLink = document.getElementById('accountLink');
+            if (accountLink) {
+                accountLink.innerText = 'ADMIN DASHBOARD';
+                accountLink.onclick = function(e) {
+                    e.preventDefault();
+                    window.location.href = '/admin.html';
+                };
+            }
+
+            const previewBanner = document.createElement('div');
+            previewBanner.innerHTML = `
+                <div style="position: fixed; bottom: 0; left: 0; width: 100%; background: #1A1611; color: #C9A86A; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; font-family: 'Courier Prime', monospace; font-size: 11px; letter-spacing: 2px; z-index: 99999; box-shadow: 0 -4px 15px rgba(0,0,0,0.2);">
+                    <span>⚡ STOREFRONT PREVIEW MODE (ADMIN ACTIVE)</span>
+                    <a href="/admin.html" style="background: #C9A86A; color: #1A1611; padding: 6px 14px; text-decoration: none; font-weight: bold; border-radius: 2px;">EXIT TO COMMAND CENTER</a>
+                </div>
+            `;
+            document.body.appendChild(previewBanner);
+        });
+    }
+})();
+</script>
 
 <script>
-async function subscribeNewsletter() {
-  const email = document.getElementById('subEmail').value.trim();
-  const msgEl = document.getElementById('subMsg');
-  if(!email || !email.includes('@')) {
-    msgEl.style.color = '#ff8888';
-    msgEl.innerText = 'Please enter a valid email address.';
-    return;
-  }
-  msgEl.style.color = '#C9A86A';
-  msgEl.innerText = 'Subscribing to archive...';
+async function loadStorefrontLookbookReels() {
   try {
-    const res = await fetch('/api/newsletter', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    });
-    const data = await res.json();
-    if(data.success) {
-      msgEl.innerText = data.message;
-      document.getElementById('subEmail').value = '';
+    let reelsList = [];
+    
+    // Check admin's 'marketplace_reels' first
+    const marketReels = localStorage.getItem('marketplace_reels');
+    if (marketReels) {
+      try {
+        const parsed = JSON.parse(marketReels);
+        if (Array.isArray(parsed)) {
+          reelsList = parsed.map(r => ({
+            video_url: r.videoUrl || r.video_url || r.image_url || r.url,
+            title: r.caption || r.title,
+            hotspots: r.hotspots || []
+          }));
+        }
+      } catch(e) {}
+    }
+
+    if (!reelsList.length) {
+      const localReels = localStorage.getItem('saved_lookbook_reels');
+      if (localReels) {
+        try { 
+          const parsedLocal = JSON.parse(localReels);
+          if (Array.isArray(parsedLocal)) {
+            reelsList = parsedLocal.map(r => ({
+              video_url: r.videoUrl || r.video_url || r.image_url || r.url,
+              title: r.caption || r.title,
+              hotspots: r.hotspots || []
+            }));
+          }
+        } catch(e) {}
+      }
+    }
+
+    if (!reelsList.length) {
+      const localSingle = localStorage.getItem('saved_lookbook_reel');
+      if (localSingle) {
+        try { 
+          const single = JSON.parse(localSingle); 
+          if(single && (single.video_url || single.videoUrl || single.image_url)) {
+            reelsList.push({
+              video_url: single.video_url || single.videoUrl || single.image_url, 
+              title: single.title || single.caption,
+              hotspots: single.hotspots || []
+            }); 
+          }
+        } catch(e) {}
+      }
+    }
+
+    if (!reelsList.length) {
+      try {
+        const res = await fetch('/api/cms/lookbook-reel');
+        const data = await res.json();
+        if(data.success && data.reel && (data.reel.video_url || data.reel.videoUrl)) {
+          reelsList.push({
+            video_url: data.reel.video_url || data.reel.videoUrl,
+            title: data.reel.title || data.reel.caption,
+            hotspots: data.reel.hotspots || []
+          });
+        }
+      } catch(e) {}
+    }
+
+    const container = document.getElementById('lookbookReelsContainer');
+    const staticGrid = document.getElementById('lookbookStaticGrid');
+
+    if(reelsList && reelsList.length > 0) {
+      if(staticGrid) staticGrid.style.display = 'none';
+      if(container) container.style.display = 'grid';
+      
+      if(container) {
+        container.innerHTML = reelsList.map((reel, index) => {
+          let spanStyle = "grid-column: span 6;";
+          if (reelsList.length === 1) {
+            spanStyle = "grid-column: span 12;";
+          } else if (index % 3 === 0) {
+            spanStyle = "grid-column: span 7;";
+          } else if (index % 3 === 1) {
+            spanStyle = "grid-column: span 5;";
+          } else {
+            spanStyle = "grid-column: span 12;";
+          }
+
+          const hotspotsHtml = (reel.hotspots || []).map(h => `
+            <div style="position:absolute; top:${h.top}%; left:${h.left}%; pointer-events:auto; transform:translate(-50%, -50%);">
+              <div style="width:18px; height:18px; background:#C9A86A; border:2px solid #fff; border-radius:50%; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,0.5); position:relative; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'" onclick="alert('Featured Piece: ${h.name} — $${h.price}')" title="${h.name} ($${h.price})">
+                <div style="position:absolute; bottom:26px; left:50%; transform:translateX(-50%); background:rgba(26,22,17,0.92); color:#FBF8F3; padding:6px 12px; font-size:11px; font-family:'Courier Prime',monospace; white-space:nowrap; border-radius:4px; box-shadow:0 4px 12px rgba(0,0,0,0.3); opacity:0; transition:opacity 0.2s; pointer-events:none;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">${h.name} — $${h.price}</div>
+              </div>
+            </div>
+          `).join('');
+
+          const isVideo = reel.video_url && (reel.video_url.includes('.mp4') || reel.video_url.includes('.webm') || reel.video_url.includes('blob:') || reel.video_url.includes('video'));
+          
+          let mediaHtml = isVideo 
+            ? `<video autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover; display:block;" src="${reel.video_url}"></video>`
+            : `<img src="${reel.video_url || 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200'}" style="width:100%; height:100%; object-fit:cover; display:block;">`;
+
+          return `
+            <div style="${spanStyle} position:relative; height:420px; overflow:hidden; border-radius:12px; background:#1A1611; box-shadow:0 15px 35px rgba(0,0,0,0.15);">
+              ${mediaHtml}
+              <div style="position:absolute; inset:0; pointer-events:none;">
+                ${hotspotsHtml}
+              </div>
+              <div style="position:absolute; bottom:20px; left:20px; background:rgba(26,22,17,0.88); color:#FBF8F3; padding:10px 18px; font-family:Fraunces,serif; font-size:16px; letter-spacing:1.5px; border-radius:6px; box-shadow:0 4px 20px rgba(0,0,0,0.3);">${reel.title || 'Archival Motion'}</div>
+            </div>
+          `;
+        }).join('');
+      }
     } else {
-      msgEl.style.color = '#ff8888';
-      msgEl.innerText = data.error || 'Subscription failed.';
+      if(container) container.style.display = 'none';
+      if(staticGrid) staticGrid.style.display = 'grid';
     }
   } catch(e) {
-    msgEl.style.color = '#ff8888';
-    msgEl.innerText = 'Server connection error.';
+    console.error('Failed to load lookbook reels on storefront', e);
   }
 }
+loadStorefrontLookbookReels();
 </script>
+
 </body>
 </html>

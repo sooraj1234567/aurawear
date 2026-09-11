@@ -60,13 +60,30 @@ async function doLogin() {
       localStorage.setItem('aurawear_token', d.token || email);
       localStorage.setItem('aurawear_email', email);
 
+      const user = d.user || {};
+      const role = (user.role || d.role || '').toLowerCase();
+
+      // Store complete user session object for route guards and UI state
+      localStorage.setItem('user', JSON.stringify({
+        id: user.id || user._id || '',
+        name: user.name || email,
+        email: email,
+        role: role
+      }));
+
       if (!localStorage.getItem('aurawear_wishlist_' + email)) {
         localStorage.setItem('aurawear_wishlist_' + email, '[]');
       }
       if (!localStorage.getItem('aurawear_cart_' + email)) {
         localStorage.setItem('aurawear_cart_' + email, '[]');
       }
-      getRedirectAndGo();
+
+      // Redirect sellers/vendors directly to the vendor dashboard
+      if (role === 'vendor' || role === 'seller') {
+        location.href = '/vendor.html';
+      } else {
+        getRedirectAndGo();
+      }
     } else {
       msgEl.style.color = '#a33';
       msgEl.innerText = d.error || 'Invalid email or password.';
@@ -82,12 +99,14 @@ async function doRegister() {
   const remailInput = document.getElementById('remail');
   const rphoneInput = document.getElementById('rphone');
   const rpassInput = document.getElementById('rpass');
+  const rroleInput = document.getElementById('rrole');
   const msgEl = document.getElementById('msg');
 
   const name = rnameInput.value.trim();
   const email = remailInput.value.toLowerCase().trim();
   const phone = rphoneInput.value.trim();
   const password = rpassInput.value;
+  const role = rroleInput ? rroleInput.value.toLowerCase() : 'customer';
 
   if (!name || !email || !password) {
     msgEl.innerText = 'Please fill out all required fields.';
@@ -100,12 +119,11 @@ async function doRegister() {
     const r = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name, first_name: name, last_name: "", phone })
+      body: JSON.stringify({ email, password, name, first_name: name, last_name: "", phone, role })
     });
     const d = await r.json();
 
     if (d.success) {
-      // Clear any leftover redirect intent so new users always land on the home archive
       localStorage.removeItem('aurawear_redirect_after_login');
       localStorage.removeItem('aurawear_wishlist');
       localStorage.removeItem('aurawear_cart');
@@ -114,8 +132,22 @@ async function doRegister() {
       localStorage.setItem('aurawear_wishlist_' + email, '[]');
       localStorage.setItem('aurawear_cart_' + email, '[]');
       
-      // Explicitly redirect new registrations to the Home Page (or change to '/profile.html' if you prefer)
-      location.href = '/';
+      const user = d.user || {};
+      const userRole = (user.role || role).toLowerCase();
+
+      // Store complete user session object for route guards and UI state
+      localStorage.setItem('user', JSON.stringify({
+        id: user.id || user._id || '',
+        name: user.name || name,
+        email: email,
+        role: userRole
+      }));
+
+      if (userRole === 'vendor' || userRole === 'seller') {
+        location.href = '/vendor.html';
+      } else {
+        location.href = '/';
+      }
     } else {
       msgEl.style.color = '#a33';
       msgEl.innerText = d.error || 'Registration failed.';
