@@ -1194,12 +1194,21 @@ window.addEventListener('scroll',()=>{document.getElementById('navbar').classLis
 
 async function loadHero(){
   try{
-    const r=await fetch('/api/hero?t='+Date.now());
-    const d=await r.json();
+    // Check localStorage first for admin-uploaded hero settings
+    const cmsSettings = JSON.parse(localStorage.getItem('marketplace_cms_settings') || '{}');
+    if (cmsSettings.heroUrl) {
+      const finalUrl = cmsSettings.heroUrl;
+      const validUrl = finalUrl.startsWith('http') || finalUrl.startsWith('/') || finalUrl.startsWith('blob:') ? finalUrl : '/' + finalUrl;
+      document.getElementById('heroImage').src = validUrl;
+      return;
+    }
+
+    const r = await fetch('/api/hero?t=' + Date.now());
+    const d = await r.json();
     const imgUrl = d.image || d.image_path || d.path || d.url;
     if(imgUrl){
       const finalUrl = imgUrl.startsWith('http') || imgUrl.startsWith('/') ? imgUrl : '/' + imgUrl;
-      document.getElementById('heroImage').src = finalUrl + (finalUrl.includes('?')?'&':'?') + 'v=' + Date.now();
+      document.getElementById('heroImage').src = finalUrl + (finalUrl.includes('?') ? '&' : '?') + 'v=' + Date.now();
     }
   }catch(e){}
 }

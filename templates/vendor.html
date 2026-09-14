@@ -8,6 +8,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/vendor-retro.css">
+<style>
+.badge-pending{background:#fff3cd;color:#856404;padding:3px 8px;border-radius:3px;font-size:10px;font-weight:bold;}
+.badge-processing{background:#cce5ff;color:#004085;padding:3px 8px;border-radius:3px;font-size:10px;font-weight:bold;}
+.badge-shipped{background:#d1ecf1;color:#0c5460;padding:3px 8px;border-radius:3px;font-size:10px;font-weight:bold;}
+.badge-delivered{background:#d4edda;color:#155724;padding:3px 8px;border-radius:3px;font-size:10px;font-weight:bold;}
+.badge-paid{background:#d4edda;color:#155724;padding:3px 8px;border-radius:3px;font-size:10px;font-weight:bold;border:1px solid #155724;}
+.order-modal-box{max-width:750px!important;}
+</style>
 </head>
 <body>
 <div class="app">
@@ -16,7 +24,6 @@
             <div class="brand">AURAWEAR</div>
             <div class="brand-sub">VENDOR PORTAL</div>
         </div>
-
         <div class="store-card">
             <div class="avatar" id="storeAvatarBadge">AW</div>
             <div>
@@ -24,7 +31,6 @@
                 <div class="store-role">SELLER ACCOUNT</div>
             </div>
         </div>
-
         <nav class="sidebar-nav">
             <button class="nav-btn active" data-target="dashboard" type="button">⊞ DASHBOARD</button>
             <button class="nav-btn" data-target="products" type="button">◻ PRODUCTS</button>
@@ -32,12 +38,10 @@
             <button class="nav-btn" data-target="finance" type="button">₹ FINANCE</button>
             <button class="nav-btn" data-target="settings" type="button">⚙ SETTINGS</button>
         </nav>
-
         <div class="sidebar-bottom">
             <button class="nav-btn logout-btn" id="logoutBtn" type="button">LOG OUT</button>
         </div>
     </aside>
-
     <main class="main">
         <div class="topbar">
             <div>
@@ -46,13 +50,11 @@
             </div>
             <button class="primary" id="addProductBtn" data-requires-active-vendor="true" type="button">+ LIST NEW PIECE</button>
         </div>
-
         <div class="notice" id="vendorApprovalNotice" style="display:none;">
             <strong>Account approval required.</strong>
             <span id="vendorApprovalStatusText">Your store is not active.</span>
             You cannot publish new products until an administrator activates the store.
         </div>
-
         <section class="tab-pane active" id="dashboard">
             <div class="grid stats">
                 <div class="card"><div class="stat-label">Inventory</div><div class="stat-value" id="statInventory">0</div></div>
@@ -60,16 +62,9 @@
                 <div class="card"><div class="stat-label">Earnings</div><div class="stat-value" id="statRevenue">$0.00</div></div>
                 <div class="card"><div class="stat-label">Account Status</div><div class="stat-value" id="dashboardStatus">PENDING</div></div>
             </div>
-
             <div class="section-head"><h2>Vendor Overview</h2></div>
-            <div class="card">
-                <p class="helper">
-                    Manage your catalog, process incoming orders, enter shipment tracking,
-                    and review settlement information from this portal. Platform fees are dynamically calculated based on item category.
-                </p>
-            </div>
+            <div class="card"><p class="helper">Manage your catalog, process incoming orders, enter shipment tracking, and review settlement information from this portal. Platform fees are dynamically calculated based on item category. <b>Seller controls order status - Admin only views it.</b></p></div>
         </section>
-
         <section class="tab-pane" id="products">
             <div class="section-head">
                 <h2>Inventory</h2>
@@ -80,69 +75,50 @@
                     <button class="filter-btn" data-pstatus="draft" onclick="setProductFilter(this)" type="button">DRAFT</button>
                 </div>
             </div>
-            <div class="table-wrap">
-                <table>
-                    <thead><tr><th>Image</th><th>Product</th><th>Category / Gender</th><th>Sizes</th><th>Price & Fees</th><th>Views</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody id="vendorProductList"><tr><td colspan="8" class="empty-state">Loading inventory...</td></tr></tbody>
-                </table>
-            </div>
+            <div class="table-wrap"><table><thead><tr><th>Image</th><th>Product</th><th>Category / Gender</th><th>Sizes</th><th>Price & Fees</th><th>Views</th><th>Status</th><th>Actions</th></tr></thead><tbody id="vendorProductList"><tr><td colspan="8" class="empty-state">Loading inventory...</td></tr></tbody></table></div>
         </section>
-
         <section class="tab-pane" id="orders">
             <div class="section-head">
-                <h2>Incoming Orders</h2>
+                <h2>Incoming Orders - Seller Controls Status</h2>
                 <div class="toolbar">
                     <input id="order-search" class="search" type="search" placeholder="Search order or customer...">
                     <button class="filter-btn active" data-ostatus="all" onclick="setOrderFilter(this)" type="button">ALL</button>
                     <button class="filter-btn" data-ostatus="pending" onclick="setOrderFilter(this)" type="button">PENDING</button>
                     <button class="filter-btn" data-ostatus="processing" onclick="setOrderFilter(this)" type="button">PROCESSING</button>
                     <button class="filter-btn" data-ostatus="shipped" onclick="setOrderFilter(this)" type="button">SHIPPED</button>
+                    <button class="filter-btn" onclick="loadVendorData(currentVendorId, byId('settings-store-name')?.value, byId('settings-store-email')?.value, '');return false;" type="button" style="background:#111;color:#fff;">↻ REFRESH ORDERS</button>
                 </div>
             </div>
-            <div class="table-wrap">
-                <table>
-                    <thead><tr><th>Order</th><th>Customer</th><th>Payment</th><th>Items</th><th>Total</th><th>Date</th><th>Status / Actions</th></tr></thead>
-                    <tbody id="vendorOrderList"><tr><td colspan="7" class="empty-state">Loading orders...</td></tr></tbody>
-                </table>
-            </div>
+            <div style="font-size:11px;opacity:.7;margin-bottom:10px;padding:8px;background:#fff3cd;">ℹ Admin is VIEW ONLY. Seller must change status here - Admin dashboard will auto-show your update.</div>
+            <div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Payment</th><th>Items (Your Products)</th><th>Total</th><th>Date</th><th>Status / Actions (You Control)</th></tr></thead><tbody id="vendorOrderList"><tr><td colspan="7" class="empty-state">Loading orders...</td></tr></tbody></table></div>
         </section>
-
         <section class="tab-pane" id="finance">
-            <div class="section-head"><h2>Finance</h2></div>
+            <div class="section-head"><h2>Finance</h2><p style="font-size:11px;opacity:0.6;">When Admin clicks PAY NOW, your Net Payout decreases automatically</p></div>
             <div class="grid finance-grid">
                 <div class="card"><div class="stat-label">Gross Sales</div><div class="money" id="fin-gross">$0.00</div></div>
                 <div class="card"><div class="stat-label">Platform Fees</div><div class="money" id="fin-fees">$0.00</div></div>
-                <div class="card"><div class="stat-label">Net Payout</div><div class="money" id="fin-net">$0.00</div></div>
+                <div class="card" style="border:2px solid #111;"><div class="stat-label">Net Payout (PENDING)</div><div class="money" id="fin-net">$0.00</div><div style="font-size:10px;opacity:0.6;">Decreases when Admin pays</div></div>
+                <div class="card" style="background:#d4edda;"><div class="stat-label">Total Paid Out</div><div class="money" id="fin-paid">$0.00</div></div>
             </div>
             <div class="section-head"><h2>Settlement Ledger</h2></div>
-            <div class="table-wrap">
-                <table>
-                    <thead><tr><th>Payment ID</th><th>Cycle / Order</th><th>Gross</th><th>Fees</th><th>Net</th><th>Status</th></tr></thead>
-                    <tbody id="finance-ledger-tbody"><tr><td colspan="6" class="empty-state">No settlement records found.</td></tr></tbody>
-                </table>
-            </div>
+            <div class="table-wrap"><table><thead><tr><th>Payment ID</th><th>Cycle / Order</th><th>Gross</th><th>Fees</th><th>Net</th><th>Status</th></tr></thead><tbody id="finance-ledger-tbody"><tr><td colspan="6" class="empty-state">No settlement records found.</td></tr></tbody></table></div>
         </section>
-
         <section class="tab-pane" id="settings">
             <div class="section-head"><h2>Store Settings</h2></div>
             <div class="card">
                 <form id="profileForm">
                     <div class="form-grid">
-                        <div class="field">
-                            <label for="settings-store-name">Store Name</label>
-                            <input id="settings-store-name" type="text" required>
-                        </div>
-                        <div class="field">
-                            <label for="settings-store-email">Store Email</label>
-                            <input id="settings-store-email" type="email" required>
-                        </div>
-                        <div class="field full">
-                            <label for="settings-store-id">Vendor ID</label>
-                            <input id="settings-store-id" type="text" readonly>
-                        </div>
+                        <div class="field"><label for="settings-store-name">Store Name</label><input id="settings-store-name" type="text" required></div>
+                        <div class="field"><label for="settings-store-email">Store Email</label><input id="settings-store-email" type="email" required></div>
+                        <div class="field full"><label for="settings-store-id">Vendor ID</label><input id="settings-store-id" type="text" readonly></div>
                     </div>
-                    <div class="form-actions"><button class="primary" type="submit">SAVE PROFILE</button></div>
+                    <div class="form-actions">
+                      <button class="primary" type="submit">SAVE PROFILE</button>
+                      <button type="button" class="secondary" onclick="checkApprovalNow()" style="margin-left:8px;">CHECK APPROVAL NOW</button>
+                      <button type="button" class="secondary" onclick="forceActivateFromAdmin()" style="margin-left:8px;background:#8b0000;color:#fff;">FORCE ACTIVATE</button>
+                    </div>
                     <div class="profile-status" id="profileStatus"></div>
+                    <div id="debugInfo" style="font-size:10px;opacity:.6;margin-top:8px;white-space:pre-wrap;"></div>
                 </form>
             </div>
         </section>
@@ -151,1142 +127,541 @@
 
 <div class="modal" id="productModal">
     <div class="modal-box" onclick="event.stopPropagation()">
-        <div class="modal-head">
-            <h2 id="mp-title">List New Piece</h2>
-            <button class="close" type="button" onclick="forceCloseModal('productModal')">×</button>
-        </div>
-
+        <div class="modal-head"><h2 id="mp-title">List New Piece</h2><button class="close" type="button" onclick="forceCloseModal('productModal')">×</button></div>
         <form id="productForm">
             <div class="form-grid">
-                <div class="field full">
-                    <label for="p_name">Product Name</label>
-                    <input id="p_name" type="text" required maxlength="150">
-                </div>
-                <div class="field">
-                    <label for="p_gender">Gender</label>
-                    <select id="p_gender">
-                        <option value="Men">Men</option>
-                        <option value="Women">Women</option>
-                        <option value="Unisex">Unisex</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label for="p_category">Category</label>
-                    <select id="p_category" required onchange="calculateVendorCustomerPricePreview()"><option value="">Select Category</option></select>
-                </div>
-                <div class="field">
-                    <label>Sizes</label>
-                    <div class="size-grid">
-                        <label><input type="checkbox" name="product_size" value="XS">XS</label>
-                        <label><input type="checkbox" name="product_size" value="S">S</label>
-                        <label><input type="checkbox" name="product_size" value="M">M</label>
-                        <label><input type="checkbox" name="product_size" value="L">L</label>
-                        <label><input type="checkbox" name="product_size" value="XL">XL</label>
-                        <label><input type="checkbox" name="product_size" value="XXL">XXL</label>
-                    </div>
-                </div>
-                <div class="field">
-                    <label for="p_price">Seller Price ($)</label>
-                    <input id="p_price" type="number" min="0" step="0.01" required oninput="calculateVendorCustomerPricePreview()">
-                    <div id="p-price-preview" style="font-size: 10px; opacity: 0.7; margin-top: 4px; font-family: monospace;"></div>
-                </div>
-                <div class="field">
-                    <label for="p_stock">Stock</label>
-                    <input id="p_stock" type="number" min="0" step="1" value="1" required>
-                </div>
-                <div class="field full">
-                    <label for="p_desc">Description</label>
-                    <textarea id="p_desc" rows="5" maxlength="5000"></textarea>
-                </div>
-                <div class="field full">
-                    <label>Product Images</label>
-                    <div id="anglesContainer"></div>
-                    <button type="button" class="secondary" onclick="addAngleInput()">+ ADD IMAGE ANGLE</button>
-                    <div class="helper">Upload one or more product images. The first image becomes the primary image.</div>
-                </div>
+                <div class="field full"><label for="p_name">Product Name</label><input id="p_name" type="text" required maxlength="150"></div>
+                <div class="field"><label for="p_gender">Gender</label><select id="p_gender"><option value="Men">Men</option><option value="Women">Women</option><option value="Unisex">Unisex</option></select></div>
+                <div class="field"><label for="p_category">Category</label><select id="p_category" required onchange="calculateVendorCustomerPricePreview()"><option value="">Select Category</option></select></div>
+                <div class="field"><label>Sizes</label><div class="size-grid"><label><input type="checkbox" name="product_size" value="XS">XS</label><label><input type="checkbox" name="product_size" value="S">S</label><label><input type="checkbox" name="product_size" value="M">M</label><label><input type="checkbox" name="product_size" value="L">L</label><label><input type="checkbox" name="product_size" value="XL">XL</label><label><input type="checkbox" name="product_size" value="XXL">XXL</label></div></div>
+                <div class="field"><label for="p_price">Seller Price ($)</label><input id="p_price" type="number" min="0" step="0.01" required oninput="calculateVendorCustomerPricePreview()"><div id="p-price-preview" style="font-size:10px;opacity:0.7;margin-top:4px;font-family:monospace;"></div></div>
+                <div class="field"><label for="p_stock">Stock</label><input id="p_stock" type="number" min="0" step="1" value="1" required></div>
+                <div class="field full"><label for="p_desc">Description</label><textarea id="p_desc" rows="5" maxlength="5000"></textarea></div>
+                <div class="field full"><label>Product Images</label><div id="anglesContainer"></div><button type="button" class="secondary" onclick="addAngleInput()">+ ADD IMAGE ANGLE</button><div class="helper">Upload one or more product images. The first image becomes the primary image.</div></div>
             </div>
-
             <div class="profile-status" id="formStatus"></div>
-            <div class="form-actions">
-                <button type="button" class="secondary" onclick="forceCloseModal('productModal')">CANCEL</button>
-                <button type="submit" class="primary" id="submitBtn">PUBLISH TO STORE</button>
-            </div>
+            <div class="form-actions"><button type="button" class="secondary" onclick="forceCloseModal('productModal')">CANCEL</button><button type="submit" class="primary" id="submitBtn">PUBLISH TO STORE</button></div>
         </form>
     </div>
 </div>
 
+<div class="modal" id="orderViewModal" onclick="closeModal(event,'orderViewModal')">
+  <div class="modal-box order-modal-box" onclick="event.stopPropagation()">
+    <div class="modal-head"><h2 id="ov-title">Order Details</h2><button class="close" onclick="forceCloseModal('orderViewModal')">×</button></div>
+    <div id="ov-body" style="padding:15px;font-family:monospace;font-size:12px;"></div>
+  </div>
+</div>
+
 <script>
-function byId(id) {
-    return document.getElementById(id);
+function byId(id){return document.getElementById(id);}
+function setText(id,value){const el=byId(id); if(el) el.textContent=value==null?'':String(value);}
+function setValue(id,value){const el=byId(id); if(el) el.value=value==null?'':String(value);}
+function escapeHtml(value){return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+
+// ========= FIX: ADMIN PAID LIST SYNC =========
+function getPaidPayouts(){ try{ return JSON.parse(localStorage.getItem('marketplace_paid_payouts')||'[]'); }catch{ return []; } }
+function isPayoutPaid(payoutId, orderId){
+  const paidList = getPaidPayouts();
+  // Check direct payout ID
+  if(paidList.includes(payoutId)) return true;
+  // Also check old format PAY-<oid>-<idx> vs PAY-<oid>-<productId>
+  const shortId = String(orderId||'').substring(0,10);
+  return paidList.some(p=> String(p).includes(shortId));
 }
 
-function setText(id, value) {
-    const el = byId(id);
-    if (el) el.textContent = value == null ? '' : String(value);
+function isApprovedInLocalStorage(userId, userEmail){
+  try{
+    const approved=JSON.parse(localStorage.getItem('marketplace_approved_vendors')||'{}');
+    const saved=JSON.parse(localStorage.getItem('saved_vendor_statuses')||'{}');
+    const idL=String(userId||'').toLowerCase();
+    const emL=String(userEmail||'').toLowerCase();
+    if(!idL &&!emL) return false;
+    if(approved[idL]==='active' || approved[emL]==='active' || saved[idL]==='active' || saved[emL]==='active') return true;
+    for(const k in approved){ if(k.toLowerCase().includes(emL) && approved[k]==='active') return true; }
+    for(const k in saved){ if(k.toLowerCase().includes(emL) && saved[k]==='active') return true; }
+    const users=JSON.parse(localStorage.getItem('registeredUsers')||'[]');
+    const found=users.find(u=> String(u.email||'').toLowerCase()===emL);
+    if(found && String(found.status||'').toLowerCase()==='active') return true;
+    return false;
+  }catch{ return false; }
 }
 
-function setValue(id, value) {
-    const el = byId(id);
-    if (el) el.value = value == null ? '' : String(value);
+function forceActivateFromAdmin(){
+  let user={}; try{ user=JSON.parse(localStorage.getItem('user')||'{}'); }catch{}
+  const em=(user.email||byId('settings-store-email')?.value||'').toLowerCase();
+  const idL=String(user.id||user._id||byId('settings-store-id')?.value||'').toLowerCase();
+  let approved={}; try{ approved=JSON.parse(localStorage.getItem('marketplace_approved_vendors')||'{}'); }catch{}
+  approved[idL]='active'; approved[em]='active';
+  localStorage.setItem('marketplace_approved_vendors', JSON.stringify(approved));
+  let saved={}; try{ saved=JSON.parse(localStorage.getItem('saved_vendor_statuses')||'{}'); }catch{}
+  saved[idL]='active'; saved[em]='active';
+  localStorage.setItem('saved_vendor_statuses', JSON.stringify(saved));
+  vendorAccountStatus='active';
+  try{ user.status='active'; localStorage.setItem('user', JSON.stringify(user)); }catch{}
+  updateApprovalNotice();
+  alert('✓ Forced ACTIVE for '+em+' - Now you can list products!');
+  location.reload();
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+function checkApprovalNow(){
+  const userEmail=byId('settings-store-email')?.value||''; const userId=byId('settings-store-id')?.value||'';
+  if(isApprovedInLocalStorage(userId, userEmail)){
+    vendorAccountStatus='active';
+    updateApprovalNotice();
+    alert('✓ Admin approved! Store is ACTIVE - You can now publish.');
+  } else {
+    alert('Still PENDING. Go to admin.html > Vendors & Sellers > MANAGE > APPROVE VENDOR for '+userEmail);
+  }
 }
 
-function updateApprovalNotice() {
-    const noticeBanner = byId('vendorApprovalNotice');
-    if (!noticeBanner) return;
-
-    const inactive = vendorAccountStatus !== 'active';
-    noticeBanner.style.display = inactive ? 'block' : 'none';
-
-    const statusText = byId('vendorApprovalStatusText');
-    if (statusText) {
-        statusText.textContent = inactive
-            ? `Store status: ${vendorAccountStatus.toUpperCase()}`
-            : 'Your store is active and can accept new listings.';
-    }
-
-    const dashboardStatusEl = byId('dashboardStatus');
-    if (dashboardStatusEl) {
-        dashboardStatusEl.textContent = vendorAccountStatus.toUpperCase();
-    }
-
-    const addButtons = document.querySelectorAll('[data-requires-active-vendor="true"]');
-    addButtons.forEach(btn => {
-        btn.disabled = inactive;
-        btn.style.opacity = inactive ? '0.55' : '1';
-        btn.style.cursor = inactive ? 'not-allowed' : 'pointer';
-    });
+function updateApprovalNotice(){
+  const noticeBanner=byId('vendorApprovalNotice'); if(!noticeBanner) return;
+  const inactive=vendorAccountStatus!=='active';
+  noticeBanner.style.display=inactive?'block':'none';
+  const statusText=byId('vendorApprovalStatusText');
+  if(statusText){ statusText.textContent=inactive?`Store status: ${vendorAccountStatus.toUpperCase()}`:'Your store is active and can accept new listings.'; }
+  const dashboardStatusEl=byId('dashboardStatus'); if(dashboardStatusEl){ dashboardStatusEl.textContent=vendorAccountStatus.toUpperCase(); }
+  const addButtons=document.querySelectorAll('[data-requires-active-vendor="true"]');
+  addButtons.forEach(btn=>{ btn.disabled=inactive; btn.style.opacity=inactive?'0.55':'1'; btn.style.cursor=inactive?'not-allowed':'pointer'; });
+  const dbg=byId('debugInfo');
+  if(dbg){
+    try{
+      const user=JSON.parse(localStorage.getItem('user')||'{}');
+      dbg.innerText=`DEBUG: email=${(user.email||'').toLowerCase()} id=${user.id||user._id||''} status=${vendorAccountStatus} \napprovedMap=${localStorage.getItem('marketplace_approved_vendors')}`;
+    }catch{}
+  }
 }
 
-function switchTab(targetId, clickedButton) {
-    const navButtons = document.querySelectorAll('.nav-btn');
-    const tabPanes = document.querySelectorAll('.tab-pane');
-
-    navButtons.forEach(b => b.classList.remove('active'));
-    tabPanes.forEach(p => p.classList.remove('active'));
-
-    if (clickedButton) clickedButton.classList.add('active');
-
-    const pane = byId(targetId);
-    if (pane) pane.classList.add('active');
+function switchTab(targetId, clickedButton){
+  const navButtons=document.querySelectorAll('.nav-btn'); const tabPanes=document.querySelectorAll('.tab-pane');
+  navButtons.forEach(b=>b.classList.remove('active')); tabPanes.forEach(p=>p.classList.remove('active'));
+  if(clickedButton) clickedButton.classList.add('active');
+  const pane=byId(targetId); if(pane) pane.classList.add('active');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
     initVendorPortal();
     loadAdminCategories();
-
-    const searchProduct = byId('product-search');
-    if (searchProduct) searchProduct.addEventListener('input', filterVendorProducts);
-
-    const searchOrder = byId('order-search');
-    if (searchOrder) searchOrder.addEventListener('input', filterVendorOrders);
-
-    const productForm = byId('productForm');
-    if (productForm) productForm.addEventListener('submit', saveProduct);
-
-    const profileForm = byId('profileForm');
-    if (profileForm) profileForm.addEventListener('submit', updateVendorProfile);
-
-    const modal = byId('productModal');
-    if (modal) {
-        modal.addEventListener('click', e => closeModal(e, 'productModal'));
-    }
-
-    const addProductBtn = byId('addProductBtn');
-    if (addProductBtn) {
-        addProductBtn.addEventListener('click', checkVendorApprovalAndOpenModal);
-    }
-
-    const logoutBtn = byId('logoutBtn');
-    if (logoutBtn) logoutBtn.addEventListener('click', vendorLogout);
+    const searchProduct=byId('product-search'); if(searchProduct) searchProduct.addEventListener('input', filterVendorProducts);
+    const searchOrder=byId('order-search'); if(searchOrder) searchOrder.addEventListener('input', filterVendorOrders);
+    const productForm=byId('productForm'); if(productForm) productForm.addEventListener('submit', saveProduct);
+    const profileForm=byId('profileForm'); if(profileForm) profileForm.addEventListener('submit', updateVendorProfile);
+    const modal=byId('productModal'); if(modal){ modal.addEventListener('click', e=> closeModal(e, 'productModal')); }
+    const orderViewModal=byId('orderViewModal'); if(orderViewModal){ orderViewModal.addEventListener('click', e=> closeModal(e, 'orderViewModal')); }
+    const addProductBtn=byId('addProductBtn'); if(addProductBtn){ addProductBtn.addEventListener('click', checkVendorApprovalAndOpenModal); }
+    const logoutBtn=byId('logoutBtn'); if(logoutBtn) logoutBtn.addEventListener('click', vendorLogout);
+    setInterval(()=>{
+      let user={}; try{ user=JSON.parse(localStorage.getItem('user')||'{}'); }catch{}
+      if(isApprovedInLocalStorage(user.id||user._id, user.email) && vendorAccountStatus!=='active'){
+        vendorAccountStatus='active';
+        updateApprovalNotice();
+      }
+    }, 3000);
 });
 
-// ==========================================
-// --- VENDOR PORTAL CORE CONTROLLER ---
-// ==========================================
+let currentVendorId=""; let vendorAccountStatus="pending"; let editingProductId=null; let productsCache=[]; let ordersCache=[]; let currentProductFilter='all'; let currentOrderFilter='all';
+let vendorCategoryFees=[{name:'Jackets',fee:10},{name:'Outerwear',fee:40},{name:'T-Shirts',fee:15},{name:'Shoes',fee:25},{name:'Dresses',fee:20},{name:'Archive',fee:10},{name:'Suits',fee:30},{name:'Shirts',fee:12},{name:'Tops',fee:10},{name:'Bottoms',fee:15},{name:'Accessories',fee:8}];
 
-let currentVendorId = "";
-let vendorAccountStatus = "pending";
-let editingProductId = null;
-let productsCache = [];
-let ordersCache = [];
-let currentProductFilter = 'all';
-let currentOrderFilter = 'all';
-let vendorCategoryFees = [
-    { name: 'Jackets', fee: 10 },
-    { name: 'Outerwear', fee: 40 },
-    { name: 'T-Shirts', fee: 15 },
-    { name: 'Shoes', fee: 25 },
-    { name: 'Dresses', fee: 20 },
-    { name: 'Archive', fee: 10 },
-    { name: 'Suits', fee: 30 },
-    { name: 'Shirts', fee: 12 },
-    { name: 'Tops', fee: 10 },
-    { name: 'Bottoms', fee: 15 },
-    { name: 'Accessories', fee: 8 }
-];
-
-async function loadAdminCategories() {
-    try {
-        const savedFees = localStorage.getItem('marketplace_category_fees');
-        if (savedFees) {
-            vendorCategoryFees = JSON.parse(savedFees);
-        } else {
-            const res = await fetch('/api/categories');
-            const data = await res.json();
-            if (data.categories) {
-                vendorCategoryFees = data.categories.map(c => typeof c === 'string' ? { name: c, fee: 10 } : c);
-            }
-        }
-    } catch (e) {
-        console.error('Using default category fees');
+async function loadAdminCategories(){
+  try{
+    const savedFees=localStorage.getItem('marketplace_category_fees');
+    if(savedFees){ vendorCategoryFees=JSON.parse(savedFees); } else {
+      const res=await fetch('/api/categories'); const data=await res.json();
+      if(data.categories){ vendorCategoryFees=data.categories.map(c=> typeof c==='string'?{name:c,fee:10}:c); }
     }
-    updateCategoryDropdown();
+  }catch(e){ console.error('Using default category fees'); }
+  updateCategoryDropdown();
 }
-
-function updateCategoryDropdown(selectedVal = '') {
-    const selectEl = document.getElementById('p_category');
-    if (!selectEl) return;
-    const activeCats = vendorCategoryFees.filter(c => c.status !== 'Disabled');
-    selectEl.innerHTML = `<option value="">Select Category</option>` + (activeCats.length ? activeCats : vendorCategoryFees).map(c => `
-        <option value="${c.name}" ${c.name === selectedVal ? 'selected' : ''}>${c.name} (Fee: $${c.fee})</option>
-    `).join('');
-    calculateVendorCustomerPricePreview();
+function updateCategoryDropdown(selectedVal=''){
+  const selectEl=document.getElementById('p_category'); if(!selectEl) return;
+  const activeCats=vendorCategoryFees.filter(c=> c.status!=='Disabled');
+  selectEl.innerHTML=`<option value="">Select Category</option>` + (activeCats.length?activeCats:vendorCategoryFees).map(c=> `<option value="${c.name}" ${c.name===selectedVal?'selected':''}>${c.name} (Fee: $${c.fee})</option>`).join('');
+  calculateVendorCustomerPricePreview();
 }
-
-function calculateVendorCustomerPricePreview() {
-    const priceInput = document.getElementById('p_price');
-    const catSelect = document.getElementById('p_category');
-    const previewEl = document.getElementById('p-price-preview');
-    if (!priceInput || !catSelect || !previewEl) return;
-
-    const sellerPrice = parseFloat(priceInput.value) || 0;
-    const selectedCatName = catSelect.value;
-    const catObj = vendorCategoryFees.find(c => c.name === selectedCatName);
-    const platformFee = catObj ? Number(catObj.fee) : 10;
-    const customerPrice = sellerPrice + platformFee;
-
-    previewEl.innerText = `Customer Price: $${customerPrice.toFixed(2)} (Your Earnings: $${sellerPrice.toFixed(2)} + Platform Fee: $${platformFee.toFixed(2)})`;
+function calculateVendorCustomerPricePreview(){
+  const priceInput=document.getElementById('p_price'); const catSelect=document.getElementById('p_category'); const previewEl=document.getElementById('p-price-preview');
+  if(!priceInput||!catSelect||!previewEl) return;
+  const sellerPrice=parseFloat(priceInput.value)||0; const selectedCatName=catSelect.value; const catObj=vendorCategoryFees.find(c=> c.name===selectedCatName);
+  const platformFee=catObj?Number(catObj.fee):10; const customerPrice=sellerPrice+platformFee;
+  previewEl.innerText=`Customer Price: $${customerPrice.toFixed(2)} (Your Earnings: $${sellerPrice.toFixed(2)} + Platform Fee: $${platformFee.toFixed(2)})`;
 }
-
-// --- TAB NAVIGATION SYSTEM ---
-function initNavigation() {
-    const navButtons = document.querySelectorAll('.nav-btn');
-    const tabPanes = document.querySelectorAll('.tab-pane');
-
-    navButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            navButtons.forEach(b => b.classList.remove('active'));
-            tabPanes.forEach(p => p.classList.remove('active'));
-
-            const targetId = e.currentTarget.getAttribute('data-target');
-            e.currentTarget.classList.add('active');
-            
-            const targetPane = document.getElementById(targetId);
-            if(targetPane) {
-                targetPane.classList.add('active');
-            }
-        });
+function initNavigation(){
+  const navButtons=document.querySelectorAll('.nav-btn'); const tabPanes=document.querySelectorAll('.tab-pane');
+  navButtons.forEach(btn=>{
+    btn.addEventListener('click',(e)=>{
+      navButtons.forEach(b=> b.classList.remove('active')); tabPanes.forEach(p=> p.classList.remove('active'));
+      const targetId=e.currentTarget.getAttribute('data-target'); e.currentTarget.classList.add('active');
+      const targetPane=document.getElementById(targetId); if(targetPane){ targetPane.classList.add('active'); }
+      if(targetId==='orders'){ loadVendorData(currentVendorId, byId('settings-store-name')?.value, byId('settings-store-email')?.value, ''); }
+      if(targetId==='finance'){ loadVendorData(currentVendorId, byId('settings-store-name')?.value, byId('settings-store-email')?.value, ''); }
     });
+  });
+}
+function extractId(val){ if(!val) return ""; if(typeof val==='string') return val; if(typeof val==='number') return String(val); if(typeof val==='object'){ if(val.$oid) return val.$oid; if(val.id) return extractId(val.id); if(val._id) return extractId(val._id);} return String(val); }
+function findVendorId(data){ if(!data) return ""; const u=data.user||data; return extractId(u._id)||extractId(u.id)||extractId(u.user_id)||extractId(u.vendor_id)||extractId(data._id); }
+function itemBelongsToVendor(item,vendorId,storeName,storeEmail){
+  const itemVid=extractId(item.vendor_id||item.vendor||item.store_id||'').toLowerCase();
+  const itemStore=String(item.vendor_name||item.store||item.storeName||'').toLowerCase();
+  const itemEmail=String(item.vendor_email||'').toLowerCase();
+  const vId=String(vendorId||'').toLowerCase();
+  const vName=String(storeName||'').toLowerCase();
+  const vEmail=String(storeEmail||'').toLowerCase();
+  if(!itemVid &&!itemStore &&!itemEmail) return true;
+  if(vId && itemVid && itemVid===vId) return true;
+  if(vName && (itemStore===vName||itemVid===vName||itemStore.includes(vName))) return true;
+  if(vEmail && (itemStore===vEmail||itemVid===vEmail||itemEmail===vEmail)) return true;
+  return false;
 }
 
-function extractId(val) {
-    if (!val) return "";
-    if (typeof val === 'string') return val;
-    if (typeof val === 'number') return String(val);
-    if (typeof val === 'object') {
-        if (val.$oid) return val.$oid;
-        if (val.id) return extractId(val.id);
-        if (val._id) return extractId(val._id);
+async function fetchAllVendorOrdersCombined(){
+  let combined=[];
+  try{
+    const res=await fetch('/api/orders');
+    if(res.ok){
+      const data=await res.json();
+      const apiOrders=data.orders|| (Array.isArray(data)?data:[]);
+      combined=combined.concat(apiOrders);
     }
-    return String(val);
+  }catch{}
+  const keys=['marketplace_orders','aurawear_orders','orders','checkout_orders','order_history'];
+  keys.forEach(k=>{
+    try{
+      const arr=JSON.parse(localStorage.getItem(k)||'[]');
+      if(Array.isArray(arr)) combined=combined.concat(arr);
+    }catch{}
+  });
+  const seen=new Set(); let uniq=[];
+  combined.forEach(o=>{
+    const id=String(o._id||o.id||o.order_id||JSON.stringify(o).slice(0,30));
+    if(!seen.has(id)){ seen.add(id); uniq.push(o); }
+  });
+  uniq.sort((a,b)=> new Date(b.created_at||b.date||0) - new Date(a.created_at||a.date||0));
+  return uniq;
 }
 
-function findVendorId(data) {
-    if (!data) return "";
-    const u = data.user || data;
-    return extractId(u._id) || extractId(u.id) || extractId(u.user_id) || extractId(u.vendor_id) || extractId(data._id);
-}
-
-function itemBelongsToVendor(item, vendorId, storeName, storeEmail) {
-    const itemVid = extractId(item.vendor_id || item.vendor || item.store_id || '').toLowerCase();
-    const itemStore = String(item.vendor_name || item.store || item.storeName || '').toLowerCase();
-    
-    const vId = String(vendorId || '').toLowerCase();
-    const vName = String(storeName || '').toLowerCase();
-    const vEmail = String(storeEmail || '').toLowerCase();
-
-    if (vId && itemVid && itemVid === vId) return true;
-    if (vName && (itemStore === vName || itemVid === vName)) return true;
-    if (vEmail && (itemStore === vEmail || itemVid === vEmail)) return true;
-    
-    return false;
-}
-
-async function initVendorPortal() {
-    const token = localStorage.getItem('aurawear_token') || localStorage.getItem('token');
-    if (!token) { window.location.href = '/login.html'; return; }
-
-    try {
-        const res = await fetch('/api/auth/me', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ token })
+async function initVendorPortal(){
+  const token=localStorage.getItem('aurawear_token')||localStorage.getItem('token');
+  if(!token){ window.location.href='/login.html'; return; }
+  try{
+    const res=await fetch('/api/auth/me',{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token})});
+    let data; try{ data=await res.json(); }catch{ data=null; }
+    if(res.ok && data && (data.success||data.user||data.id||data._id||data.email)){
+      const userObj=data.user||data;
+      const userRole=(userObj.role||data.role||'').toLowerCase();
+      const userEmail=(userObj.email||userObj.user?.email||'').toLowerCase();
+      const userStoreName=(userObj.storeName||userObj.store||userObj.name||'').toLowerCase();
+      if(userRole && userRole!=='vendor' && userRole!=='seller' && userRole!=='admin'){ alert('Access Denied: Customer accounts cannot access vendor portal.'); window.location.href='/profile.html'; return; }
+      currentVendorId=findVendorId(data); if(!currentVendorId){ currentVendorId=userObj.id||userObj._id||userObj.vendor_id||userEmail||'v_seller'; }
+      vendorAccountStatus=(userObj.status||data.status||'pending').toLowerCase();
+      if(isApprovedInLocalStorage(currentVendorId, userEmail)){
+        vendorAccountStatus='active';
+      }
+      try{
+        const statusRes=await fetch('/api/admin/sellers');
+        const statusData=await statusRes.json();
+        const rawSellers=statusData.sellers|| (Array.isArray(statusData)?statusData:[]);
+        const matchedSeller=rawSellers.find(s=>{
+          const sId=extractId(s.id||s._id).toLowerCase(); const sEmail=String(s.email||'').trim().toLowerCase();
+          return (currentVendorId && sId===currentVendorId.toLowerCase()) || (userEmail && sEmail===userEmail);
         });
-        
-        let data;
-        try {
-            data = await res.json();
-        } catch (err) {
-            data = null;
+        if(matchedSeller && matchedSeller.status){
+          const apiStatus=matchedSeller.status.toLowerCase();
+          if(apiStatus==='active') vendorAccountStatus='active';
+          else if(vendorAccountStatus!=='active') vendorAccountStatus=apiStatus;
         }
-
-        if (res.ok && data && (data.success || data.user || data.id || data._id || data.email)) {
-            const userObj = data.user || data;
-            const userRole = (userObj.role || data.role || '').toLowerCase();
-            const userEmail = (userObj.email || userObj.user?.email || '').toLowerCase();
-            const userStoreName = (userObj.storeName || userObj.store || userObj.name || '').toLowerCase();
-            
-            if (userRole && userRole !== 'vendor' && userRole !== 'seller' && userRole !== 'admin') {
-                alert('Access Denied: Customer accounts cannot access the vendor portal.');
-                window.location.href = '/profile.html';
-                return;
-            }
-
-            currentVendorId = findVendorId(data);
-            if (!currentVendorId) {
-                currentVendorId = userObj.id || userObj._id || userObj.vendor_id || userEmail || 'v_seller';
-            }
-            
-            vendorAccountStatus = (userObj.status || data.status || 'pending').toLowerCase();
-
-            try {
-                const statusRes = await fetch('/api/admin/sellers');
-                const statusData = await statusRes.json();
-                const rawSellers = statusData.sellers || (Array.isArray(statusData) ? statusData : []);
-                
-                const matchedSeller = rawSellers.find(s => {
-                    const sId = extractId(s.id || s._id).toLowerCase();
-                    const sEmail = String(s.email || '').trim().toLowerCase();
-                    return (currentVendorId && sId === currentVendorId.toLowerCase()) || (userEmail && sEmail === userEmail);
-                });
-
-                if (matchedSeller && matchedSeller.status) {
-                    vendorAccountStatus = matchedSeller.status.toLowerCase();
-                }
-            } catch (err) {}
-
-            if (!currentVendorId) { window.location.href = '/login.html'; return; }
-            
-            const userName = userObj.storeName || userObj.store || userObj.name || userObj.first_name || 'Vendor Store';
-            const displayEmail = userEmail || userObj.email || 'vendor@aurawear.com';
-
-            setText('sidebarStoreName', userName);
-            setText('displayStoreTitle', userName);
-            setText('storeAvatarBadge', userName.substring(0, 2).toUpperCase());
-
-            setValue('settings-store-name', userName);
-            setValue('settings-store-email', displayEmail);
-            setValue('settings-store-id', currentVendorId);
-
-            updateApprovalNotice();
-            loadVendorData(currentVendorId, userName, userEmail, userStoreName);
-        } else {
-            window.location.href = '/login.html';
-        }
-    } catch (e) {
-        window.location.href = '/login.html';
-    }
+      }catch(err){}
+      if(isApprovedInLocalStorage(currentVendorId, userEmail)){
+        vendorAccountStatus='active';
+        try{ userObj.status='active'; localStorage.setItem('user', JSON.stringify(userObj)); }catch{}
+      }
+      if(!currentVendorId){ window.location.href='/login.html'; return; }
+      const userName=userObj.storeName||userObj.store||userObj.name||userObj.first_name||'Vendor Store';
+      const displayEmail=userEmail||userObj.email||'vendor@aurawear.com';
+      setText('sidebarStoreName', userName); setText('displayStoreTitle', userName); setText('storeAvatarBadge', userName.substring(0,2).toUpperCase());
+      setValue('settings-store-name', userName); setValue('settings-store-email', displayEmail); setValue('settings-store-id', currentVendorId);
+      updateApprovalNotice();
+      loadVendorData(currentVendorId, userName, userEmail, userStoreName);
+    }else{ window.location.href='/login.html'; }
+  }catch(e){ console.error(e); window.location.href='/login.html'; }
 }
-
-function checkVendorApprovalAndOpenModal() {
-    if (vendorAccountStatus !== 'active') {
-        alert('⚠️ Warning: Your store account is currently pending admin approval or has been suspended. You cannot list or upload new pieces until an administrator activates your store.');
-        return;
-    }
-    openProductModal();
+function checkVendorApprovalAndOpenModal(){ if(vendorAccountStatus!=='active'){ alert('⚠ Warning: Your store account is currently pending admin approval or has been suspended. You cannot list or upload new pieces until an administrator activates your store.'); return; } openProductModal(); }
+async function updateVendorProfile(e){
+  e.preventDefault(); const token=localStorage.getItem('aurawear_token')||localStorage.getItem('token'); const newName=document.getElementById('settings-store-name').value.trim(); const newEmail=document.getElementById('settings-store-email').value.trim(); const statusEl=document.getElementById('profileStatus');
+  statusEl.style.color='var(--text-ink)'; statusEl.innerText='Updating profile...';
+  try{
+    const res=await fetch('/api/auth/update',{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token, name:newName, email:newEmail})});
+    const data=await res.json();
+    if(data.success){ statusEl.style.color='#2d6a4f'; statusEl.innerText='✓ Profile updated successfully!'; document.getElementById('sidebarStoreName').innerText=newName; setText('displayStoreTitle', newName); setText('storeAvatarBadge', newName.substring(0,2).toUpperCase()); } else { statusEl.style.color='#a85d35'; statusEl.innerText=data.error||'Failed to update profile.'; }
+  }catch(err){ statusEl.style.color='#a85d35'; statusEl.innerText='Connection error while saving profile.'; }
 }
-
-async function updateVendorProfile(e) {
-    e.preventDefault();
-    const token = localStorage.getItem('aurawear_token') || localStorage.getItem('token');
-    const newName = document.getElementById('settings-store-name').value.trim();
-    const newEmail = document.getElementById('settings-store-email').value.trim();
-    const statusEl = document.getElementById('profileStatus');
-
-    statusEl.style.color = 'var(--text-ink)';
-    statusEl.innerText = 'Updating profile...';
-
-    try {
-        const res = await fetch('/api/auth/update', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ token, name: newName, email: newEmail })
-        });
-        const data = await res.json();
-
-        if (data.success) {
-            statusEl.style.color = '#2d6a4f';
-            statusEl.innerText = '✓ Profile updated successfully!';
-            document.getElementById('sidebarStoreName').innerText = newName;
-            setText('displayStoreTitle', newName);
-            setText('storeAvatarBadge', newName.substring(0, 2).toUpperCase());
-        } else {
-            statusEl.style.color = '#a85d35';
-            statusEl.innerText = data.error || 'Failed to update profile.';
-        }
-    } catch (err) {
-        statusEl.style.color = '#a85d35';
-        statusEl.innerText = 'Connection error while saving profile.';
+async function loadVendorData(vendorId, storeName='', storeEmail='', storeKeyName=''){
+  if(!vendorId) return;
+  let totalSellerEarningsPending=0; let totalPlatformFees=0; let totalGrossSales=0; let totalPaidOut=0; let pendingCount=0;
+  try{
+    const pRes=await fetch(`/api/vendor/products?vendor_id=${encodeURIComponent(vendorId)}`); const pData=await pRes.json(); let fetchedProducts=pData.products|| (Array.isArray(pData)?pData:[]);
+    productsCache=fetchedProducts.filter(p=> itemBelongsToVendor(p, vendorId, storeName, storeEmail));
+    if(productsCache.length===0){
+      try{ const localProducts=JSON.parse(localStorage.getItem('marketplace_products')||'[]'); const localFiltered=localProducts.filter(p=> itemBelongsToVendor(p, vendorId, storeName, storeEmail)); if(localFiltered.length>0) productsCache=localFiltered; }catch{}
     }
-}
-
-async function loadVendorData(vendorId, storeName = '', storeEmail = '', storeKeyName = '') {
-    if (!vendorId) return;
-    
-    let totalSellerEarnings = 0;
-    let totalPlatformFees = 0;
-    let totalGrossSales = 0;
-    let activeCount = 0;
-    let pendingCount = 0;
-
-    try {
-        const pRes = await fetch(`/api/vendor/products?vendor_id=${encodeURIComponent(vendorId)}`);
-        const pData = await pRes.json();
-        let fetchedProducts = pData.products || (Array.isArray(pData) ? pData : []);
-
-        productsCache = fetchedProducts.filter(p => itemBelongsToVendor(p, vendorId, storeName, storeEmail));
-
-        activeCount = productsCache.length;
-        document.getElementById('statInventory').innerText = activeCount;
-        renderProductsTable();
-    } catch (e) {
-        document.getElementById('vendorProductList').innerHTML = `<tr><td colspan="8" class="empty-state" style="color:var(--rust);">Error loading inventory.</td></tr>`;
-    }
-
-    try {
-        const oRes = await fetch('/api/orders');
-        const oData = await oRes.json();
-        const rawOrders = oData.orders || (Array.isArray(oData) ? oData : []);
-        
-        ordersCache = rawOrders.filter(o => {
-            const items = o.items || [];
-            return items.some(i => itemBelongsToVendor(i, vendorId, storeName, storeEmail));
-        });
-
-        renderOrdersTable();
-
-        ordersCache.forEach(o => {
-            const items = o.items || [];
-            const vendorItems = items.filter(i => itemBelongsToVendor(i, vendorId, storeName, storeEmail));
-
-            const status = (o.status || 'pending').toLowerCase();
-            if (status === 'pending' || status === 'processing') pendingCount++;
-
-            vendorItems.forEach(i => {
-                const qty = Number(i.qty || i.quantity || 1);
-                const sPrice = Number(i.seller_price || i.price || i.unit_price) || 0;
-                let pFee = Number(i.platform_fee || 0);
-                if (!pFee && i.category) {
-                    const foundCat = vendorCategoryFees.find(c => c.name.toLowerCase() === String(i.category).toLowerCase());
-                    pFee = foundCat ? foundCat.fee : 10;
-                } else if (!pFee) {
-                    pFee = 10;
-                }
-                const cPrice = Number(i.customer_price || (sPrice + pFee));
-
-                totalSellerEarnings += (sPrice * qty);
-                totalPlatformFees += (pFee * qty);
-                totalGrossSales += (cPrice * qty);
-            });
-        });
-
-        document.getElementById('statRevenue').innerText = `$${vendorAccountStatus === 'active' ? totalSellerEarnings.toFixed(2) : '0.00'}`;
-        document.getElementById('statOrders').innerText = pendingCount;
-
-        document.getElementById('fin-gross').innerText = `$${vendorAccountStatus === 'active' ? totalGrossSales.toFixed(2) : '0.00'}`;
-        document.getElementById('fin-fees').innerText = `$${vendorAccountStatus === 'active' ? totalPlatformFees.toFixed(2) : '0.00'}`;
-        document.getElementById('fin-net').innerText = `$${vendorAccountStatus === 'active' ? totalSellerEarnings.toFixed(2) : '0.00'}`;
-
-        const savedPayouts = JSON.parse(localStorage.getItem('saved_payout_statuses') || '{}');
-        const savedStatuses = JSON.parse(localStorage.getItem('saved_order_statuses') || '{}');
-
-        let ledgerHtml = '';
-        let hasLedgerItems = false;
-
-        ordersCache.forEach((o, orderIndex) => {
-            const oid = extractId(o._id || o.id);
-            const orderStatus = (o.status || savedStatuses[oid] || 'processing').toLowerCase();
-            const rawPaymentMethod = String(o.payment_method || o.payment_status || 'PAID').toUpperCase();
-            const isCod = rawPaymentMethod.includes('COD') || rawPaymentMethod.includes('CASH') || rawPaymentMethod.includes('PENDING');
-            const isPaid = !isCod || orderStatus === 'delivered';
-
-            const items = o.items || [];
-            items.forEach((i, itemIndex) => {
-                if (itemBelongsToVendor(i, vendorId, storeName, storeEmail)) {
-                    hasLedgerItems = true;
-                    const qty = Number(i.qty || i.quantity || 1);
-                    const sPrice = Number(i.seller_price || i.price || i.unit_price) || 0;
-                    let pFee = Number(i.platform_fee || 0);
-                    if (!pFee && i.category) {
-                        const foundCat = vendorCategoryFees.find(c => c.name.toLowerCase() === String(i.category).toLowerCase());
-                        pFee = foundCat ? foundCat.fee : 10;
-                    } else if (!pFee) {
-                        pFee = 10;
-                    }
-                    const cPrice = Number(i.customer_price || (sPrice + pFee));
-
-                    const grossSales = cPrice * qty;
-                    const platformFeeTotal = pFee * qty;
-                    const netPayout = sPrice * qty;
-
-                    const itemIdentifier = extractId(i.product_id || i._id || i.id || itemIndex);
-                    const payoutId = `PAY-${oid}-${itemIdentifier.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                    const currentStatus = savedPayouts[payoutId] || (isPaid ? 'pending' : 'locked');
-
-                    let badgeClass = 'status-pending';
-                    let displayStatus = currentStatus.toUpperCase();
-                    if (currentStatus === 'paid') {
-                        badgeClass = 'status-paid';
-                        displayStatus = 'SETTLED';
-                    } else if (currentStatus === 'locked') {
-                        badgeClass = 'status-pending';
-                        displayStatus = 'LOCKED (COD PENDING)';
-                    } else {
-                        displayStatus = 'PENDING';
-                    }
-
-                    ledgerHtml += `
-                        <tr>
-                            <td><b>${payoutId}</b></td>
-                            <td>Order #${oid.substring(Math.max(0, oid.length - 5)).toUpperCase()}</td>
-                            <td>$${grossSales.toFixed(2)}</td>
-                            <td style="color:var(--rust);">$${platformFeeTotal.toFixed(2)}</td>
-                            <td><b>$${netPayout.toFixed(2)}</b></td>
-                            <td><span class="status-badge ${badgeClass}">${displayStatus}</span></td>
-                        </tr>
-                    `;
-                }
-            });
-        });
-
-        if (vendorAccountStatus === 'active' && hasLedgerItems) {
-            document.getElementById('finance-ledger-tbody').innerHTML = ledgerHtml;
-        } else {
-            document.getElementById('finance-ledger-tbody').innerHTML = `<tr><td colspan="6" class="empty-state">No settlement records found.</td></tr>`;
-        }
-
-    } catch (e) {
-        document.getElementById('vendorOrderList').innerHTML = `<tr><td colspan="7" class="empty-state" style="color:var(--rust);">Error loading orders.</td></tr>`;
-    }
-}
-
-function renderProductsTable() {
-    const tbody = document.getElementById('vendorProductList');
-    if (!tbody) return;
-    const searchInput = document.getElementById('product-search');
-    const query = searchInput ? searchInput.value.toLowerCase() : '';
-
-    const filtered = productsCache.filter(p => {
-        const matchesStatus = currentProductFilter === 'all' || p.status === currentProductFilter;
-        const matchesSearch = (p.name || '').toLowerCase().includes(query) || (p.category || '').toLowerCase().includes(query) || (p.gender || '').toLowerCase().includes(query);
-        return matchesStatus && matchesSearch;
-    });
-
-    if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No matching inventory items found.</td></tr>`;
-        return;
-    }
-
-    tbody.innerHTML = filtered.map(p => {
-        const prodId = extractId(p._id || p.id);
-        const imgSrc = escapeHtml(p.image || p.image_path || '/uploads/placeholder.png');
-        const status = p.status || 'live';
-        const displaySizes = Array.isArray(p.sizes) ? p.sizes.join(', ') : (p.size || 'M');
-        const sPrice = Number(p.seller_price || p.price || 0);
-        let pFee = Number(p.platform_fee || 0);
-        if (!pFee && p.category) {
-            const foundCat = vendorCategoryFees.find(c => c.name.toLowerCase() === String(p.category).toLowerCase());
-            pFee = foundCat ? foundCat.fee : 10;
-        } else if (!pFee) {
-            pFee = 10;
-        }
-        const cPrice = Number(p.customer_price || (sPrice + pFee));
-
-        return `
-            <tr>
-                <td><img src="${imgSrc}" style="width:36px; height:36px; object-fit:cover; border:1px solid var(--border);" onerror="this.style.display='none'"></td>
-                <td><strong>${escapeHtml(p.name || 'Untitled')}</strong></td>
-                <td>${escapeHtml(p.category || 'Archive')} • ${escapeHtml(p.gender || 'Men')}</td>
-                <td>${escapeHtml(displaySizes)}</td>
-                <td>
-                    Seller: $${sPrice.toFixed(2)}<br>
-                    <span style="color:var(--gold); font-size:10px;">Fee: $${pFee.toFixed(2)}</span><br>
-                    <b>Customer: $${cPrice.toFixed(2)}</b><br>
-                    <span style="font-size:9px; opacity:0.6;">Stock: ${p.stock || 1}</span>
-                </td>
-                <td>${p.views || 42}</td>
-                <td><span class="status-badge ${status === 'live' ? 'status-paid' : 'status-pending'}">${status.toUpperCase()}</span></td>
-                <td>
-                    <button onclick="startEditProduct('${prodId}')" style="background:#2d6a4f; color:#fff; border:none; padding:4px 8px; font-size:9px; cursor:pointer; border-radius:3px; margin-right:4px;" type="button">EDIT</button>
-                    <button onclick="deleteProduct('${prodId}')" style="background:#a85d35; color:#fff; border:none; padding:4px 8px; font-size:9px; cursor:pointer; border-radius:3px;" type="button">REMOVE</button>
-                </td>
-            </tr>
-        `;
-    }).join('');
-}
-
-function renderOrdersTable() {
-    const tbody = document.getElementById('vendorOrderList');
-    if (!tbody) return;
-    const searchInput = document.getElementById('order-search');
-    const query = searchInput ? searchInput.value.toLowerCase() : '';
-
-    const storeName = document.getElementById('settings-store-name').value;
-    const storeEmail = document.getElementById('settings-store-email').value;
-
-    const filtered = ordersCache.filter(o => {
-        const status = (o.status || 'pending').toLowerCase();
-        const matchesStatus = currentOrderFilter === 'all' || status === currentOrderFilter;
-        
-        const orderIdStr = extractId(o._id || o.id).toLowerCase();
-        const customerStr = (o.customer_name || o.name || o.email || '').toLowerCase();
-        const matchesSearch = orderIdStr.includes(query) || customerStr.includes(query);
-
-        return matchesStatus && matchesSearch;
-    });
-
-    if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No incoming orders found matching criteria.</td></tr>`;
-        return;
-    }
-
-    tbody.innerHTML = filtered.map(o => {
-        const orderId = extractId(o._id || o.id);
-        const status = (o.status || 'pending').toLowerCase();
-
-        const items = o.items || [];
-        const vendorItems = items.filter(i => itemBelongsToVendor(i, currentVendorId, storeName, storeEmail));
-
-        let orderTotal = 0;
-        vendorItems.forEach(i => { 
-            const qty = Number(i.qty || i.quantity || 1);
-            const sPrice = Number(i.seller_price || i.price || i.unit_price) || 0;
-            let pFee = Number(i.platform_fee || 0);
-            if (!pFee && i.category) {
-                const foundCat = vendorCategoryFees.find(c => c.name.toLowerCase() === String(i.category).toLowerCase());
-                pFee = foundCat ? foundCat.fee : 10;
-            } else if (!pFee) {
-                pFee = 10;
-            }
-            const cPrice = Number(i.customer_price || (sPrice + pFee));
-            orderTotal += (cPrice * qty);
-        });
-
-        const customerName = o.customer_name || o.name || o.email || 'Collector';
-        
-        let paymentDisplay = o.payment_status || o.payment_method || 'PAID';
-        if (paymentDisplay === 'COD_PENDING' && (status === 'delivered' || status === 'completed')) {
-            paymentDisplay = 'PAID';
-        }
-
-        const orderDate = (o.created_at || o.date || '').substring(0, 10) || 'Recent';
-        const itemsSummary = vendorItems.map(i => `${i.qty || 1}x ${i.name} (${i.size || 'M'})`).join(', ') || 'Archive Piece';
-
-        let statusClass = 'status-pending';
-        if (status === 'paid' || status === 'delivered') statusClass = 'status-paid';
-        if (status === 'processing') statusClass = 'status-processing';
-        if (status === 'shipped') statusClass = 'status-shipped';
-
-        let actionButtons = `
-            <select class="retro-input" style="padding: 4px; font-size: 11px; margin-bottom: 4px;" onchange="updateOrderStatus('${orderId}', this.value)">
-                <option value="pending" ${status === 'pending' ? 'selected' : ''}>Pending</option>
-                <option value="processing" ${status === 'processing' ? 'selected' : ''}>Processing</option>
-                <option value="shipped" ${status === 'shipped' ? 'selected' : ''}>Shipped</option>
-                <option value="delivered" ${status === 'delivered' ? 'selected' : ''}>Delivered</option>
-            </select>
-            <div>
-                <button onclick="promptAndShipOrder('${orderId}')" style="background:#2d6a4f; color:#fff; border:none; padding:4px 8px; font-size:9px; cursor:pointer; border-radius:3px; margin-right:4px;" type="button">SHIP & TRACK</button>
-                <button onclick="printStoreInvoice('${orderId}')" style="background:#0077b6; color:#fff; border:none; padding:4px 8px; font-size:9px; cursor:pointer; border-radius:3px;" type="button">INVOICE</button>
-            </div>
-        `;
-        if (status === 'shipped' || status === 'delivered') {
-            const trackingInfo = o.tracking_number ? `<br><span style="font-size:9px; font-family:monospace;">Courier: ${o.courier || 'N/A'}<br>Tracking: ${o.tracking_number}</span>` : '';
-            actionButtons = `
-                <select class="retro-input" style="padding: 4px; font-size: 11px; margin-bottom: 4px;" onchange="updateOrderStatus('${orderId}', this.value)">
-                    <option value="pending" ${status === 'pending' ? 'selected' : ''}>Pending</option>
-                    <option value="processing" ${status === 'processing' ? 'selected' : ''}>Processing</option>
-                    <option value="shipped" ${status === 'shipped' ? 'selected' : ''}>Shipped</option>
-                    <option value="delivered" ${status === 'delivered' ? 'selected' : ''}>Delivered</option>
-                </select>
-                <div>
-                    <button onclick="printStoreInvoice('${orderId}')" style="background:#0077b6; color:#fff; border:none; padding:4px 8px; font-size:9px; cursor:pointer; border-radius:3px;" type="button">INVOICE</button>
-                </div>
-                ${trackingInfo}
-            `;
-        }
-
-        return `
-            <tr>
-                <td style="font-family:monospace; font-size:10px;">#AW-${orderId.substring(Math.max(0, orderId.length - 5)).toUpperCase()}</td>
-                <td><strong>${escapeHtml(customerName)}</strong></td>
-                <td><span class="status-badge active" style="font-size:9px;">${escapeHtml(paymentDisplay)}</span></td>
-                <td>${escapeHtml(itemsSummary)}</td>
-                <td>$${orderTotal.toFixed(2)}</td>
-                <td>${orderDate}</td>
-                <td>
-                    <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-start;">
-                        <span class="status-badge ${statusClass}">${status.toUpperCase()}</span>
-                        <div>${actionButtons}</div>
-                    </div>
-                </td>
-            </tr>
-        `;
-    }).join('');
-}
-
-function numberToWords(num) {
-    if (isNaN(num)) return '';
-    if (num === 0) return 'Zero Dollars Only';
-    const units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
-    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-    
-    function convert(n) {
-        if (n < 20) return units[n];
-        if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 ? ' ' + units[n % 10] : '');
-        if (n < 1000) return units[Math.floor(n / 100)] + ' Hundred' + (n % 100 ? ' ' + convert(n % 100) : '');
-        if (n < 1000000) return convert(Math.floor(n / 1000)) + ' Thousand' + (n % 1000 ? ' ' + convert(n % 1000) : '');
-        return n.toString();
-    }
-    return convert(Math.round(num)) + ' Dollars Only';
-}
-
-function printStoreInvoice(orderId) {
-    const order = ordersCache.find(o => extractId(o._id || o.id) === String(orderId));
-    if (!order) {
-        alert('Order details not found for invoice.');
-        return;
-    }
-
-    const storeName = document.getElementById('settings-store-name').value || 'Vendor Store';
-    const storeEmail = document.getElementById('settings-store-email').value || 'vendor@aurawear.com';
-    const items = (order.items || []).filter(i => itemBelongsToVendor(i, currentVendorId, storeName, storeEmail));
-    
-    let subtotal = 0;
-    items.forEach(i => {
-        const qty = Number(i.qty || i.quantity || 1);
-        const sPrice = Number(i.seller_price || i.price || i.unit_price) || 0;
-        let pFee = Number(i.platform_fee || 0);
-        if (!pFee && i.category) {
-            const foundCat = vendorCategoryFees.find(c => c.name.toLowerCase() === String(i.category).toLowerCase());
-            pFee = foundCat ? foundCat.fee : 10;
-        } else if (!pFee) {
-            pFee = 10;
-        }
-        const cPrice = Number(i.customer_price || (sPrice + pFee));
-        subtotal += (cPrice * qty);
-    });
-
-    const shippingRate = Number(order.shipping || order.shipping_rate || 15.00);
-    const totalAmount = subtotal + shippingRate;
-
-    const customerName = escapeHtml(order.customer_name || (order.first_name ? `${order.first_name} ${order.last_name || ''}` : '') || order.name || 'Valued Customer');
-    const customerEmail = escapeHtml(order.email || 'N/A');
-    const customerPhone = escapeHtml(order.phone || 'N/A');
-    
-    const shippingAddress = escapeHtml(order.address ? `${order.address}, ${order.city || ''} ${order.zip || ''}` : 'N/A');
-    const billingAddress = escapeHtml(order.billing_address || order.address ? `${order.address}, ${order.city || ''} ${order.zip || ''}` : 'N/A');
-    
-    const orderDate = escapeHtml((order.created_at || order.date || '').substring(0, 10) || new Date().toLocaleDateString());
-    const invoiceDate = new Date().toLocaleDateString();
-    const invoiceNumber = 'INV-' + orderId.substring(Math.max(0, orderId.length - 6)).toUpperCase();
-    const formattedOrderId = '#AW-' + orderId.substring(Math.max(0, orderId.length - 5)).toUpperCase();
-
-    const win = window.open('', '_blank');
-    win.document.write(`
-        <html>
-        <head>
-            <title>Invoice - ${invoiceNumber}</title>
-            <style>
-                body { font-family: monospace; padding: 30px; color: #111; background: #fff; max-width: 800px; margin: auto; }
-                .invoice-header { display: flex; justify-content: space-between; border-bottom: 2px solid #111; padding-bottom: 15px; margin-bottom: 20px; }
-                .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; font-size: 12px; }
-                table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
-                th, td { border: 1px solid #111; padding: 10px; text-align: left; }
-                th { background: #f0f0f0; }
-                .totals { margin-top: 20px; text-align: right; font-size: 13px; }
-                .words { margin-top: 10px; font-style: italic; font-size: 12px; }
-            </style>
-        </head>
-        <body>
-            <div class="invoice-header">
-                <div>
-                    <h2>AURAWEAR INVOICE</h2>
-                    <p><strong>Store:</strong> ${escapeHtml(storeName)} (${escapeHtml(storeEmail)})</p>
-                    <p><strong>Invoice Number:</strong> ${invoiceNumber}</p>
-                    <p><strong>Order ID:</strong> ${formattedOrderId}</p>
-                </div>
-                <div>
-                    <p><strong>Order Date:</strong> ${orderDate}</p>
-                    <p><strong>Invoice Date:</strong> ${invoiceDate}</p>
-                </div>
-            </div>
-
-            <div class="details-grid">
-                <div>
-                    <h3>Customer Details</h3>
-                    <p><strong>Name:</strong> ${customerName}</p>
-                    <p><strong>Email:</strong> ${customerEmail}</p>
-                    <p><strong>Phone:</strong> ${customerPhone}</p>
-                </div>
-                <div>
-                    <h3>Addresses</h3>
-                    <p><strong>Shipping Address:</strong><br>${shippingAddress}</p>
-                    <p><strong>Billing Address:</strong><br>${billingAddress}</p>
-                </div>
-            </div>
-
-            <table>
-                <thead>
-                    <tr><th>Product Details</th><th>Size</th><th>Qty</th><th>Customer Price</th><th>Subtotal</th></tr>
-                </thead>
-                <tbody>
-                    ${items.map(i => {
-                        const qty = Number(i.qty || i.quantity || 1);
-                        const sPrice = Number(i.seller_price || i.price || i.unit_price) || 0;
-                        let pFee = Number(i.platform_fee || 0);
-                        if (!pFee && i.category) {
-                            const foundCat = vendorCategoryFees.find(c => c.name.toLowerCase() === String(i.category).toLowerCase());
-                            pFee = foundCat ? foundCat.fee : 10;
-                        } else if (!pFee) {
-                            pFee = 10;
-                        }
-                        const cPrice = Number(i.customer_price || (sPrice + pFee));
-                        return `<tr><td>${escapeHtml(i.name)}</td><td>${escapeHtml(i.size || 'M')}</td><td>${qty}</td><td>$${cPrice.toFixed(2)}</td><td>$${(qty * cPrice).toFixed(2)}</td></tr>`;
-                    }).join('')}
-                </tbody>
-            </table>
-
-            <div class="totals">
-                <p>Subtotal: $${subtotal.toFixed(2)}</p>
-                <p>Shipping Rate: $${shippingRate.toFixed(2)}</p>
-                <h3>Total Amount: $${totalAmount.toFixed(2)}</h3>
-                <div class="words">Amount in Words: ${numberToWords(totalAmount)}</div>
-            </div>
-
-            <script>window.print();<\/script>
-        </body>
-        </html>
-    `);
-    win.document.close();
-}
-
-function setProductFilter(btnElement) {
-    document.querySelectorAll('#products .filter-btn').forEach(btn => btn.classList.remove('active'));
-    btnElement.classList.add('active');
-    currentProductFilter = btnElement.getAttribute('data-pstatus');
+    document.getElementById('statInventory').innerText=productsCache.length;
     renderProductsTable();
-}
-
-function filterVendorProducts() {
-    renderProductsTable();
-}
-
-function setOrderFilter(btnElement) {
-    document.querySelectorAll('#orders .filter-btn').forEach(btn => btn.classList.remove('active'));
-    btnElement.classList.add('active');
-    currentOrderFilter = btnElement.getAttribute('data-ostatus');
+  }catch(e){ document.getElementById('vendorProductList').innerHTML=`<tr><td colspan="8" class="empty-state" style="color:var(--rust);">Error loading inventory.</td></tr>`; }
+  try{
+    const allOrdersCombined = await fetchAllVendorOrdersCombined();
+    ordersCache = allOrdersCombined.filter(o=>{
+      const items=o.items||o.products||[];
+      if(items.length===0) return true;
+      return items.some(i=> itemBelongsToVendor(i, vendorId, storeName, storeEmail));
+    });
     renderOrdersTable();
-}
+    const paidList = getPaidPayouts();
+    const savedPayouts=JSON.parse(localStorage.getItem('saved_payout_statuses')||'{}');
+    const savedStatuses=JSON.parse(localStorage.getItem('saved_order_statuses')||'{}');
+    let ledgerHtml=''; let hasLedgerItems=false;
 
-function filterVendorOrders() {
-    renderOrdersTable();
-}
+    ordersCache.forEach((o,orderIndex)=>{
+      const oid=extractId(o._id||o.id);
+      const orderStatus=(o.status||savedStatuses[oid]||'processing').toLowerCase();
+      const items=o.items||[];
 
-function addAngleInput(existingUrl = '') {
-    const container = document.getElementById('anglesContainer');
-    const div = document.createElement('div');
-    div.className = 'angle-row';
-    div.style.cssText = 'display:flex; gap:8px; align-items:center; margin-bottom:8px;';
-    div.innerHTML = `
-        ${existingUrl ? `<img src="${existingUrl}" style="width:35px; height:40px; object-fit:cover; border:1px solid var(--border-dark);">` : ''}
-        <input type="file" accept="image/*" class="angle-file-input" style="padding:6px; background:#fff; flex:1; font-size:11px;">
-        <input type="hidden" class="angle-url-input" value="${existingUrl}">
-        <button type="button" onclick="this.parentElement.remove()" style="background:#a85d35; color:#fff; border:none; padding:8px 12px; font-size:10px; cursor:pointer; border-radius:3px;">✕</button>
-    `;
-    container.appendChild(div);
-}
+      if(items.length===0){
+        hasLedgerItems=true;
+        const payoutId=`PAY-${oid}-0`;
+        const isPaidByAdmin = isPayoutPaid(payoutId, oid);
+        if(isPaidByAdmin) totalPaidOut += Number(o.total||0)*0.9;
+        else totalSellerEarningsPending += Number(o.total||0)*0.9;
+        totalGrossSales+=Number(o.total||0);
+        totalPlatformFees+=Number(o.total||0)*0.1;
+        const badgeClass = isPaidByAdmin? 'badge-paid' : 'badge-pending';
+        const displayStatus = isPaidByAdmin? 'PAID ✓' : 'PENDING';
+        ledgerHtml+=`<tr style="${isPaidByAdmin?'background:#f0faf0;':''}"><td><b>${payoutId}</b></td><td>Order #${oid.substring(Math.max(0, oid.length-5)).toUpperCase()}</td><td>$${Number(o.total||0).toFixed(2)}</td><td style="color:var(--rust);">$${(Number(o.total||0)*0.1).toFixed(2)}</td><td><b>$${(Number(o.total||0)*0.9).toFixed(2)}</b></td><td><span class="${badgeClass}">${displayStatus}</span></td></tr>`;
+      }
 
-function openProductModal() {
-    if (vendorAccountStatus !== 'active') {
-        alert('⚠️ Error: Your account is pending admin approval. You cannot upload products.');
-        return;
-    }
-    editingProductId = null;
-    document.getElementById('mp-title').innerText = "List New Piece";
-    document.getElementById('submitBtn').innerText = "PUBLISH TO STORE";
-    document.getElementById('productForm').reset();
-    document.getElementById('anglesContainer').innerHTML = '';
-    
-    document.querySelectorAll('input[name="product_size"]').forEach(cb => cb.checked = false);
+      items.forEach((i,itemIndex)=>{
+        if(itemBelongsToVendor(i, vendorId, storeName, storeEmail)){
+          hasLedgerItems=true;
+          const qty=Number(i.qty||i.quantity||1);
+          const sPrice=Number(i.seller_price||i.price||i.unit_price)||0;
+          let pFee=Number(i.platform_fee||0);
+          if(!pFee && i.category){ const foundCat=vendorCategoryFees.find(c=> c.name.toLowerCase()===String(i.category).toLowerCase()); pFee=foundCat?foundCat.fee:10; } else if(!pFee){ pFee=10; }
+          const cPrice=Number(i.customer_price||(sPrice+pFee));
+          const grossSales=cPrice*qty;
+          const platformFeeTotal=pFee*qty;
+          const netPayout=sPrice*qty;
+          const itemIdentifier=extractId(i.product_id||i._id||i.id||itemIndex);
+          const payoutId=`PAY-${oid}-${itemIdentifier.replace(/[^a-zA-Z0-9]/g,'_')}`;
+          const payoutIdAlt=`PAY-${oid}-${itemIndex}`;
+          const isPaidByAdmin = isPayoutPaid(payoutId, oid) || isPayoutPaid(payoutIdAlt, oid) || paidList.some(p=> p.includes(oid.substring(0,8)));
 
-    updateCategoryDropdown();
-    addAngleInput();
-    document.getElementById('productModal').classList.add('open');
-}
+          if(isPaidByAdmin) totalPaidOut+=netPayout;
+          else totalSellerEarningsPending+=netPayout;
 
-function startEditProduct(id) {
-    if (vendorAccountStatus !== 'active') {
-        alert('⚠️ Error: Your account is pending admin approval. You cannot edit products.');
-        return;
-    }
-    const product = productsCache.find(p => extractId(p._id || p.id) === String(id));
-    if (!product) return;
+          totalGrossSales+=grossSales;
+          totalPlatformFees+=platformFeeTotal;
 
-    editingProductId = id;
-    document.getElementById('mp-title').innerText = "Edit Piece (ID: " + id.substring(Math.max(0, id.length - 5)) + ")";
-    document.getElementById('submitBtn').innerText = "SAVE CHANGES";
+          let badgeClass='badge-pending';
+          let displayStatus='PENDING';
+          if(isPaidByAdmin){ badgeClass='badge-paid'; displayStatus='PAID ✓'; }
 
-    document.getElementById('p_name').value = product.name || '';
-    document.getElementById('p_gender').value = product.gender || 'Men';
-    updateCategoryDropdown(product.category || '');
-    
-    let productSizes = [];
-    if (Array.isArray(product.sizes) && product.sizes.length > 0) {
-        productSizes = product.sizes.map(s => String(s).trim().toUpperCase());
-    } else if (typeof product.sizes === 'string' && product.sizes.trim().length > 0) {
-        productSizes = product.sizes.split(',').map(s => s.trim().toUpperCase());
-    } else if (product.size && typeof product.size === 'string') {
-        productSizes = product.size.split(',').map(s => s.trim().toUpperCase());
-    }
+          ledgerHtml+=`<tr style="${isPaidByAdmin?'background:#f0faf0;opacity:0.8;':''}"><td><b>${payoutId}</b></td><td>Order #${oid.substring(Math.max(0, oid.length-5)).toUpperCase()}</td><td>$${grossSales.toFixed(2)}</td><td style="color:var(--rust);">$${platformFeeTotal.toFixed(2)}</td><td><b>$${netPayout.toFixed(2)}</b></td><td><span class="${badgeClass}">${displayStatus}</span></td></tr>`;
+        }
+      });
 
-    document.querySelectorAll('input[name="product_size"]').forEach(cb => {
-        cb.checked = productSizes.includes(cb.value.trim().toUpperCase());
+      const status=(o.status||'pending').toLowerCase();
+      if(status==='pending'||status==='processing') pendingCount++;
     });
 
-    document.getElementById('p_price').value = product.seller_price || product.price || '';
-    document.getElementById('p_stock').value = product.stock || 1;
-    document.getElementById('p_desc').value = product.description || '';
+    // Pending counts are AFTER deducting paid amounts - this makes it decrease automatically
+    document.getElementById('statRevenue').innerText=`$${vendorAccountStatus==='active'?(totalSellerEarningsPending+totalPaidOut).toFixed(2):'0.00'}`;
+    document.getElementById('statOrders').innerText=pendingCount;
+    document.getElementById('fin-gross').innerText=`$${vendorAccountStatus==='active'?totalGrossSales.toFixed(2):'0.00'}`;
+    document.getElementById('fin-fees').innerText=`$${vendorAccountStatus==='active'?totalPlatformFees.toFixed(2):'0.00'}`;
+    document.getElementById('fin-net').innerText=`$${vendorAccountStatus==='active'?totalSellerEarningsPending.toFixed(2):'0.00'}`;
+    const paidEl=document.getElementById('fin-paid'); if(paidEl) paidEl.innerText=`$${vendorAccountStatus==='active'?totalPaidOut.toFixed(2):'0.00'}`;
 
-    document.getElementById('anglesContainer').innerHTML = '';
-    let gallery = Array.isArray(product.images) ? product.images : (product.image ? [product.image] : []);
-    if (gallery.length === 0) gallery.push('');
-    gallery.forEach(imgUrl => addAngleInput(imgUrl));
-
-    calculateVendorCustomerPricePreview();
-    document.getElementById('productModal').classList.add('open');
+    if(vendorAccountStatus==='active' && hasLedgerItems){ document.getElementById('finance-ledger-tbody').innerHTML=ledgerHtml; } else { document.getElementById('finance-ledger-tbody').innerHTML=`<tr><td colspan="6" class="empty-state">No settlement records found.</td></tr>`; }
+  }catch(e){ document.getElementById('vendorOrderList').innerHTML=`<tr><td colspan="7" class="empty-state" style="color:var(--rust);">Error loading orders: ${e.message}</td></tr>`; }
+}
+function renderProductsTable(){
+  const tbody=document.getElementById('vendorProductList'); if(!tbody) return; const searchInput=document.getElementById('product-search'); const query=searchInput?searchInput.value.toLowerCase():'';
+  const filtered=productsCache.filter(p=>{ const matchesStatus=currentProductFilter==='all'||p.status===currentProductFilter; const matchesSearch=(p.name||'').toLowerCase().includes(query)||(p.category||'').toLowerCase().includes(query)||(p.gender||'').toLowerCase().includes(query); return matchesStatus && matchesSearch; });
+  if(filtered.length===0){ tbody.innerHTML=`<tr><td colspan="8" class="empty-state">No matching inventory items found.</td></tr>`; return; }
+  tbody.innerHTML=filtered.map(p=>{
+    const prodId=extractId(p._id||p.id); const imgSrc=escapeHtml(p.image||p.image_path||'/uploads/placeholder.png'); const status=p.status||'live'; const displaySizes=Array.isArray(p.sizes)?p.sizes.join(', '):(p.size||'M');
+    const sPrice=Number(p.seller_price||p.price||0); let pFee=Number(p.platform_fee||0); if(!pFee && p.category){ const foundCat=vendorCategoryFees.find(c=> c.name.toLowerCase()===String(p.category).toLowerCase()); pFee=foundCat?foundCat.fee:10; } else if(!pFee){ pFee=10; } const cPrice=Number(p.customer_price||(sPrice+pFee));
+    return `<tr><td><img src="${imgSrc}" style="width:36px;height:36px;object-fit:cover;border:1px solid var(--border);" onerror="this.style.display='none'"></td><td><strong>${escapeHtml(p.name||'Untitled')}</strong></td><td>${escapeHtml(p.category||'Archive')} • ${escapeHtml(p.gender||'Men')}</td><td>${escapeHtml(displaySizes)}</td><td>Seller: $${sPrice.toFixed(2)}<br><span style="color:var(--gold);font-size:10px;">Fee: $${pFee.toFixed(2)}</span><br><b>Customer: $${cPrice.toFixed(2)}</b><br><span style="font-size:9px;opacity:0.6;">Stock: ${p.stock||1}</span></td><td>${p.views||42}</td><td><span class="status-badge ${status==='live'?'status-paid':'status-pending'}">${status.toUpperCase()}</span></td><td><button onclick="startEditProduct('${prodId}')" style="background:#2d6a4f;color:#fff;border:none;padding:4px 8px;font-size:9px;cursor:pointer;border-radius:3px;margin-right:4px;" type="button">EDIT</button><button onclick="deleteProduct('${prodId}')" style="background:#a85d35;color:#fff;border:none;padding:4px 8px;font-size:9px;cursor:pointer;border-radius:3px;" type="button">REMOVE</button></td></tr>`;
+  }).join('');
+}
+function renderOrdersTable(){
+  const tbody=document.getElementById('vendorOrderList'); if(!tbody) return; const searchInput=document.getElementById('order-search'); const query=searchInput?searchInput.value.toLowerCase():'';
+  const storeName=document.getElementById('settings-store-name').value; const storeEmail=document.getElementById('settings-store-email').value;
+  const filtered=ordersCache.filter(o=>{
+    const status=(o.status||'pending').toLowerCase(); const matchesStatus=currentOrderFilter==='all'||status===currentOrderFilter;
+    const orderIdStr=extractId(o._id||o.id).toLowerCase(); const customerStr=(o.customer_name||o.name||o.email||'').toLowerCase(); const matchesSearch=orderIdStr.includes(query)||customerStr.includes(query); return matchesStatus && matchesSearch;
+  });
+  if(filtered.length===0){ tbody.innerHTML=`<tr><td colspan="7" class="empty-state">No incoming orders found matching criteria.<br><span style="font-size:11px;">Checked ${ordersCache.length} orders from localStorage + API. Do a buyer checkout on storefront - order will appear here instantly.</span></td></tr>`; return; }
+  tbody.innerHTML=filtered.map(o=>{
+    const orderId=extractId(o._id||o.id); const status=(o.status||'pending').toLowerCase(); const items=o.items||o.products||[]; const vendorItems=items.filter(i=> itemBelongsToVendor(i, currentVendorId, storeName, storeEmail));
+    let orderTotal=0; vendorItems.forEach(i=>{ const qty=Number(i.qty||i.quantity||1); const sPrice=Number(i.seller_price||i.price||i.unit_price)||0; let pFee=Number(i.platform_fee||0); if(!pFee && i.category){ const foundCat=vendorCategoryFees.find(c=> c.name.toLowerCase()===String(i.category).toLowerCase()); pFee=foundCat?foundCat.fee:10; } else if(!pFee){ pFee=10; } const cPrice=Number(i.customer_price||(sPrice+pFee)); orderTotal+=(cPrice*qty); });
+    if(orderTotal===0) orderTotal=Number(o.total||o.grand_total||0);
+    const customerName=o.customer_name||o.name||o.email||'Collector'; let paymentDisplay=o.payment_status||o.payment_method||'PAID'; if(paymentDisplay==='COD_PENDING' && (status==='delivered'||status==='completed')){ paymentDisplay='PAID'; }
+    const orderDate=(o.created_at||o.date||'').substring(0,10)||'Recent';
+    const itemsSummary= vendorItems.length>0? vendorItems.map(i=> `${i.qty||1}x ${i.name||'Item'} (${i.size||'M'})`).join(', ') : (o.customer_name||'Order') + ' - 1 order';
+    let statusClass='status-pending'; if(status==='paid'||status==='delivered') statusClass='status-paid'; if(status==='processing') statusClass='status-processing'; if(status==='shipped') statusClass='status-shipped';
+    let actionButtons=`<div style="min-width:180px;"><select class="retro-input" style="padding:6px;font-size:11px;margin-bottom:6px;width:100%;" onchange="updateOrderStatus('${orderId}', this.value)"><option value="pending" ${status==='pending'?'selected':''}>Pending</option><option value="processing" ${status==='processing'?'selected':''}>Processing</option><option value="shipped" ${status==='shipped'?'selected':''}>Shipped</option><option value="delivered" ${status==='delivered'?'selected':''}>Delivered</option></select><div style="display:flex;gap:4px;flex-wrap:wrap;"><button onclick="promptAndShipOrder('${orderId}')" style="background:#2d6a4f;color:#fff;border:none;padding:5px 8px;font-size:9px;cursor:pointer;border-radius:3px;" type="button">SHIP & TRACK</button><button onclick="viewVendorOrder('${orderId}')" style="background:#111;color:#fff;border:none;padding:5px 8px;font-size:9px;cursor:pointer;border-radius:3px;" type="button">VIEW</button><button onclick="printStoreInvoice('${orderId}')" style="background:#0077b6;color:#fff;border:none;padding:5px 8px;font-size:9px;cursor:pointer;border-radius:3px;" type="button">INVOICE</button></div></div>`;
+    if(status==='shipped'||status==='delivered'){ const trackingInfo=o.tracking_number?`<br><span style="font-size:9px;font-family:monospace;">Courier: ${o.courier||'N/A'}<br>Tracking: ${o.tracking_number}</span>`:'';
+      actionButtons=`<div style="min-width:180px;"><select class="retro-input" style="padding:6px;font-size:11px;margin-bottom:6px;width:100%;" onchange="updateOrderStatus('${orderId}', this.value)"><option value="pending" ${status==='pending'?'selected':''}>Pending</option><option value="processing" ${status==='processing'?'selected':''}>Processing</option><option value="shipped" ${status==='shipped'?'selected':''}>Shipped</option><option value="delivered" ${status==='delivered'?'selected':''}>Delivered</option></select><div style="display:flex;gap:4px;flex-wrap:wrap;"><button onclick="viewVendorOrder('${orderId}')" style="background:#111;color:#fff;border:none;padding:5px 8px;font-size:9px;" type="button">VIEW</button><button onclick="printStoreInvoice('${orderId}')" style="background:#0077b6;color:#fff;border:none;padding:5px 8px;font-size:9px;" type="button">INVOICE</button></div>${trackingInfo}</div>`;
+    }
+    return `<tr><td style="font-family:monospace;font-size:10px;">#AW-${orderId.substring(Math.max(0, orderId.length-5)).toUpperCase()}</td><td><strong>${escapeHtml(customerName)}</strong><br><span style="font-size:9px;opacity:.6;">${escapeHtml(o.email||'')}</span></td><td><span class="status-badge active" style="font-size:9px;">${escapeHtml(paymentDisplay)}</span></td><td style="font-size:11px;max-width:200px;">${escapeHtml(itemsSummary)}</td><td><b>$${orderTotal.toFixed(2)}</b></td><td>${orderDate}</td><td><div style="display:flex;flex-direction:column;gap:4px;"><span class="status-badge ${statusClass}">${status.toUpperCase()}</span>${actionButtons}</div></td></tr>`;
+  }).join('');
 }
 
-async function saveProduct(e) {
-    e.preventDefault();
-    if (!currentVendorId) return;
+function viewVendorOrder(id){
+  const o=ordersCache.find(x=> extractId(x._id||x.id)===String(id));
+  if(!o) return alert('Order not found');
+  const oid=extractId(o._id||o.id);
+  const body=byId('ov-body');
+  body.innerHTML=`
+    <p><b>Order ID:</b> #AW-${oid.substring(0,6).toUpperCase()}</p>
+    <p><b>Customer:</b> ${escapeHtml(o.customer_name||o.name||o.email||'')} - ${escapeHtml(o.email||'')}</p>
+    <p><b>Address:</b> ${escapeHtml(o.address||o.shipping_address||'')}, ${escapeHtml(o.city||'')}, ${escapeHtml(o.zip||'')}</p>
+    <p><b>Status:</b> ${(o.status||'pending').toUpperCase()} (You control this - Admin views it)</p>
+    <p><b>Total:</b> $${Number(o.total||o.grand_total||0).toFixed(2)}</p>
+    <hr>
+    <p><b>Items:</b></p>
+    <table border=1 cellpadding=6 style="width:100%;border-collapse:collapse;font-size:12px;"><tr><th>Product</th><th>Qty</th><th>Price</th></tr>
+    ${(o.items||[]).map(i=>`<tr><td>${escapeHtml(i.name||'Item')}</td><td>${i.qty||1}</td><td>$${Number(i.customer_price||i.price||0).toFixed(2)}</td></tr>`).join('') || `<tr><td colspan=3>No items array - total $${o.total}</td></tr>`}
+    </table>
+    <div style="margin-top:12px;"><button class="primary" onclick="promptAndShipOrder('${oid}')">SHIP & TRACK</button> <button class="secondary" onclick="forceCloseModal('orderViewModal')">CLOSE</button></div>
+  `;
+  byId('ov-title').innerText='Order #AW-'+oid.substring(0,6).toUpperCase();
+  byId('orderViewModal').classList.add('open');
+}
 
-    if (vendorAccountStatus !== 'active') {
-        alert('⚠️ Error: Your store account is pending approval. Product submissions are locked.');
-        return;
+function numberToWords(num){ if(isNaN(num)) return ''; if(num===0) return 'Zero Dollars Only'; const units=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen']; const tens=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety']; function convert(n){ if(n<20) return units[n]; if(n<100) return tens[Math.floor(n/10)]+(n%10?' '+units[n%10]:''); if(n<1000) return units[Math.floor(n/100)]+' Hundred'+(n%100?' '+convert(n%100):''); if(n<1000000) return convert(Math.floor(n/1000))+' Thousand'+(n%1000?' '+convert(n%1000):''); return n.toString(); } return convert(Math.round(num))+' Dollars Only'; }
+function printStoreInvoice(orderId){
+  const order=ordersCache.find(o=> extractId(o._id||o.id)===String(orderId)); if(!order){ alert('Order details not found for invoice.'); return; }
+  const storeName=document.getElementById('settings-store-name').value||'Vendor Store'; const storeEmail=document.getElementById('settings-store-email').value||'vendor@aurawear.com'; const items=(order.items||[]).filter(i=> itemBelongsToVendor(i, currentVendorId, storeName, storeEmail));
+  const finalItems = items.length>0? items : (order.items||[{name:'Order', qty:1, customer_price: order.total||0}]);
+  let subtotal=0; finalItems.forEach(i=>{ const qty=Number(i.qty||i.quantity||1); const sPrice=Number(i.seller_price||i.price||i.unit_price)||0; let pFee=Number(i.platform_fee||0); if(!pFee && i.category){ const foundCat=vendorCategoryFees.find(c=> c.name.toLowerCase()===String(i.category).toLowerCase()); pFee=foundCat?foundCat.fee:10; } else if(!pFee){ pFee=10; } const cPrice=Number(i.customer_price||(sPrice+pFee)||order.total||0); subtotal+=(cPrice*qty); });
+  if(subtotal===0) subtotal=Number(order.total||0);
+  const shippingRate=Number(order.shipping||order.shipping_rate||15.00); const totalAmount=subtotal+shippingRate;
+  const customerName=escapeHtml(order.customer_name||(order.first_name?`${order.first_name} ${order.last_name||''}`:'')||order.name||'Valued Customer'); const customerEmail=escapeHtml(order.email||'N/A'); const customerPhone=escapeHtml(order.phone||'N/A');
+  const shippingAddress=escapeHtml(order.address?`${order.address}, ${order.city||''} ${order.zip||''}`:'N/A'); const billingAddress=escapeHtml(order.billing_address||order.address?`${order.address}, ${order.city||''} ${order.zip||''}`:'N/A');
+  const orderDate=escapeHtml((order.created_at||order.date||'').substring(0,10)|| new Date().toLocaleDateString()); const invoiceDate=new Date().toLocaleDateString(); const invoiceNumber='INV-'+orderId.substring(Math.max(0, orderId.length-6)).toUpperCase(); const formattedOrderId='#AW-'+orderId.substring(Math.max(0, orderId.length-5)).toUpperCase();
+  const win=window.open('', '_blank');
+  win.document.write(`<html><head><title>Invoice - ${invoiceNumber}</title><style>body{font-family:monospace;padding:30px;color:#111;background:#fff;max-width:800px;margin:auto;}.invoice-header{display:flex;justify-content:space-between;border-bottom:2px solid #111;padding-bottom:15px;margin-bottom:20px;}.details-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;font-size:12px;} table{width:100%;border-collapse:collapse;margin-top:20px;font-size:12px;} th,td{border:1px solid #111;padding:10px;text-align:left;} th{background:#f0f0f0;}.totals{margin-top:20px;text-align:right;font-size:13px;}.words{margin-top:10px;font-style:italic;font-size:12px;}</style></head><body><div class="invoice-header"><div><h2>AURAWEAR INVOICE</h2><p><strong>Store:</strong> ${escapeHtml(storeName)} (${escapeHtml(storeEmail)})</p><p><strong>Invoice Number:</strong> ${invoiceNumber}</p><p><strong>Order ID:</strong> ${formattedOrderId}</p></div><div><p><strong>Order Date:</strong> ${orderDate}</p><p><strong>Invoice Date:</strong> ${invoiceDate}</p></div></div><div class="details-grid"><div><h3>Customer Details</h3><p><strong>Name:</strong> ${customerName}</p><p><strong>Email:</strong> ${customerEmail}</p><p><strong>Phone:</strong> ${customerPhone}</p></div><div><h3>Addresses</h3><p><strong>Shipping Address:</strong><br>${shippingAddress}</p><p><strong>Billing Address:</strong><br>${billingAddress}</p></div></div><table><thead><tr><th>Product Details</th><th>Size</th><th>Qty</th><th>Customer Price</th><th>Subtotal</th></tr></thead><tbody>${finalItems.map(i=>{ const qty=Number(i.qty||i.quantity||1); const sPrice=Number(i.seller_price||i.price||i.unit_price)||0; let pFee=Number(i.platform_fee||0); if(!pFee && i.category){ const foundCat=vendorCategoryFees.find(c=> c.name.toLowerCase()===String(i.category).toLowerCase()); pFee=foundCat?foundCat.fee:10; } else if(!pFee){ pFee=10; } const cPrice=Number(i.customer_price||(sPrice+pFee)||order.total||0); return `<tr><td>${escapeHtml(i.name||'Item')}</td><td>${escapeHtml(i.size||'M')}</td><td>${qty}</td><td>$${cPrice.toFixed(2)}</td><td>$${(qty*cPrice).toFixed(2)}</td></tr>`; }).join('')}</tbody></table><div class="totals"><p>Subtotal: $${subtotal.toFixed(2)}</p><p>Shipping Rate: $${shippingRate.toFixed(2)}</p><h3>Total Amount: $${totalAmount.toFixed(2)}</h3><div class="words">Amount in Words: ${numberToWords(totalAmount)}</div></div><script>window.print();<\/script></body></html>`);
+  win.document.close();
+}
+function setProductFilter(btnElement){ document.querySelectorAll('#products.filter-btn').forEach(btn=> btn.classList.remove('active')); btnElement.classList.add('active'); currentProductFilter=btnElement.getAttribute('data-pstatus'); renderProductsTable(); }
+function filterVendorProducts(){ renderProductsTable(); }
+function setOrderFilter(btnElement){ document.querySelectorAll('#orders.filter-btn').forEach(btn=> btn.classList.remove('active')); btnElement.classList.add('active'); currentOrderFilter=btnElement.getAttribute('data-ostatus'); renderOrdersTable(); }
+function filterVendorOrders(){ renderOrdersTable(); }
+function addAngleInput(existingUrl=''){
+  const container=document.getElementById('anglesContainer'); const div=document.createElement('div'); div.className='angle-row'; div.style.cssText='display:flex; gap:8px; align-items:center; margin-bottom:8px;';
+  div.innerHTML=`${existingUrl?`<img src="${existingUrl}" style="width:35px;height:40px;object-fit:cover;border:1px solid var(--border-dark);">`:''}<input type="file" accept="image/*" class="angle-file-input" style="padding:6px;background:#fff;flex:1;font-size:11px;"><input type="hidden" class="angle-url-input" value="${existingUrl}"><button type="button" onclick="this.parentElement.remove()" style="background:#a85d35;color:#fff;border:none;padding:8px 12px;font-size:10px;cursor:pointer;border-radius:3px;">✕</button>`;
+  container.appendChild(div);
+}
+function openProductModal(){
+  if(vendorAccountStatus!=='active'){ alert('⚠ Error: Your account is pending admin approval. You cannot upload products.'); return; }
+  editingProductId=null; document.getElementById('mp-title').innerText="List New Piece"; document.getElementById('submitBtn').innerText="PUBLISH TO STORE"; document.getElementById('productForm').reset(); document.getElementById('anglesContainer').innerHTML=''; document.querySelectorAll('input[name="product_size"]').forEach(cb=> cb.checked=false);
+  updateCategoryDropdown(); addAngleInput(); document.getElementById('productModal').classList.add('open');
+}
+function startEditProduct(id){
+  if(vendorAccountStatus!=='active'){ alert('⚠ Error: Your account is pending admin approval. You cannot edit products.'); return; }
+  const product=productsCache.find(p=> extractId(p._id||p.id)===String(id)); if(!product) return;
+  editingProductId=id; document.getElementById('mp-title').innerText="Edit Piece (ID: "+id.substring(Math.max(0, id.length-5))+")"; document.getElementById('submitBtn').innerText="SAVE CHANGES";
+  document.getElementById('p_name').value=product.name||''; document.getElementById('p_gender').value=product.gender||'Men'; updateCategoryDropdown(product.category||'');
+  let productSizes=[]; if(Array.isArray(product.sizes) && product.sizes.length>0){ productSizes=product.sizes.map(s=> String(s).trim().toUpperCase()); } else if(typeof product.sizes==='string' && product.sizes.trim().length>0){ productSizes=product.sizes.split(',').map(s=> s.trim().toUpperCase()); } else if(product.size && typeof product.size==='string'){ productSizes=product.size.split(',').map(s=> s.trim().toUpperCase()); }
+  document.querySelectorAll('input[name="product_size"]').forEach(cb=>{ cb.checked=productSizes.includes(cb.value.trim().toUpperCase()); });
+  document.getElementById('p_price').value=product.seller_price||product.price||''; document.getElementById('p_stock').value=product.stock||1; document.getElementById('p_desc').value=product.description||'';
+  document.getElementById('anglesContainer').innerHTML=''; let gallery=Array.isArray(product.images)?product.images:(product.image?[product.image]:[]); if(gallery.length===0) gallery.push(''); gallery.forEach(imgUrl=> addAngleInput(imgUrl));
+  calculateVendorCustomerPricePreview(); document.getElementById('productModal').classList.add('open');
+}
+async function saveProduct(e){
+  e.preventDefault(); if(!currentVendorId) return;
+  if(vendorAccountStatus!=='active'){ alert('⚠ Error: Your store account is pending approval. Product submissions are locked.'); return; }
+  const statusEl=document.getElementById('formStatus'); statusEl.style.color='var(--text-ink)'; statusEl.innerText=editingProductId?'Saving changes...':'Publishing to store...';
+  try{
+    const angleRows=document.querySelectorAll('.angle-row'); let galleryImagePaths=[];
+    for(let row of angleRows){
+      const fileInput=row.querySelector('.angle-file-input'); const hiddenUrl=row.querySelector('.angle-url-input');
+      if(fileInput && fileInput.files[0]){
+        const formDa=new FormData(); formDa.append('file', fileInput.files[0]);
+        const upRes=await fetch('/api/upload',{method:'POST', body:formDa}); const upData=await upRes.json();
+        const path=upData.file_path||upData.path||(upData.filename?`/uploads/${upData.filename}`:""); if(path) galleryImagePaths.push(path);
+      } else if(hiddenUrl && hiddenUrl.value.trim()){ galleryImagePaths.push(hiddenUrl.value.trim()); }
     }
-
-    const statusEl = document.getElementById('formStatus');
-    statusEl.style.color = 'var(--text-ink)';
-    statusEl.innerText = editingProductId ? 'Saving changes...' : 'Publishing to store...';
-
-    try {
-        const angleRows = document.querySelectorAll('.angle-row');
-        let galleryImagePaths = [];
-        
-        for (let row of angleRows) {
-            const fileInput = row.querySelector('.angle-file-input');
-            const hiddenUrl = row.querySelector('.angle-url-input');
-
-            if (fileInput && fileInput.files[0]) {
-                const formDa = new FormData();
-                formDa.append('file', fileInput.files[0]);
-                const upRes = await fetch('/api/upload', { 
-                    method: 'POST', 
-                    body: formDa 
-                });
-                const upData = await upRes.json();
-                const path = upData.file_path || upData.path || (upData.filename ? `/uploads/${upData.filename}` : "");
-                if (path) galleryImagePaths.push(path);
-            } else if (hiddenUrl && hiddenUrl.value.trim()) {
-                galleryImagePaths.push(hiddenUrl.value.trim());
-            }
-        }
-
-        const primaryImg = galleryImagePaths.length > 0 ? galleryImagePaths[0] : 'https://via.placeholder.com/150';
-
-        const rawPriceInput = parseFloat(document.getElementById('p_price').value) || 0;
-        const sellerPrice = parseFloat(rawPriceInput.toFixed(2));
-        const category = document.getElementById('p_category').value;
-
-        const catObj = vendorCategoryFees.find(c => c.name === category);
-        const platformFee = catObj ? Number(catObj.fee) : 10;
-        const customerPrice = sellerPrice + platformFee;
-
-        const checkedSizes = Array.from(document.querySelectorAll('input[name="product_size"]:checked')).map(cb => cb.value);
-        const finalSizeString = checkedSizes.length > 0 ? checkedSizes.join(', ') : 'M';
-
-        const payload = {
-            name: document.getElementById('p_name').value.trim(),
-            gender: document.getElementById('p_gender').value,
-            category: category,
-            size: finalSizeString,
-            sizes: checkedSizes.length > 0 ? checkedSizes : ['M'],
-            seller_price: sellerPrice,
-            platform_fee: platformFee,
-            customer_price: customerPrice,
-            price: customerPrice,
-            stock: parseInt(document.getElementById('p_stock').value) || 1,
-            image_path: primaryImg,
-            image: primaryImg,
-            images: galleryImagePaths,
-            description: document.getElementById('p_desc').value.trim(),
-            vendor_id: currentVendorId,
-            status: 'live',
-            vendor_name: document.getElementById('settings-store-name')?.value || 'Marketplace Seller'
-        };
-
-        const endpoint = editingProductId ? `/api/products/${editingProductId}` : '/api/products';
-        const method = editingProductId ? 'PUT' : 'POST';
-
-        const res = await fetch(endpoint, {
-            method: method,
-            headers: { 
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
+    const primaryImg=galleryImagePaths.length>0?galleryImagePaths[0]:'https://via.placeholder.com/150';
+    const rawPriceInput=parseFloat(document.getElementById('p_price').value)||0; const sellerPrice=parseFloat(rawPriceInput.toFixed(2)); const category=document.getElementById('p_category').value;
+    const catObj=vendorCategoryFees.find(c=> c.name===category); const platformFee=catObj?Number(catObj.fee):10; const customerPrice=sellerPrice+platformFee;
+    const checkedSizes=Array.from(document.querySelectorAll('input[name="product_size"]:checked')).map(cb=> cb.value); const finalSizeString=checkedSizes.length>0?checkedSizes.join(', '):'M';
+    const payload={ name:document.getElementById('p_name').value.trim(), gender:document.getElementById('p_gender').value, category:category, size:finalSizeString, sizes:checkedSizes.length>0?checkedSizes:['M'], seller_price:sellerPrice, platform_fee:platformFee, customer_price:customerPrice, price:customerPrice, stock:parseInt(document.getElementById('p_stock').value)||1, image_path:primaryImg, image:primaryImg, images:galleryImagePaths, description:document.getElementById('p_desc').value.trim(), vendor_id:currentVendorId, vendor_name:byId('settings-store-name')?.value||'Vendor', vendor_email:byId('settings-store-email')?.value||'', status:'live' };
+    const endpoint=editingProductId?`/api/products/${editingProductId}`:'/api/products'; const method=editingProductId?'PUT':'POST';
+    const res=await fetch(endpoint,{method:method, headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)}); const data=await res.json();
+    if(res.ok||data.success){
+      const assignedId=data.product_id||data.id||editingProductId||('PROD-'+Date.now()); const persistedRecord={...payload, id:assignedId, _id:assignedId};
+      let localProducts=JSON.parse(localStorage.getItem('marketplace_products')||'[]');
+      if(editingProductId){ localProducts=localProducts.map(p=> String(p.id||p._id)===String(editingProductId)?persistedRecord:p); if(!localProducts.some(p=> String(p.id||p._id)===String(editingProductId))){ localProducts.unshift(persistedRecord); } } else { localProducts.unshift(persistedRecord); }
+      localStorage.setItem('marketplace_products', JSON.stringify(localProducts));
+      statusEl.style.color='#2d6a4f'; statusEl.innerText=editingProductId?'✓ Changes saved successfully!':'✓ Successfully listed to archive store!'; forceCloseModal('productModal'); loadVendorData(currentVendorId, document.getElementById('settings-store-name')?.value||'', document.getElementById('settings-store-email')?.value||'', '');
+    } else { statusEl.style.color='#a85d35'; statusEl.innerText=data.error||'Failed to save product.'; }
+  }catch(err){ statusEl.style.color='#a85d35'; statusEl.innerText='Server error during submission.'; }
+}
+async function deleteProduct(id){
+  if(vendorAccountStatus!=='active'){ alert('⚠ Error: Your account is pending admin approval.'); return; }
+  if(!confirm("Are you sure you want to remove this piece from the archive?")) return;
+  await fetch(`/api/products/${id}`,{method:'DELETE'});
+  let localProducts=JSON.parse(localStorage.getItem('marketplace_products')||'[]'); localProducts=localProducts.filter(p=> String(p.id||p._id)!==String(id)); localStorage.setItem('marketplace_products', JSON.stringify(localProducts));
+  loadVendorData(currentVendorId, document.getElementById('settings-store-name')?.value||'', document.getElementById('settings-store-email')?.value||'', '');
+}
+async function promptAndShipOrder(orderId){
+  const courier=prompt("Enter Courier Name (e.g., FedEx, DHL, UPS):","FedEx"); if(courier===null) return;
+  const trackingNumber=prompt("Enter Tracking Number:",""); if(trackingNumber===null) return;
+  try{
+    const res=await fetch(`/api/orders/${orderId}/tracking`,{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({courier, tracking_number:trackingNumber})});
+    const data=await res.json();
+    ['marketplace_orders','aurawear_orders','orders'].forEach(k=>{
+      try{
+        let arr=JSON.parse(localStorage.getItem(k)||'[]');
+        arr=arr.map(o=> String(o._id||o.id)===String(orderId)? {...o, courier, tracking_number:trackingNumber, status:'shipped'} : o);
+        localStorage.setItem(k, JSON.stringify(arr));
+      }catch{}
+    });
+    alert('✓ Order marked as shipped and tracking info saved. Admin will see SHIPPED status.');
+    loadVendorData(currentVendorId, document.getElementById('settings-store-name')?.value||'', document.getElementById('settings-store-email')?.value||'', '');
+  }catch(e){ alert('Server connection error while saving tracking - but localStorage updated'); loadVendorData(currentVendorId, byId('settings-store-name')?.value, byId('settings-store-email')?.value, ''); }
+}
+async function updateOrderStatus(orderId,newStatus){
+  if(!confirm(`Update order status to ${newStatus.toUpperCase()}? Admin will see this change.`)) { loadVendorData(currentVendorId, byId('settings-store-name')?.value, byId('settings-store-email')?.value, ''); return; }
+  try{
+    const payload={status:newStatus}; const order=ordersCache.find(o=> extractId(o._id||o.id)===String(orderId));
+    if(order && newStatus==='delivered' && (order.payment_method==='COD'||order.payment_status==='COD_PENDING')){ payload.payment_status='PAID'; }
+    ['marketplace_orders','aurawear_orders','orders','checkout_orders'].forEach(k=>{
+      try{
+        let arr=JSON.parse(localStorage.getItem(k)||'[]');
+        let changed=false;
+        arr=arr.map(o=>{
+          if(String(o._id||o.id)===String(orderId)){
+            changed=true;
+            return {...o, status:newStatus,...payload};
+          }
+          return o;
         });
-        const data = await res.json();
-
-        if (res.ok || data.success) {
-            // Synchronize into local storage so admin master catalog immediately picks it up
-            const assignedId = data.product_id || data.id || editingProductId || ('PROD-' + Date.now());
-            const persistedRecord = { ...payload, id: assignedId, _id: assignedId };
-            
-            let localProducts = JSON.parse(localStorage.getItem('marketplace_products') || '[]');
-            if (editingProductId) {
-                localProducts = localProducts.map(p => String(p.id || p._id) === String(editingProductId) ? persistedRecord : p);
-                if (!localProducts.some(p => String(p.id || p._id) === String(editingProductId))) {
-                    localProducts.unshift(persistedRecord);
-                }
-            } else {
-                localProducts.unshift(persistedRecord);
-            }
-            localStorage.setItem('marketplace_products', JSON.stringify(localProducts));
-
-            statusEl.style.color = '#2d6a4f';
-            statusEl.innerText = editingProductId ? '✓ Changes saved successfully!' : '✓ Successfully listed to archive store!';
-            forceCloseModal('productModal');
-            loadVendorData(currentVendorId, document.getElementById('settings-store-name')?.value || '', document.getElementById('settings-store-email')?.value || '', '');
-        } else {
-            statusEl.style.color = '#a85d35';
-            statusEl.innerText = data.error || 'Failed to save product.';
-        }
-    } catch (err) {
-        statusEl.style.color = '#a85d35';
-        statusEl.innerText = 'Server error during submission.';
-    }
+        if(changed) localStorage.setItem(k, JSON.stringify(arr));
+      }catch{}
+    });
+    try{
+      await fetch(`/api/orders/${orderId}/status`,{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+    }catch{}
+    alert('✓ Status updated to '+newStatus.toUpperCase()+' - Admin dashboard will now show '+newStatus.toUpperCase());
+    loadVendorData(currentVendorId, document.getElementById('settings-store-name')?.value||'', document.getElementById('settings-store-email')?.value||'', '');
+  }catch(e){ alert('Error: '+e.message); }
 }
-
-async function deleteProduct(id) {
-    if (vendorAccountStatus !== 'active') {
-        alert('⚠️ Error: Your account is pending admin approval.');
-        return;
-    }
-    if (!confirm("Are you sure you want to remove this piece from the archive?")) return;
-    await fetch(`/api/products/${id}`, { method: 'DELETE' });
-    
-    // Also remove from localStorage sync
-    let localProducts = JSON.parse(localStorage.getItem('marketplace_products') || '[]');
-    localProducts = localProducts.filter(p => String(p.id || p._id) !== String(id));
-    localStorage.setItem('marketplace_products', JSON.stringify(localProducts));
-
-    loadVendorData(currentVendorId, document.getElementById('settings-store-name')?.value || '', document.getElementById('settings-store-email')?.value || '', '');
-}
-
-async function promptAndShipOrder(orderId) {
-    const courier = prompt("Enter Courier Name (e.g., FedEx, DHL, UPS):", "FedEx");
-    if (courier === null) return;
-    const trackingNumber = prompt("Enter Tracking Number:", "");
-    if (trackingNumber === null) return;
-
-    try {
-        const res = await fetch(`/api/orders/${orderId}/tracking`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ courier, tracking_number: trackingNumber })
-        });
-        const data = await res.json();
-        if (data.success) {
-            alert('✓ Order marked as shipped and tracking info saved.');
-            loadVendorData(currentVendorId, document.getElementById('settings-store-name')?.value || '', document.getElementById('settings-store-email')?.value || '', '');
-        } else {
-            alert(data.error || 'Failed to update tracking details.');
-        }
-    } catch (e) {
-        alert('Server connection error while saving tracking.');
-    }
-}
-
-async function updateOrderStatus(orderId, newStatus) {
-    if (!confirm(`Update order status to ${newStatus.toUpperCase()}?`)) return;
-    try {
-        const payload = { status: newStatus };
-        const order = ordersCache.find(o => extractId(o._id || o.id) === String(orderId));
-        if (order && newStatus === 'delivered' && (order.payment_method === 'COD' || order.payment_status === 'COD_PENDING')) {
-            payload.payment_status = 'PAID';
-        }
-
-        const res = await fetch(`/api/orders/${orderId}/status`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (data.success) {
-            loadVendorData(currentVendorId, document.getElementById('settings-store-name')?.value || '', document.getElementById('settings-store-email')?.value || '', '');
-        } else {
-            alert(data.error || 'Failed to update status.');
-        }
-    } catch (e) {
-        alert('Server connection error.');
-    }
-}
-
-function closeModal(event, modalId) {
-    if (event.target.id === modalId) {
-        forceCloseModal(modalId);
-    }
-}
-
-function forceCloseModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) modal.classList.remove('open');
-}
-
-function vendorLogout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('aurawear_token');
-    localStorage.removeItem('user');
-    window.location.href = '/login.html';
-}
+function closeModal(event,modalId){ if(event.target.id===modalId){ forceCloseModal(modalId); } }
+function forceCloseModal(modalId){ const modal=document.getElementById(modalId); if(modal) modal.classList.remove('open'); }
+function vendorLogout(){ localStorage.removeItem('token'); localStorage.removeItem('aurawear_token'); localStorage.removeItem('user'); window.location.href='/login.html'; }
 </script>
 </body>
 </html>

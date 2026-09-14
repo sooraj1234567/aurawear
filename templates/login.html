@@ -18,7 +18,7 @@
   <div class="card">
     <h1>AURAWEAR</h1>
     <div class="subtitle">HAUTE-COUTURE ARCHIVE CONCIERGE</div>
-    
+
     <div class="tabs">
       <div id="t1" class="tab active" onclick="showLogin()">SIGN IN</div>
       <div id="t2" class="tab" onclick="showReg()">CREATE ACCOUNT</div>
@@ -77,6 +77,18 @@ function showReg() {
   document.getElementById('msg').innerText = '';
 }
 
+function isLocallyApproved(id, email){
+  try{
+    const approved = JSON.parse(localStorage.getItem('marketplace_approved_vendors')||'{}');
+    const saved = JSON.parse(localStorage.getItem('saved_vendor_statuses')||'{}');
+    const k1 = String(id||'').toLowerCase();
+    const k2 = String(email||'').toLowerCase();
+    if(approved==='active' || approved==='active') return true;
+    if(saved==='active' || saved==='active') return true;
+    return false;
+  }catch{ return false; }
+}
+
 async function doLogin() {
   const email = document.getElementById('lemail').value.trim();
   const password = document.getElementById('lpass').value.trim();
@@ -93,24 +105,83 @@ async function doLogin() {
     const data = await res.json();
     if (data.success) {
       localStorage.setItem('aurawear_token', data.token);
-      
-      // Clear out any stale checkout redirect flags
+      localStorage.setItem('token', data.token);
       localStorage.removeItem('aurawear_redirect_after_login');
 
       const user = data.user || {};
       const role = (user.role || data.role || '').toLowerCase();
-      
+      const userId = user.id || user._id || data.id || data._id || email;
+      const userEmail = (user.email || email).toLowerCase();
+      const userName = user.name || user.storeName || email.split('@')[0];
+
+      // FIXED: Check local permanent approval first - never downgrade to pending
+      let finalStatus = (user.status || '').toLowerCase() || 'active';
+      if(role === 'vendor' || role === 'seller'){
+        if(isLocallyApproved(userId, userEmail)){
+          finalStatus = 'active';
+        } else if(!user.status){
+          finalStatus = 'pending';
+          // Check registeredUsers fallback
+          try{
+            const regs = JSON.parse(localStorage.getItem('registeredUsers')||'[]');
+            const found = regs.find(u=> String(u.email||'').toLowerCase()===userEmail);
+            if(found && String(found.status||'').toLowerCase()==='active') finalStatus='active';
+          }catch{}
+        }
+      }
+
       localStorage.setItem('user', JSON.stringify({
-        id: user.id || user._id || '',
-        name: user.name || email,
-        email: email,
-        role: role
+        id: userId,
+        _id: userId,
+        name: userName,
+        email: userEmail,
+        role: role,
+        status: finalStatus
       }));
 
+      // FIXED: Update registeredUsers with proper ID and status
+      try{
+        let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+        let foundIndex = -1;
+        registeredUsers = registeredUsers.map((u, idx)=>{
+          const uEmail = String(u.email||'').toLowerCase();
+          const uId = String(u.id||u._id||'').toLowerCase();
+          if(uEmail===userEmail || uId===String(userId).toLowerCase()){
+            foundIndex = idx;
+            // Don't downgrade active to pending if locally approved
+            let newStatus = finalStatus;
+            if(isLocallyApproved(userId, userEmail)) newStatus='active';
+            return {
+              id: userId,
+              _id: userId,
+              name: userName,
+              storeName: user.storeName || user.store || userName+"'s Store",
+              store: user.storeName || user.store || userName+"'s Store",
+              email: userEmail,
+              role: role,
+              status: newStatus
+            };
+          }
+          return u;
+        });
+        if(foundIndex===-1){
+          registeredUsers.push({
+            id: userId,
+            _id: userId,
+            name: userName,
+            storeName: user.storeName || user.store || userName+"'s Store",
+            store: user.storeName || user.store || userName+"'s Store",
+            email: userEmail,
+            role: role,
+            status: finalStatus
+          });
+        }
+        localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+      }catch(e){ console.error(e); }
+
       if (role === 'vendor' || role === 'seller') {
-        window.location.href = '/vendor';
+        window.location.href = '/vendor.html';
       } else {
-        // Always redirect normal buyers to home page
         window.location.href = '/';
       }
     } else {
@@ -118,6 +189,7 @@ async function doLogin() {
       msg.innerText = data.error || 'Login failed or account terminated.';
     }
   } catch (e) {
+    console.error(e);
     msg.style.color = '#a85d35';
     msg.innerText = 'Connection error.';
   }
@@ -130,7 +202,13 @@ async function doRegister() {
   const password = document.getElementById('rpass').value.trim();
   const role = document.getElementById('rrole').value.toLowerCase();
   const msg = document.getElementById('msg');
-  
+
+  if(!name ||!email ||!password){
+    msg.style.color = '#a85d35';
+    msg.innerText = 'Please fill all required fields.';
+    return;
+  }
+
   msg.style.color = '#1A1611';
   msg.innerText = 'Creating account...';
 
@@ -144,30 +222,56 @@ async function doRegister() {
     if (data.success) {
       if (data.token) {
         localStorage.setItem('aurawear_token', data.token);
+        localStorage.setItem('token', data.token);
       }
-      
+
       localStorage.removeItem('aurawear_redirect_after_login');
 
       const user = data.user || {};
+      const userId = user.id || user._id || data.id || email;
+      const userEmail = (user.email || email).toLowerCase();
+      const userName = user.name || name;
       const userRole = (user.role || role).toLowerCase();
 
+      // FIXED: Vendors start as pending unless already approved locally
+      let initialStatus = 'active';
+      if(userRole === 'vendor' || userRole === 'seller'){
+        initialStatus = isLocallyApproved(userId, userEmail)? 'active' : 'pending';
+      }
+
       localStorage.setItem('user', JSON.stringify({
-        id: user.id || user._id || '',
-        name: user.name || name,
-        email: email,
-        role: userRole
+        id: userId,
+        _id: userId,
+        name: userName,
+        email: userEmail,
+        role: userRole,
+        status: initialStatus
       }));
 
-      const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-      registeredUsers.push({
-        name: name,
-        email: email,
-        role: userRole
-      });
-      localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
-      
+      // FIXED: Save with FULL fields needed by admin.html
+      try{
+        const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+        // Remove old duplicate if exists
+        const filtered = registeredUsers.filter(u=> String(u.email||'').toLowerCase()!==userEmail);
+        filtered.push({
+          id: userId,
+          _id: userId,
+          name: userName,
+          storeName: userName+"'s Store",
+          store: userName+"'s Store",
+          owner: userName,
+          email: userEmail,
+          phone: phone,
+          role: userRole,
+          status: initialStatus
+        });
+        localStorage.setItem('registeredUsers', JSON.stringify(filtered));
+      }catch(e){ console.error(e); }
+
       if (userRole === 'vendor' || userRole === 'seller') {
-        window.location.href = '/vendor';
+        msg.style.color = '#2d6a4f';
+        msg.innerText = initialStatus==='active'? '✓ Account created and ACTIVE!' : '✓ Account created! Pending admin approval. Redirecting...';
+        setTimeout(()=>{ window.location.href = '/vendor.html'; }, 800);
       } else {
         window.location.href = '/';
       }
@@ -176,6 +280,7 @@ async function doRegister() {
       msg.innerText = data.error || 'Registration failed.';
     }
   } catch (e) {
+    console.error(e);
     msg.style.color = '#a85d35';
     msg.innerText = 'Connection error.';
   }

@@ -23,11 +23,8 @@ h1{font-family:Fraunces;font-size:48px;font-weight:300;margin:0;letter-spacing:2
 #modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;place-items:center;z-index:99;padding:20px}
 #modal.open{display:grid}
 .modal-box{background:#FBF8F3;border:1px solid rgba(0,0,0,.12);max-width:520px;width:100%;padding:24px;max-height:90vh;overflow-y:auto}
-
-/* Delete modal styling */
 #deleteModal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;place-items:center;z-index:2000;padding:20px}
 #deleteModal.open{display:grid}
-
 @media(max-width:900px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -37,8 +34,6 @@ h1{font-family:Fraunces;font-size:48px;font-weight:300;margin:0;letter-spacing:2
 <h1>MY ARCHIVE</h1><p id="welcome" style="opacity:.6"></p>
 <div class="grid">
 <div class="card">
-
-<!-- PROFILE IMAGE SECTION -->
 <div style="display:flex;align-items:center;gap:14px">
 <div style="position:relative;width:64px;height:64px">
 <div style="width:64px;height:64px;border:1px solid #000;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#fff">
@@ -50,9 +45,7 @@ h1{font-family:Fraunces;font-size:48px;font-weight:300;margin:0;letter-spacing:2
 <div><div style="font-size:11px;letter-spacing:2px">PROFILE PHOTO</div><div id="uploadStatus" style="font-size:10px;opacity:.6;margin-top:2px">Click ✎ to change</div></div>
 </div>
 <input type="file" id="avatarInput" accept="image/*" hidden>
-
 <div style="margin-top:16px"><div style="font-size:10px;letter-spacing:2px;opacity:.5">PROFILE</div><div id="pInfo" style="margin-top:10px;line-height:2.2;font-size:14px"></div></div>
-
 <div style="margin-top:18px;border-top:1px solid rgba(0,0,0,.1);padding-top:14px">
 <div style="font-size:10px;letter-spacing:2px;opacity:.5">MANAGE PROFILE</div>
 <input id="editName" class="edit-input" placeholder="Full Name">
@@ -61,21 +54,15 @@ h1{font-family:Fraunces;font-size:48px;font-weight:300;margin:0;letter-spacing:2
 <button class="btn" style="background:#1A1611;color:#fff;margin-top:12px" onclick="saveProfile()">SAVE CHANGES</button>
 <div id="saveMsg" style="font-size:11px;margin-top:8px;min-height:16px"></div>
 </div>
-
 <div style="margin-top:18px"><div style="font-size:10px;letter-spacing:2px;opacity:.5">PREFERENCES</div><div style="margin-top:8px;font-size:13px">Newsletter • Archive Letters — ON</div></div>
 <button class="btn" onclick="logout()">LOG OUT</button>
-
-<!-- DELETE ACCOUNT SECTION -->
 <div style="margin-top:16px;border-top:1px solid rgba(0,0,0,.1);padding-top:14px">
 <button class="btn" style="background:transparent;color:#b00;border-color:#b00" onclick="openDeleteModal()">DELETE ACCOUNT</button>
 </div>
-
 </div>
 <div>
   <div style="font-family:Fraunces;letter-spacing:2px;font-size:18px;margin-bottom:12px">MY ORDERS</div>
   <div id="orders"></div>
-  
-  <!-- MY MESSAGE & ADMIN REPLIES SECTION -->
   <div style="margin-top: 40px;">
     <h3 style="font-family: Fraunces; font-weight: 300; font-size: 24px; letter-spacing: 2px; margin-bottom: 16px;">MY MESSAGES & REPLIES</h3>
     <div id="userMessagesList" style="display: flex; flex-direction: column; gap: 14px;">
@@ -85,11 +72,7 @@ h1{font-family:Fraunces;font-size:48px;font-weight:300;margin:0;letter-spacing:2
 </div>
 </div>
 </div>
-
-<!-- ORDER DETAILS MODAL -->
 <div id="modal" onclick="if(event.target==this)closeModal()"><div class="modal-box"><div style="display:flex;justify-content:space-between"><h3 id="mTitle" style="font-family:Fraunces;margin:0"></h3><button onclick="closeModal()" style="background:none;border:1px solid rgba(0,0,0,.2);width:32px;height:32px;cursor:pointer">✕</button></div><div id="mBody" style="margin-top:16px"></div></div></div>
-
-<!-- DELETE ACCOUNT CONFIRMATION MODAL -->
 <div id="deleteModal" onclick="if(event.target==this)closeDeleteModal()">
   <div class="modal-box" style="border:2px dashed #b00">
     <div style="display:flex;justify-content:space-between;align-items:center">
@@ -97,7 +80,6 @@ h1{font-family:Fraunces;font-size:48px;font-weight:300;margin:0;letter-spacing:2
       <button onclick="closeDeleteModal()" style="background:none;border:1px solid rgba(0,0,0,.2);width:32px;height:32px;cursor:pointer">✕</button>
     </div>
     <p style="font-size:12px;opacity:.7;line-height:1.5;margin-top:12px">Are you sure you wish to permanently remove your archive profile? All personal tracking data will be removed.</p>
-    
     <label style="font-size:11px;font-weight:600;display:block;margin-top:14px;letter-spacing:1px">REASON FOR DELETION:</label>
     <select id="delReason" style="width:100%;padding:10px;margin-top:6px;border:1px solid rgba(0,0,0,.2);background:#fff;font-size:12px">
       <option value="No longer using the platform">No longer using the platform</option>
@@ -106,10 +88,8 @@ h1{font-family:Fraunces;font-size:48px;font-weight:300;margin:0;letter-spacing:2
       <option value="Created a duplicate account">Created a duplicate account</option>
       <option value="Other">Other reason (specify below)</option>
     </select>
-
     <label style="font-size:11px;font-weight:600;display:block;margin-top:12px;letter-spacing:1px">ADDITIONAL DETAILS (OPTIONAL):</label>
     <textarea id="delCustomReason" rows="3" placeholder="Tell us why you are leaving..." style="width:100%;padding:10px;margin-top:6px;border:1px solid rgba(0,0,0,.2);background:#fff;font-size:12px;resize:none;box-sizing:border-box"></textarea>
-    
     <div style="display:flex;gap:10px;margin-top:20px">
       <button onclick="closeDeleteModal()" style="flex:1;background:#fff;border:1px solid #1A1611;padding:12px;font-size:10px;letter-spacing:2px;cursor:pointer">CANCEL</button>
       <button onclick="confirmDeleteAccount()" style="flex:1;background:#b00;color:#fff;border:none;padding:12px;font-size:10px;letter-spacing:2px;cursor:pointer">CONFIRM DELETE</button>
@@ -127,6 +107,37 @@ function getOrderIdStr(id) {
   if (typeof id === 'object' && id.$oid) return id.$oid;
   if (typeof id === 'object' && id.id) return String(id.id);
   return String(id);
+}
+
+// ====== FIX: Read from API + localStorage (same as Admin fix) ======
+async function fetchAllBuyerOrdersCombined(email){
+  let combined=[];
+  // 1. API
+  try{
+    const ro=await fetch('/api/orders');
+    const od=await ro.json();
+    const apiOrders = od.orders|| (Array.isArray(od)?od:[]);
+    combined = combined.concat(apiOrders);
+  }catch(e){ console.log('API orders failed'); }
+  // 2. localStorage - checkout.html now saves here
+  const keys=['marketplace_orders','aurawear_orders','orders','checkout_orders','order_history'];
+  keys.forEach(k=>{
+    try{
+      const arr=JSON.parse(localStorage.getItem(k)||'[]');
+      if(Array.isArray(arr)) combined=combined.concat(arr);
+    }catch{}
+  });
+  // Deduplicate
+  const seen=new Set(); let uniq=[];
+  combined.forEach(o=>{
+    const id=String(o._id||o.id||o.order_id||'');
+    if(!id){ uniq.push(o); return; }
+    if(!seen.has(id)){ seen.add(id); uniq.push(o); }
+  });
+  // Filter by this buyer's email only
+  const filtered = uniq.filter(o=> (o.email||o.customer_email||'').toLowerCase().trim()===email.toLowerCase().trim());
+  filtered.sort((a,b)=> new Date(b.created_at||b.date||0) - new Date(a.created_at||a.date||0));
+  return filtered;
 }
 
 async function load(){
@@ -154,33 +165,34 @@ async function load(){
    document.getElementById('profileInitial').innerText = name.charAt(0).toUpperCase();
  }
 
- const ro=await fetch('/api/orders'); const od=await ro.json();
- allOrders=(od.orders||[]).filter(o=> (o.email||'').toLowerCase().trim()===email.toLowerCase().trim());
+ // FIXED: Now reads API + localStorage, so orders appear even if API fails
+ allOrders = await fetchAllBuyerOrdersCombined(email);
+
  if(allOrders.length===0){document.getElementById('orders').innerHTML='<div style="opacity:.6;border:1px dashed rgba(0,0,0,.2);padding:20px;text-align:center">No orders yet — <a href="/" style="color:#000">start shopping</a></div>'; return;}
  document.getElementById('orders').innerHTML=allOrders.map((o,idx)=>{
    const st=(o.status||'pending').toUpperCase();
    const canCancel = (st==='PENDING' || st==='CONFIRMED');
-   const dateStr=new Date(o.created_at||Date.now()).toLocaleDateString();
-   const imgs=(o.items||[]).slice(0,4).map(it=>{
+   const dateStr=new Date(o.created_at||o.date||Date.now()).toLocaleDateString();
+   const itemsArr = o.items||[];
+   const imgs=itemsArr.slice(0,4).map(it=>{
      const src=it.image_path||it.image||'/uploads/hero.jpg';
      return `<img src="${src}" onerror="this.src='https://images.unsplash.com/photo-1495385794356-15371f348c19?q=80&w=200'">`;
    }).join('');
 
    const rawId = getOrderIdStr(o._id || o.id);
-   const displayId = rawId.length >= 6 ? rawId.slice(-6).toUpperCase() : rawId.toUpperCase();
+   const displayId = rawId.length >= 6? rawId.slice(-6).toUpperCase() : rawId.toUpperCase();
 
-   // Render tracking snippet if order is shipped
    let trackingSnippet = '';
    if(st === 'SHIPPED' && (o.tracking_number || o.courier)) {
      trackingSnippet = `<div style="margin-top:6px; font-size:11px; font-family:monospace; background:#fff; padding:6px; border:1px solid rgba(0,0,0,.1)">📦 Courier: <b>${o.courier || 'Standard'}</b><br>🔢 Tracking: <b>${o.tracking_number}</b></div>`;
    }
 
    return `<div class="order">
-     <div><b>ORDER #${displayId}</b><br><span style="opacity:.6;font-size:12px">Placed • ${dateStr} • ${o.items?.length||0} items • ${o.payment_method||'COD'}</span><div class="order-imgs">${imgs}</div>
+     <div><b>ORDER #${displayId}</b><br><span style="opacity:.6;font-size:12px">Placed • ${dateStr} • ${itemsArr.length||0} items • ${o.payment_method||'COD'}</span><div class="order-imgs">${imgs || '<span style="font-size:11px;opacity:.5">No images</span>'}</div>
      ${trackingSnippet}
-     ${canCancel? `<div style="margin-top:8px"><button onclick="cancelOrder('${o._id}', event)" style="background:#1A1611;color:#fff;border:none;padding:8px 12px;font-size:9px;letter-spacing:2px;cursor:pointer">CANCEL ORDER</button></div>` : st==='CANCELLED'? `<div style="margin-top:8px;font-size:9px;letter-spacing:2px;color:#b00">CANCELLED</div>` : `<div style="margin-top:8px;font-size:9px;letter-spacing:1px;opacity:.4">Cannot cancel after shipping</div>`}
+     ${canCancel? `<div style="margin-top:8px"><button onclick="cancelOrder('${o._id||o.id}', event)" style="background:#1A1611;color:#fff;border:none;padding:8px 12px;font-size:9px;letter-spacing:2px;cursor:pointer">CANCEL ORDER</button></div>` : st==='CANCELLED'? `<div style="margin-top:8px;font-size:9px;letter-spacing:2px;color:#b00">CANCELLED</div>` : `<div style="margin-top:8px;font-size:9px;letter-spacing:1px;opacity:.4">Cannot cancel after shipping</div>`}
      </div>
-     <div style="text-align:right"><span class="badge ${st}">${st}</span><div style="margin-top:8px;font-weight:600">$${o.total||o.subtotal||0}</div><div class="view-link" onclick="openOrder(${idx})">VIEW DETAILS →</div></div>
+     <div style="text-align:right"><span class="badge ${st}">${st}</span><div style="margin-top:8px;font-weight:600">$${o.total||o.grand_total||o.subtotal||0}</div><div class="view-link" onclick="openOrder(${idx})">VIEW DETAILS →</div></div>
    </div>`;
  }).join('');
 }
@@ -190,11 +202,11 @@ function openOrder(i){
  const canCancel = (st==='PENDING' || st==='CONFIRMED');
  const itemsHtml=(o.items||[]).map(it=>{
    const src=it.image_path||it.image||'/uploads/hero.jpg';
-   return `<div style="display:flex;gap:12px;margin-bottom:12px"><img src="${src}" style="width:60px;height:76px;object-fit:cover;border:1px solid rgba(0,0,0,.1)" onerror="this.src='https://images.unsplash.com/photo-1495385794356-15371f348c19?q=80&w=200'"><div><div style="font-family:Fraunces">${it.name}</div><div style="font-size:12px;opacity:.6">Qty ${it.qty||1} • $${it.price}</div></div></div>`;
+   return `<div style="display:flex;gap:12px;margin-bottom:12px"><img src="${src}" style="width:60px;height:76px;object-fit:cover;border:1px solid rgba(0,0,0,.1)" onerror="this.src='https://images.unsplash.com/photo-1495385794356-15371f348c19?q=80&w=200'"><div><div style="font-family:Fraunces">${it.name}</div><div style="font-size:12px;opacity:.6">Qty ${it.qty||1} • $${it.price||it.customer_price||0}</div></div></div>`;
  }).join('');
 
  const rawId = getOrderIdStr(o._id || o.id);
- const displayId = rawId.length >= 6 ? rawId.slice(-6).toUpperCase() : rawId.toUpperCase();
+ const displayId = rawId.length >= 6? rawId.slice(-6).toUpperCase() : rawId.toUpperCase();
 
  let trackingDetailsHtml = '';
  if(st === 'SHIPPED' && (o.tracking_number || o.courier)) {
@@ -209,13 +221,13 @@ function openOrder(i){
 
  document.getElementById('mTitle').innerText='ORDER #'+displayId;
  document.getElementById('mBody').innerHTML=`
-   <div style="font-size:12px;opacity:.7;margin-bottom:12px">Status: <b>${st}</b> • ${new Date(o.created_at).toLocaleString()}<br>Payment: ${o.payment_method||'COD'} - ${o.payment_status||''}</div>
+   <div style="font-size:12px;opacity:.7;margin-bottom:12px">Status: <b>${st}</b> • ${new Date(o.created_at||o.date).toLocaleString()}<br>Payment: ${o.payment_method||'COD'} - ${o.payment_status||''}</div>
    ${trackingDetailsHtml}
-   <div>${itemsHtml}</div>
+   <div>${itemsHtml || '<div style="opacity:.6">No items data</div>'}</div>
    <div style="border-top:1px solid rgba(0,0,0,.12);margin-top:12px;padding-top:12px">
      <div style="display:flex;justify-content:space-between"><span>Subtotal</span><span>$${o.subtotal||o.total||0}</span></div>
-     <div style="display:flex;justify-content:space-between;font-weight:600;margin-top:6px"><span>Total</span><span>$${o.total||0}</span></div>
-     ${canCancel? `<button onclick="cancelOrder('${o._id}')" style="width:100%;margin-top:16px;background:#b00;color:#fff;border:none;padding:12px;letter-spacing:2px;font-size:11px;cursor:pointer">CANCEL ORDER</button>` : ``}
+     <div style="display:flex;justify-content:space-between;font-weight:600;margin-top:6px"><span>Total</span><span>$${o.total||o.grand_total||0}</span></div>
+     ${canCancel? `<button onclick="cancelOrder('${o._id||o.id}')" style="width:100%;margin-top:16px;background:#b00;color:#fff;border:none;padding:12px;letter-spacing:2px;font-size:11px;cursor:pointer">CANCEL ORDER</button>` : ``}
    </div>`;
  document.getElementById('modal').classList.add('open');
 }
@@ -224,9 +236,22 @@ async function cancelOrder(id, e){
  if(e) e.stopPropagation();
  if(!confirm('Cancel this order?')) return;
  const token=localStorage.getItem('aurawear_token');
- const r=await fetch(`/api/orders/${id}/cancel`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
- const d=await r.json();
- if(d.success){closeModal();load();} else alert(d.error||'Cannot cancel after shipping');
+ try{
+   const r=await fetch(`/api/orders/${id}/cancel`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+   const d=await r.json();
+   if(d.success){closeModal();load();} else alert(d.error||'Cannot cancel after shipping');
+ }catch(err){
+   // Fallback: localStorage cancel
+   try{
+     const keys=['marketplace_orders','aurawear_orders','orders','checkout_orders'];
+     keys.forEach(k=>{
+       let arr=JSON.parse(localStorage.getItem(k)||'[]');
+       arr=arr.map(o=>{ if(String(o._id||o.id)===String(id)) return {...o,status:'cancelled'}; return o; });
+       localStorage.setItem(k, JSON.stringify(arr));
+     });
+     closeModal(); load();
+   }catch{}
+ }
 }
 async function saveProfile(){
  const name=document.getElementById('editName').value.trim();
@@ -247,11 +272,8 @@ async function saveProfile(){
    }
  }catch(e){document.getElementById('saveMsg').innerText='Server error';}
 }
-
-// PROFILE IMAGE UPLOAD
 document.getElementById('avatarInput').addEventListener('change', async (e)=>{
  const file = e.target.files[0]; if(!file) return;
-
  const reader = new FileReader();
  reader.onload = (ev)=>{
    document.getElementById('profileImg').src = ev.target.result;
@@ -259,19 +281,16 @@ document.getElementById('avatarInput').addEventListener('change', async (e)=>{
    document.getElementById('profileInitial').style.display='none';
  };
  reader.readAsDataURL(file);
-
  document.getElementById('uploadStatus').innerText='Uploading...';
  const fd = new FormData();
  fd.append('file', file);
  fd.append('image', file);
-
  try{
    const r = await fetch('/api/upload',{method:'POST', body: fd});
    const d = await r.json();
    let path = d.path || d.url || d.file_path || d.image;
    if(!path){ document.getElementById('uploadStatus').innerText='Upload failed'; return; }
    if(!path.startsWith('/')) path = '/' + path;
-
    const token = localStorage.getItem('aurawear_token');
    const ru = await fetch('/api/auth/update',{method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({token, avatar: path})});
    const du = await ru.json();
@@ -287,8 +306,6 @@ document.getElementById('avatarInput').addEventListener('change', async (e)=>{
    document.getElementById('uploadStatus').innerText='Server error';
  }
 });
-
-// DELETE ACCOUNT MODAL HANDLERS
 function openDeleteModal(){
   document.getElementById('deleteModal').classList.add('open');
 }
@@ -299,13 +316,10 @@ function closeDeleteModal(){
 async function confirmDeleteAccount(){
   const email = localStorage.getItem('aurawear_email');
   if(!email){ alert('Session expired'); location.href='/login.html'; return; }
-
   const reason = document.getElementById('delReason').value;
   const custom_reason = document.getElementById('delCustomReason').value.trim();
   const msgEl = document.getElementById('delMsg');
-
   msgEl.innerText = 'Processing deletion...';
-
   try{
     const res = await fetch('/api/auth/delete-account', {
       method: 'POST',
@@ -324,44 +338,35 @@ async function confirmDeleteAccount(){
     msgEl.innerText = 'Server connection error.';
   }
 }
-
 function logout(){localStorage.removeItem('aurawear_token');localStorage.removeItem('aurawear_email');location.href='/login.html';}
-
 async function loadUserMessages() {
   try {
     const userEmail = document.getElementById('editEmail')?.value || localStorage.getItem('aurawear_email') || '';
-    
     const res = await fetch('/api/contact');
     const data = await res.json();
     const contacts = data.contacts || data || [];
-
     const myMessages = contacts.filter(c => {
       const email = c.email || c.user_email || '';
       return email.toLowerCase().trim() === userEmail.toLowerCase().trim();
     });
-
     const container = document.getElementById('userMessagesList');
     if (!container) return;
-
     if (!myMessages.length) {
       container.innerHTML = `<div style="background:#fff; border:1px solid rgba(0,0,0,.1); padding:20px; font-size:12px; opacity:.6;">No messages sent yet. Use the contact section on the home page to reach out!</div>`;
       return;
     }
-
     container.innerHTML = myMessages.map(m => {
       const isReplied = (m.reply && m.reply.length > 0) || (m.status === 'replied');
-      
       const rawTicketId = getOrderIdStr(m._id || m.ticket_id);
-      const ticketId = rawTicketId.length >= 6 ? rawTicketId.slice(-6).toUpperCase() : rawTicketId.toUpperCase();
-
+      const ticketId = rawTicketId.length >= 6? rawTicketId.slice(-6).toUpperCase() : rawTicketId.toUpperCase();
       return `
         <div style="background:#fff; border:1px solid rgba(0,0,0,.1); padding:20px; display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
           <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; letter-spacing:2px; opacity:.5;">
             <span>TICKET: ${ticketId}</span>
-            <span style="background:${isReplied ? '#2d6a4f' : '#C9A86A'}; color:#fff; padding:2px 8px; font-weight:600;">${isReplied ? 'REPLIED' : 'PENDING'}</span>
+            <span style="background:${isReplied? '#2d6a4f' : '#C9A86A'}; color:#fff; padding:2px 8px; font-weight:600;">${isReplied? 'REPLIED' : 'PENDING'}</span>
           </div>
           <div style="font-size:13px; font-weight:500; margin-top:4px;"><strong>Your Message:</strong> ${m.message || ''}</div>
-          ${isReplied ? `
+          ${isReplied? `
             <div style="background:#F9F1E7; border-left:3px solid #C9A86A; padding:12px; margin-top:6px; font-size:13px;">
               <strong>Admin Reply:</strong> ${m.reply || m.admin_reply || ''}
             </div>
@@ -373,7 +378,6 @@ async function loadUserMessages() {
     console.error('Failed to load user messages', e);
   }
 }
-
 load();
 setTimeout(loadUserMessages, 1200);
 </script>
